@@ -23,6 +23,14 @@ util/black :
 	$(MAKE) util/pre-commit pre-commit_id="black" pre-commit_files="--all-files"
 .PHONY : util/black
 
+util/isort :
+	$(MAKE) util/pre-commit pre-commit_id="isort" pre-commit_files="--all-files"
+.PHONY : util/isort
+
+util/flake8 :
+	$(MAKE) util/pre-commit pre-commit_id="flake8" pre-commit_files="--all-files"
+.PHONY : util/isort
+
 pre-commit_id ?= ""
 pre-commit_files ?= ""
 util/pre-commit : $(PRE_COMMIT_READY)
