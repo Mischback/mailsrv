@@ -1,0 +1,18 @@
+# Project's general Python settings
+
+# ### ISORT config
+[tool.isort]
+profile            = "black"
+combine_as_imports = true
+default_section    = "THIRDPARTY"
+sections           = [
+  "FUTURE",
+  "STDLIB",
+  "THIRDPARTY",
+  "FIRSTPARTY",
+  "LOCALFOLDER"
+]
+import_heading_stdlib      = "Python imports"
+import_heading_thirdparty  = "external imports"
+import_heading_firstparty  = "app imports"
+import_heading_localfolder = "local imports"
