@@ -7,6 +7,8 @@ UTIL_VENV_DIR := .util-venv
 UTIL_VENV_CREATED := $(UTIL_VENV_DIR)/pyvenv.cfg
 UTIL_VENV_INSTALLED := $(UTIL_VENV_DIR)/packages.txt
 
+PRE_COMMIT_READY := .git/hooks/pre-commit
+
 
 
 # ``make``-specific settings
@@ -17,11 +19,23 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 
-util/pre-commit/install : $(UTIL_VENV_INSTALLED)
-	$(UTIL_VENV_DIR)/bin/pre-commit install
-.PHONY : util/pre-commit/install
+util/black :
+	$(MAKE) util/pre-commit pre-commit_id="black" pre-commit_files="--all-files"
+.PHONY : util/black
+
+pre-commit_id ?= ""
+pre-commit_files ?= ""
+util/pre-commit : $(PRE_COMMIT_READY)
+	$(UTIL_VENV_DIR)/bin/pre-commit run $(pre-commit_files) $(pre-commit_id)
+.PHONY : util/pre-commit
+
+
 
 # Internal utility stuff to make the actual commands work
+
+# Install the pre-commit hooks
+$(PRE_COMMIT_READY) : $(UTIL_VENV_INSTALLED)
+	$(UTIL_VENV_DIR)/bin/pre-commit install
 
 # Create the utility virtual environment
 $(UTIL_VENV_CREATED) :
