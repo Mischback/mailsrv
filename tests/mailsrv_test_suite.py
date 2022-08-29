@@ -8,7 +8,7 @@ import sys
 
 # app imports
 from test_suite.exceptions import MailsrvTestSuiteConfigurationException
-from test_suite.smtp import SmtpTestCase
+from test_suite.smtp import SmtpStarttlsTestCase, SmtpTestCase
 
 # get the general logger object
 logger = logging.getLogger("test_suite")
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     # Test SMTP with TLS (STARTTLS)
     # These tests simulate getting mail from another server with TLS
     try:
-        smtp_tests = SmtpTestCase(
+        smtp_tests = SmtpStarttlsTestCase(
             target_host=target_host,
             target_smtp_port=target_smtp_port,
             from_address=from_address,
@@ -113,7 +113,6 @@ if __name__ == "__main__":
             target_alias_1=target_alias_1,
             target_recipient_nonexistent=target_recipient_nonexistent,
             relay_recipient_1=relay_recipient_1,
-            run_with_tls=True,
         )
         smtp_tests.run()
     except MailsrvTestSuiteConfigurationException as e:

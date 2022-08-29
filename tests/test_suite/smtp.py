@@ -38,7 +38,6 @@ class SmtpTestCase:
         target_alias_1=None,
         target_recipient_nonexistent=None,
         relay_recipient_1=None,
-        run_with_tls=False,
     ):
         if target_host is None:
             raise MailsrvTestSuiteConfigurationException(
@@ -89,8 +88,6 @@ class SmtpTestCase:
         self.relay_recipient = relay_recipient_1
         logger.debug("relay_recipient: {}".format(self.relay_recipient))
 
-        self.run_with_tls = run_with_tls
-
     def __sendmail(self, mail_from, rcpt_to, msg):
         try:
             self.smtp.sendmail(mail_from, rcpt_to, msg)
@@ -124,16 +121,25 @@ class SmtpTestCase:
         logger.debug("Test 04: [SUCCESS] Mail to another domain was rejected!")
 
     def run(self):
+        """Wrapp around ``_run()``."""
+        logger.info("Running SMTP tests...")
+        self._run()
+        logger.info("SMTP tests finished successfully.")
+
+    def _pre_test(self):
+        """Execute additional commands before the actual mails are sent.
+
+        This is meant to add additional commands before queuing mail, e.g.
+        ``STARTTLS``.
+        """
+        return
+
+    def _run(self):
         """Run the actual tests.
 
         Establishes the SMTP connection using Python's ``smtplib`` and then
         executes the actual test methods.
         """
-        if self.run_with_tls:
-            logger.info("Running SMTP tests using STARTTLS...")
-        else:
-            logger.info("Running SMTP tests...")
-
         logger.debug("Connecting to target ({})".format(self.target_host))
         try:
             with smtplib.SMTP(
@@ -141,9 +147,7 @@ class SmtpTestCase:
             ) as self.smtp:
                 try:
                     suite_completed = True
-                    if self.run_with_tls:
-                        self.smtp.starttls()
-                        logger.debug("Issued STARTTLS...")
+                    self._pre_test()
                     self._test01_mail_to_invalid_mailbox()
                     self._test02_mail_to_valid_mailbox()
                     self._test03_mail_to_valid_alias()
@@ -169,7 +173,21 @@ class SmtpTestCase:
             logger.debug(e, exc_info=1)
             raise self.SmtpTestOperationalError("Target refused the connection")
 
-        if self.run_with_tls:
-            logger.info("SMTP tests with STARTTLS finished successfully.")
-        else:
-            logger.info("SMTP tests finished successfully.")
+
+class SmtpStarttlsTestCase(SmtpTestCase):
+    """Test the SMTP setup of a mail server, with STARTTLS.
+
+    The included tests verify, that the delivery of valid mails to mailboxes
+    is working. This includes possible alias addresses.
+    """
+
+    def _pre_test(self):
+        """Execute ``STARTTLS`` command before mails are queued."""
+        self.smtp.starttls()
+        logger.debug("Executing STARTTLS...")
+
+    def run(self):
+        """Wrap around ``_run()``."""
+        logger.info("Running SMTP (STARTTLS) tests...")
+        self._run()
+        logger.info("SMTP (STARTTLS) tests finished successfully.")
