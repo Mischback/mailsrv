@@ -27,6 +27,12 @@ if __name__ == "__main__":
         description="Run some tests against a mail server."
     )
 
+    # positional arguments
+    parser.add_argument(
+        "target_host", action="store", help="The subject under test (SUT)"
+    )
+
+    # optional arguments
     parser.add_argument(
         "-v", "--verbose", help="Enable debug messages", action="store_true"
     )
