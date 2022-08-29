@@ -37,6 +37,7 @@ class SmtpTestCase:
         target_recipient_1=None,
         target_alias_1=None,
         target_recipient_nonexistent=None,
+        run_with_tls=False,
     ):
         if target_host is None:
             raise MailsrvTestSuiteConfigurationException(
@@ -80,6 +81,8 @@ class SmtpTestCase:
         self.recipient_nonexistent = target_recipient_nonexistent
         logger.debug("recipient_nonexistent: {}".format(self.recipient_nonexistent))
 
+        self.run_with_tls = run_with_tls
+
     def __sendmail(self, mail_from, rcpt_to, msg):
         try:
             self.smtp.sendmail(mail_from, rcpt_to, msg)
@@ -113,7 +116,10 @@ class SmtpTestCase:
         Establishes the SMTP connection using Python's ``smtplib`` and then
         executes the actual test methods.
         """
-        logger.info("Running SMTP tests...")
+        if self.run_with_tls:
+            logger.info("Running SMTP tests using STARTTLS...")
+        else:
+            logger.info("Running SMTP tests...")
 
         logger.debug("Connecting to target ({})".format(self.target_host))
         try:
@@ -122,6 +128,8 @@ class SmtpTestCase:
             ) as self.smtp:
                 try:
                     suite_completed = True
+                    if self.run_with_tls:
+                        self.smtp.starttls()
                     self._test01_mail_to_invalid_mailbox()
                     self._test02_mail_to_valid_mailbox()
                     self._test03_mail_to_valid_alias()

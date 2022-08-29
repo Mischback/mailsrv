@@ -54,6 +54,7 @@ if __name__ == "__main__":
         logger.setLevel(logging.DEBUG)
         logger.debug("Verbose logging enabled!")
 
+    # get the actual configuration
     from_address = os.getenv("MAILSRV_TEST_FROM_ADDRESS", "testuser@non.existent")
     logger.debug("from_address: {}".format(from_address))
     target_host = args.target_host
@@ -73,6 +74,8 @@ if __name__ == "__main__":
         "target_recipient_nonexistent: {}".format(target_recipient_nonexistent)
     )
 
+    # Test plain old SMTP
+    # These tests simulate getting mail from another server
     try:
         smtp_tests = SmtpTestCase(
             target_host=target_host,
@@ -94,6 +97,32 @@ if __name__ == "__main__":
         sys.exit(1)
     except SmtpTestCase.SmtpTestError:
         logger.critical("SMPT test suite finished with errors! Aborting!")
+        sys.exit(1)
+
+    # Test SMTP with TLS (STARTTLS)
+    # These tests simulate getting mail from another server with TLS
+    try:
+        smtp_tests = SmtpTestCase(
+            target_host=target_host,
+            target_smtp_port=target_smtp_port,
+            from_address=from_address,
+            target_recipient_1=target_recipient_1,
+            target_alias_1=target_alias_1,
+            target_recipient_nonexistent=target_recipient_nonexistent,
+            run_with_tls=True,
+        )
+    except MailsrvTestSuiteConfigurationException as e:
+        logger.error("Configuration error for SmtpTestCase (TLS): {}".format(e))
+        logger.error("Configuration invalid! Aborting!")
+        sys.exit(1)
+
+    try:
+        smtp_tests.run()
+    except SmtpTestCase.SmtpTestOperationalError:
+        logger.critical("Operational error! Aborting!")
+        sys.exit(1)
+    except SmtpTestCase.SmtpTestError:
+        logger.critical("SMPT (TLS) test suite finished with errors! Aborting!")
         sys.exit(1)
 
     logger.info("Test suite completed successfully!")
