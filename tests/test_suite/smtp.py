@@ -4,7 +4,7 @@ These tests are meant to test the smtp functions of a server.
 """
 # Python imports
 import logging
-import smtplib  # noqa: F401
+import smtplib
 
 # app imports
 from test_suite.exceptions import (
