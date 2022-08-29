@@ -49,14 +49,22 @@ if __name__ == "__main__":
         logger.setLevel(logging.DEBUG)
         logger.debug("Verbose logging enabled!")
 
+    from_address = os.getenv("MAILSRV_TEST_FROM_ADDRESS", "testuser@non.existent")
+    logger.debug("from_address: {}".format(from_address))
     target_host = args.target_host
     logger.debug("target_host: {}".format(target_host))
     target_smtp_port = os.getenv("MAILSRV_TEST_TARGET_SMTP_PORT", 25)
     logger.debug("target_smtp_port: {}".format(target_smtp_port))
+    target_recipient_1 = os.getenv(
+        "MAILSRV_TEST_TARGET_RECIPIENT_1", "mailbox01@test.setup"
+    )
+    logger.debug("target_recipient_1: {}".format(target_recipient_1))
 
     # start the actual test suite
     try:
         with smtplib.SMTP(host=target_host, port=target_smtp_port) as smtp:
+            # actually send a mail
+            smtp.sendmail(from_address, target_recipient_1, "foobar")
             smtp.quit()
     except smtplib.SMTPServerDisconnected as e:
         logger.error(
