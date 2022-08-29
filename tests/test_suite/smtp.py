@@ -169,4 +169,7 @@ class SmtpTestCase:
             logger.debug(e, exc_info=1)
             raise self.SmtpTestOperationalError("Target refused the connection")
 
-        logger.info("SMTP tests finished successfully.")
+        if self.run_with_tls:
+            logger.info("SMTP tests with STARTTLS finished successfully.")
+        else:
+            logger.info("SMTP tests finished successfully.")

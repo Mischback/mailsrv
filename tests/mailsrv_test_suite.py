@@ -90,13 +90,11 @@ if __name__ == "__main__":
             target_recipient_nonexistent=target_recipient_nonexistent,
             relay_recipient_1=relay_recipient_1,
         )
+        smtp_tests.run()
     except MailsrvTestSuiteConfigurationException as e:
         logger.error("Configuration error for SmtpTestCase: {}".format(e))
         logger.error("Configuration invalid! Aborting!")
         sys.exit(1)
-
-    try:
-        smtp_tests.run()
     except SmtpTestCase.SmtpTestOperationalError:
         logger.critical("Operational error! Aborting!")
         sys.exit(1)
@@ -117,13 +115,11 @@ if __name__ == "__main__":
             relay_recipient_1=relay_recipient_1,
             run_with_tls=True,
         )
+        smtp_tests.run()
     except MailsrvTestSuiteConfigurationException as e:
         logger.error("Configuration error for SmtpTestCase (TLS): {}".format(e))
         logger.error("Configuration invalid! Aborting!")
         sys.exit(1)
-
-    try:
-        smtp_tests.run()
     except SmtpTestCase.SmtpTestOperationalError:
         logger.critical("Operational error! Aborting!")
         sys.exit(1)
