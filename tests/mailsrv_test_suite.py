@@ -78,6 +78,10 @@ if __name__ == "__main__":
     )
     logger.debug("relay_recipient_1: {}".format(relay_recipient_1))
 
+    # Prepare some feedback from SENDING mails
+    # This will be further processed while FETCHING mails
+    mails_queued = (0, 0)
+
     # Test plain old SMTP
     # These tests simulate getting mail from another server
     try:
@@ -90,7 +94,7 @@ if __name__ == "__main__":
             target_recipient_nonexistent=target_recipient_nonexistent,
             relay_recipient_1=relay_recipient_1,
         )
-        smtp_tests.run()
+        mails_queued = tuple(map(sum, zip(mails_queued, smtp_tests.run())))
     except MailsrvTestSuiteConfigurationException as e:
         logger.error("Configuration error for SmtpTestCase: {}".format(e))
         logger.error("Configuration invalid! Aborting!")
@@ -114,7 +118,7 @@ if __name__ == "__main__":
             target_recipient_nonexistent=target_recipient_nonexistent,
             relay_recipient_1=relay_recipient_1,
         )
-        smtp_tests.run()
+        mails_queued = tuple(map(sum, zip(mails_queued, smtp_tests.run())))
     except MailsrvTestSuiteConfigurationException as e:
         logger.error("Configuration error for SmtpTestCase (TLS): {}".format(e))
         logger.error("Configuration invalid! Aborting!")
@@ -125,6 +129,9 @@ if __name__ == "__main__":
     except SmtpTestCase.SmtpTestError:
         logger.critical("SMPT (TLS) test suite finished with errors! Aborting!")
         sys.exit(1)
+
+    # just quickly check the results from SENDING mails
+    logger.debug("mails_queued: {}".format(mails_queued))
 
     logger.info("Test suite completed successfully!")
     sys.exit(0)

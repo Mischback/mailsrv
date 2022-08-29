@@ -104,27 +104,33 @@ class SmtpTestCase:
                 "Mail to non-existent recipient got delivered successfully"
             )
         logger.debug("Test 01: [SUCCESS] Mail to non-existent mailbox was rejected!")
+        return (0, 1)
 
     def _test02_mail_to_valid_mailbox(self):
         if not self.__sendmail(self.from_address, self.recipient_1, "foobar"):
             raise self.SmtpTestError("Mail to valid user got rejected")
         logger.debug("Test 02: [SUCCESS] Mail to valid mailbox was accepted!")
+        return (1, 0)
 
     def _test03_mail_to_valid_alias(self):
         if not self.__sendmail(self.from_address, self.alias_1, "foobar"):
             raise self.SmtpTestError("Mail to valid alias got rejected")
         logger.debug("Test 03: [SUCCESS] Mail to valid alias was accepted!")
+        return (1, 0)
 
     def _test04_mail_to_other_domain(self):
         if self.__sendmail(self.from_address, self.relay_recipient, "foobar"):
             raise self.SmtpTestError("Mail to another domain was accepted")
         logger.debug("Test 04: [SUCCESS] Mail to another domain was rejected!")
+        return (0, 1)
 
     def run(self):
         """Wrapp around ``_run()``."""
         logger.info("Running SMTP tests...")
-        self._run()
+        result = self._run()
         logger.info("SMTP tests finished successfully.")
+        logger.debug("Delivered: {} / Rejected: {}".format(result[0], result[1]))
+        return result
 
     def _pre_test(self):
         """Execute additional commands before the actual mails are sent.
@@ -146,12 +152,33 @@ class SmtpTestCase:
                 host=self.target_host, port=self.target_port
             ) as self.smtp:
                 try:
+                    # Prepare the overall result
+                    result = (0, 0)
                     suite_completed = True
                     self._pre_test()
-                    self._test01_mail_to_invalid_mailbox()
-                    self._test02_mail_to_valid_mailbox()
-                    self._test03_mail_to_valid_alias()
-                    self._test04_mail_to_other_domain()
+                    # Each test function returns a tuple of (queued, rejected)
+                    # The results are summed, so that at the end of the run,
+                    # a overall result may be returned to the calling test
+                    # runner for further processing.
+                    #
+                    # The syntax is Python magic, see
+                    # https://stackoverflow.com/a/498103
+                    result = tuple(
+                        map(sum, zip(result, self._test01_mail_to_invalid_mailbox()))
+                    )
+                    result = tuple(
+                        map(sum, zip(result, self._test02_mail_to_valid_mailbox()))
+                    )
+                    result = tuple(
+                        map(sum, zip(result, self._test03_mail_to_valid_alias()))
+                    )
+                    result = tuple(
+                        map(sum, zip(result, self._test04_mail_to_other_domain()))
+                    )
+                    # Actually return the overall result
+                    # If any test fails, the exception handling will terminate
+                    # the overall run.
+                    return result
                 except self.SmtpTestError as e:
                     logger.error("Test failed!")
                     logger.error(e)
@@ -189,5 +216,7 @@ class SmtpStarttlsTestCase(SmtpTestCase):
     def run(self):
         """Wrap around ``_run()``."""
         logger.info("Running SMTP (STARTTLS) tests...")
-        self._run()
+        result = self._run()
         logger.info("SMTP (STARTTLS) tests finished successfully.")
+        logger.debug("Delivered: {} / Rejected: {}".format(result[0], result[1]))
+        return result
