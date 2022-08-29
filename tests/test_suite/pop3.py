@@ -61,27 +61,40 @@ class Pop3TestCase:
         self.expected_messages = expected_messages
         logger.debug("expected_messages: {}".format(self.expected_messages))
 
-    def run(self):
-        """Run the tests."""
+    def _connect(self):
         try:
-            pop = poplib.POP3(self.target_host)
+            self.pop = poplib.POP3(self.target_host)
         except ConnectionRefusedError as e:
             logger.error("target ({}) refused the connection.".format(self.target_host))
             logger.debug(e, exc_info=1)
             raise self.Pop3TestOperationalError("Target refused the connection")
 
+    def _auth(self):
         try:
-            pop.user(self.username)
+            self.pop.user(self.username)
+            self.pop.pass_(self.password)
+        except poplib.error_proto as e:
+            logger.error("Authentication failed: {}".format(e))
+            raise self.Pop3TestOperationalError("Authentication failed")
+
+    def _pre_auth(self):
+        try:
+            self.pop.user(self.username)
         except poplib.error_proto:
             logger.debug(
                 "Test 01: [SUCCESS] Server disallows non-encrypted authentication!"
             )
+            self.pop.stls()
+
+    def _run(self):
+        """Run the tests."""
+        self._connect()
+
+        self._pre_auth()
 
         try:
-            pop.stls()
-            pop.user(self.username)
-            pop.pass_(self.password)
-            num_messages = len(pop.list()[1])
+            self._auth()
+            num_messages = len(self.pop.list()[1])
             logger.debug("Found messages: {}".format(num_messages))
         except poplib.error_proto as e:
             logger.error(e)
@@ -95,3 +108,30 @@ class Pop3TestCase:
         logger.debug(
             "Test 02: [SUCCESS] Expected number of messages match retrieved messages"
         )
+
+    def run(self):
+        """Wrap around ``_run()``."""
+        logger.info("Running POP3 tests...")
+        self._run()
+        logger.info("POP3 tests finished successfully...")
+
+
+class Pop3sTestCase(Pop3TestCase):
+    """Use the secure version of POP3."""
+
+    def _pre_auth(self):
+        pass
+
+    def _connect(self):
+        try:
+            self.pop = poplib.POP3_SSL(self.target_host)
+        except ConnectionRefusedError as e:
+            logger.error("target ({}) refused the connection.".format(self.target_host))
+            logger.debug(e, exc_info=1)
+            raise self.Pop3TestOperationalError("Target refused the connection")
+
+    def run(self):
+        """Wrap around ``_run()``."""
+        logger.info("Running POP3S tests...")
+        self._run()
+        logger.info("POP3S tests finished successfully...")

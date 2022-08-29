@@ -125,7 +125,7 @@ class SmtpTestCase:
         return (0, 1)
 
     def run(self):
-        """Wrapp around ``_run()``."""
+        """Wrap around ``_run()``."""
         logger.info("Running SMTP tests...")
         result = self._run()
         logger.info("SMTP tests finished successfully.")
