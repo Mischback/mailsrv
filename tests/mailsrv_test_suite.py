@@ -4,11 +4,11 @@
 import argparse
 import logging
 import os
-import smtplib
 import sys
 
 # external imports
-from test_suite.exceptions import MailsrvTestSuiteException  # noqa: F401
+from test_suite.exceptions import MailsrvTestSuiteConfigurationException
+from test_suite.smtp import SmtpTestCase
 
 # get the general logger object
 logger = logging.getLogger(__name__)
@@ -63,20 +63,17 @@ if __name__ == "__main__":
     )
     logger.debug("target_recipient_1: {}".format(target_recipient_1))
 
-    # start the actual test suite
     try:
-        with smtplib.SMTP(host=target_host, port=target_smtp_port) as smtp:
-            # actually send a mail
-            smtp.sendmail(from_address, target_recipient_1, "foobar")
-            smtp.quit()
-    except smtplib.SMTPServerDisconnected as e:
-        logger.error(
-            "target_host ({}) closed the connection unexpectedly.".format(target_host)
+        smtp_tests = SmtpTestCase(
+            target_host=target_host,
+            target_smtp_port=target_smtp_port,
+            from_address=from_address,
+            target_recipient_1=target_recipient_1,
         )
-        logger.debug(e)
-    except ConnectionRefusedError as e:
-        logger.error("target_host ({}) refused the connection.".format(target_host))
-        logger.debug(e)
+    except MailsrvTestSuiteConfigurationException as e:
+        logger.error("Configuration error for SmtpTestCase: {}".format(e))
+        logger.error("Configuration invalid! Aborting!")
+        sys.exit(1)
 
     logger.info("Test suite completed successfully!")
     sys.exit(0)

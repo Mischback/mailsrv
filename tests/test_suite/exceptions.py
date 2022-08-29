@@ -10,3 +10,9 @@ class MailsrvTestSuiteException(Exception):
     """
 
     pass
+
+
+class MailsrvTestSuiteConfigurationException(MailsrvTestSuiteException):
+    """Raised on missing or invalid configuration parameters."""
+
+    pass
