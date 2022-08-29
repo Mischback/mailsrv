@@ -3,6 +3,7 @@
 # Python imports
 import argparse
 import logging
+import smtplib
 import sys
 
 # get the general logger object
@@ -46,6 +47,22 @@ if __name__ == "__main__":
         # set the logging level to DEBUG
         logger.setLevel(logging.DEBUG)
         logger.debug("Verbose logging enabled!")
+
+    target_host = args.target_host
+    logger.debug("Running test suite against {}".format(target_host))
+
+    # start the actual test suite
+    try:
+        with smtplib.SMTP(host=target_host, port=25) as smtp:
+            smtp.quit()
+    except smtplib.SMTPServerDisconnected as e:
+        logger.error(
+            "target_host ({}) closed the connection unexpectedly.".format(target_host)
+        )
+        logger.debug(e)
+    except ConnectionRefusedError as e:
+        logger.error("target_host ({}) refused the connection.".format(target_host))
+        logger.debug(e)
 
     logger.info("Test suite completed successfully!")
     sys.exit(0)
