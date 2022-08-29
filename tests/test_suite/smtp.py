@@ -37,6 +37,7 @@ class SmtpTestCase:
         target_recipient_1=None,
         target_alias_1=None,
         target_recipient_nonexistent=None,
+        relay_recipient_1=None,
         run_with_tls=False,
     ):
         if target_host is None:
@@ -81,6 +82,13 @@ class SmtpTestCase:
         self.recipient_nonexistent = target_recipient_nonexistent
         logger.debug("recipient_nonexistent: {}".format(self.recipient_nonexistent))
 
+        if relay_recipient_1 is None:
+            raise MailsrvTestSuiteConfigurationException(
+                "Missing parameter: 'relay_recipient_1'"
+            )
+        self.relay_recipient = relay_recipient_1
+        logger.debug("relay_recipient: {}".format(self.relay_recipient))
+
         self.run_with_tls = run_with_tls
 
     def __sendmail(self, mail_from, rcpt_to, msg):
@@ -94,21 +102,26 @@ class SmtpTestCase:
         return True
 
     def _test01_mail_to_invalid_mailbox(self):
-        logger.debug("Test 01: Mail to invalid mailbox")
         if self.__sendmail(self.from_address, self.recipient_nonexistent, "foobar"):
             raise self.SmtpTestError(
                 "Mail to non-existent recipient got delivered successfully"
             )
+        logger.debug("Test 01: [SUCCESS] Mail to non-existent mailbox was rejected!")
 
     def _test02_mail_to_valid_mailbox(self):
-        logger.debug("Test 02: Mail to valid mailbox")
         if not self.__sendmail(self.from_address, self.recipient_1, "foobar"):
             raise self.SmtpTestError("Mail to valid user got rejected")
+        logger.debug("Test 02: [SUCCESS] Mail to valid mailbox was accepted!")
 
     def _test03_mail_to_valid_alias(self):
-        logger.debug("Test 03: Mail to valid alias")
         if not self.__sendmail(self.from_address, self.alias_1, "foobar"):
             raise self.SmtpTestError("Mail to valid alias got rejected")
+        logger.debug("Test 03: [SUCCESS] Mail to valid alias was accepted!")
+
+    def _test04_mail_to_other_domain(self):
+        if self.__sendmail(self.from_address, self.relay_recipient, "foobar"):
+            raise self.SmtpTestError("Mail to another domain was accepted")
+        logger.debug("Test 04: [SUCCESS] Mail to another domain was rejected!")
 
     def run(self):
         """Run the actual tests.
@@ -130,9 +143,11 @@ class SmtpTestCase:
                     suite_completed = True
                     if self.run_with_tls:
                         self.smtp.starttls()
+                        logger.debug("Issued STARTTLS...")
                     self._test01_mail_to_invalid_mailbox()
                     self._test02_mail_to_valid_mailbox()
                     self._test03_mail_to_valid_alias()
+                    self._test04_mail_to_other_domain()
                 except self.SmtpTestError as e:
                     logger.error("Test failed!")
                     logger.error(e)

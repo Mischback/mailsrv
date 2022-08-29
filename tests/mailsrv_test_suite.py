@@ -73,6 +73,10 @@ if __name__ == "__main__":
     logger.debug(
         "target_recipient_nonexistent: {}".format(target_recipient_nonexistent)
     )
+    relay_recipient_1 = os.getenv(
+        "MAILSRV_TEST_RELAY_RECIPIENT_1", "account01@relay.nonexistent"
+    )
+    logger.debug("relay_recipient_1: {}".format(relay_recipient_1))
 
     # Test plain old SMTP
     # These tests simulate getting mail from another server
@@ -84,6 +88,7 @@ if __name__ == "__main__":
             target_recipient_1=target_recipient_1,
             target_alias_1=target_alias_1,
             target_recipient_nonexistent=target_recipient_nonexistent,
+            relay_recipient_1=relay_recipient_1,
         )
     except MailsrvTestSuiteConfigurationException as e:
         logger.error("Configuration error for SmtpTestCase: {}".format(e))
@@ -109,6 +114,7 @@ if __name__ == "__main__":
             target_recipient_1=target_recipient_1,
             target_alias_1=target_alias_1,
             target_recipient_nonexistent=target_recipient_nonexistent,
+            relay_recipient_1=relay_recipient_1,
             run_with_tls=True,
         )
     except MailsrvTestSuiteConfigurationException as e:
