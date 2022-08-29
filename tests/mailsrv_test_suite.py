@@ -7,6 +7,9 @@ import os
 import smtplib
 import sys
 
+# external imports
+from test_suite.exceptions import MailsrvTestSuiteException  # noqa: F401
+
 # get the general logger object
 logger = logging.getLogger(__name__)
 
