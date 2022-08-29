@@ -35,11 +35,11 @@ if __name__ == "__main__":
 
     # enable debug messages
     if args.verbose:
+        # set a formatter that has more information
         log_handler.setFormatter(log_formatter_debug)
+        # set the logging level to DEBUG
         logger.setLevel(logging.DEBUG)
+        logger.debug("Verbose logging enabled!")
 
-    logger.debug("foo")
-
-    logger.info("bar")
-
+    logger.info("Test suite completed successfully!")
     sys.exit(0)
