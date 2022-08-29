@@ -6,7 +6,7 @@ These tests are meant to test the smtp functions of a server.
 import logging
 import smtplib  # noqa: F401
 
-# external imports
+# app imports
 from test_suite.exceptions import (
     MailsrvTestSuiteConfigurationException,
     MailsrvTestSuiteException,

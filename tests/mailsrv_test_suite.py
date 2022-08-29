@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 
-# external imports
+# app imports
 from test_suite.exceptions import MailsrvTestSuiteConfigurationException
 from test_suite.smtp import SmtpTestCase
 
