@@ -3,6 +3,7 @@
 # Python imports
 import argparse
 import logging
+import os
 import smtplib
 import sys
 
@@ -49,11 +50,13 @@ if __name__ == "__main__":
         logger.debug("Verbose logging enabled!")
 
     target_host = args.target_host
-    logger.debug("Running test suite against {}".format(target_host))
+    logger.debug("target_host: {}".format(target_host))
+    target_smtp_port = os.getenv("MAILSRV_TEST_TARGET_SMTP_PORT", 25)
+    logger.debug("target_smtp_port: {}".format(target_smtp_port))
 
     # start the actual test suite
     try:
-        with smtplib.SMTP(host=target_host, port=25) as smtp:
+        with smtplib.SMTP(host=target_host, port=target_smtp_port) as smtp:
             smtp.quit()
     except smtplib.SMTPServerDisconnected as e:
         logger.error(
