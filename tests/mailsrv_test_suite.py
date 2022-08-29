@@ -11,7 +11,7 @@ from test_suite.exceptions import MailsrvTestSuiteConfigurationException
 from test_suite.smtp import SmtpTestCase
 
 # get the general logger object
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("test_suite")
 
 if __name__ == "__main__":
 
@@ -22,7 +22,9 @@ if __name__ == "__main__":
     log_handler = logging.StreamHandler(sys.stdout)
     log_handler.setLevel(logging.DEBUG)
     log_formatter_default = logging.Formatter("%(message)s")
-    log_formatter_debug = logging.Formatter("[%(levelname)s] - %(message)s")
+    log_formatter_debug = logging.Formatter(
+        "[%(levelname)s] - [%(name)s] - %(message)s"
+    )
     log_handler.setFormatter(log_formatter_default)
     logger.addHandler(log_handler)
     logger.setLevel(logging.INFO)
@@ -74,6 +76,8 @@ if __name__ == "__main__":
         logger.error("Configuration error for SmtpTestCase: {}".format(e))
         logger.error("Configuration invalid! Aborting!")
         sys.exit(1)
+
+    smtp_tests.run()
 
     logger.info("Test suite completed successfully!")
     sys.exit(0)
