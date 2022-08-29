@@ -8,6 +8,7 @@ import sys
 
 # app imports
 from test_suite.exceptions import MailsrvTestSuiteConfigurationException
+from test_suite.pop3 import Pop3TestCase
 from test_suite.smtp import SmtpStarttlsTestCase, SmtpTestCase
 
 # get the general logger object
@@ -132,6 +133,25 @@ if __name__ == "__main__":
 
     # just quickly check the results from SENDING mails
     logger.debug("mails_queued: {}".format(mails_queued))
+
+    try:
+        pop3_tests = Pop3TestCase(
+            username=target_recipient_1,
+            password="foobar",
+            target_host=target_host,
+            expected_messages=mails_queued[0],
+        )
+        pop3_tests.run()
+    except MailsrvTestSuiteConfigurationException as e:
+        logger.error("Configuration error for Pop3TestCase: {}".format(e))
+        logger.error("Configuration invalid! Aborting!")
+        sys.exit(1)
+    except Pop3TestCase.Pop3TestOperationalError:
+        logger.critical("Operational error! Aborting!")
+        sys.exit(1)
+    except Pop3TestCase.Pop3TestError:
+        logger.critical("POP3 test suite finished with errors! Aborting!")
+        sys.exit(1)
 
     logger.info("Test suite completed successfully!")
     sys.exit(0)
