@@ -64,6 +64,12 @@ if __name__ == "__main__":
         "MAILSRV_TEST_TARGET_RECIPIENT_1", "mailbox01@test.setup"
     )
     logger.debug("target_recipient_1: {}".format(target_recipient_1))
+    target_recipient_nonexistent = os.getenv(
+        "MAILSRV_TEST_TARGET_RECIPIENT_NONEXISTENT", "iam1337@test.setup"
+    )
+    logger.debug(
+        "target_recipient_nonexistent: {}".format(target_recipient_nonexistent)
+    )
 
     try:
         smtp_tests = SmtpTestCase(
@@ -71,13 +77,21 @@ if __name__ == "__main__":
             target_smtp_port=target_smtp_port,
             from_address=from_address,
             target_recipient_1=target_recipient_1,
+            target_recipient_nonexistent=target_recipient_nonexistent,
         )
     except MailsrvTestSuiteConfigurationException as e:
         logger.error("Configuration error for SmtpTestCase: {}".format(e))
         logger.error("Configuration invalid! Aborting!")
         sys.exit(1)
 
-    smtp_tests.run()
+    try:
+        smtp_tests.run()
+    except SmtpTestCase.SmtpTestOperationalError:
+        logger.critical("Operational error! Aborting!")
+        sys.exit(1)
+    except SmtpTestCase.SmtpTestError:
+        logger.critical("SMPT test suite finished with errors! Aborting!")
+        sys.exit(1)
 
     logger.info("Test suite completed successfully!")
     sys.exit(0)
