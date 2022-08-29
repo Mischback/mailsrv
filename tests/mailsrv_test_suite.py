@@ -64,6 +64,8 @@ if __name__ == "__main__":
         "MAILSRV_TEST_TARGET_RECIPIENT_1", "mailbox01@test.setup"
     )
     logger.debug("target_recipient_1: {}".format(target_recipient_1))
+    target_alias_1 = os.getenv("MAILSRV_TEST_TARGET_ALIAS_1", "alias1@test.setup")
+    logger.debug("target_alias_1: {}".format(target_alias_1))
     target_recipient_nonexistent = os.getenv(
         "MAILSRV_TEST_TARGET_RECIPIENT_NONEXISTENT", "iam1337@test.setup"
     )
@@ -77,6 +79,7 @@ if __name__ == "__main__":
             target_smtp_port=target_smtp_port,
             from_address=from_address,
             target_recipient_1=target_recipient_1,
+            target_alias_1=target_alias_1,
             target_recipient_nonexistent=target_recipient_nonexistent,
         )
     except MailsrvTestSuiteConfigurationException as e:

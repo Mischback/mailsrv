@@ -35,6 +35,7 @@ class SmtpTestCase:
         target_smtp_port=None,
         from_address=None,
         target_recipient_1=None,
+        target_alias_1=None,
         target_recipient_nonexistent=None,
     ):
         if target_host is None:
@@ -65,6 +66,13 @@ class SmtpTestCase:
         self.recipient_1 = target_recipient_1
         logger.debug("recipient_1: {}".format(self.recipient_1))
 
+        if target_alias_1 is None:
+            raise MailsrvTestSuiteConfigurationException(
+                "Missing parameter: 'target_alias_1'"
+            )
+        self.alias_1 = target_alias_1
+        logger.debug("alias_1: {}".format(self.alias_1))
+
         if target_recipient_nonexistent is None:
             raise MailsrvTestSuiteConfigurationException(
                 "Missing parameter: 'target_recipient_nonexistent'"
@@ -94,6 +102,11 @@ class SmtpTestCase:
         if not self.__sendmail(self.from_address, self.recipient_1, "foobar"):
             raise self.SmtpTestError("Mail to valid user got rejected")
 
+    def _test03_mail_to_valid_alias(self):
+        logger.debug("Test 03: Mail to valid alias")
+        if not self.__sendmail(self.from_address, self.alias_1, "foobar"):
+            raise self.SmtpTestError("Mail to valid alias got rejected")
+
     def run(self):
         """Run the actual tests.
 
@@ -111,6 +124,7 @@ class SmtpTestCase:
                     suite_completed = True
                     self._test01_mail_to_invalid_mailbox()
                     self._test02_mail_to_valid_mailbox()
+                    self._test03_mail_to_valid_alias()
                 except self.SmtpTestError as e:
                     logger.error("Test failed!")
                     logger.error(e)
