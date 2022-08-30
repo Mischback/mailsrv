@@ -1,5 +1,6 @@
 # Ignore Python virtual environments
 .util-venv/
+.test-suite/
 
 # Ignore byte-compiled / optimized / DLL files
 __pycache__/
