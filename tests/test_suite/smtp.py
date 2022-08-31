@@ -4,6 +4,7 @@ These tests are meant to test the smtp functions of a server.
 """
 # Python imports
 import logging
+import os
 import smtplib
 
 # app imports
@@ -116,10 +117,38 @@ class SmtpTestSuite(SmtpGenericTestSuite):
     def __init__(self, target_ip=None):
         super().__init__(target_ip=target_ip)
 
+        # Set the actual suite name of this instance
         self._suite_name = "SMTP Suite"
+
+        # provide some specific things
+        self.default_sender = os.getenv(
+            "MAILSRV_TEST_SMTP_SENDER", "sender@another-host.test"
+        )
+        self.default_recipient = os.getenv(
+            "MAILSRV_TEST_SMTP_RECIPIENT_1", "user_one@sut.test"
+        )
+
+    def test_single_mailbox(self):
+        """Send a mail to a valid single mailbox.
+
+        This mail is expected to get delivered / to be accepted.
+        """
+        logger.verbose("Mail to a single mailbox")
+        logger.debug("test_single_mailbox()")
+
+        try:
+            if (
+                self._sendmail(self.default_sender, self.default_recipient, "foobar")
+                != {}
+            ):
+                raise self.SmtpTestSuiteError("Mail to a valid mailbox got rejected")
+        except smtplib.SMTPRecipientsRefused:
+            raise self.SmtpTestSuiteError("Mail to a valid mailbox got rejected")
 
     def _run_tests(self):
         logger.info("Start sending of mails...")
+
+        self.test_single_mailbox()
 
         logger.info("All mails sent successfully.")
 
