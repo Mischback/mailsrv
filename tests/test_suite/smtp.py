@@ -136,6 +136,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
             "MAILSRV_TEST_SMTP_RECIPIENT_2", "user_two@sut.test"
         )
         self.alias_1 = os.getenv("MAILSRV_TEST_SMTP_ALIAS_1", "alias_one@sut.test")
+        self.alias_list = os.getenv(
+            "MAILSRV_TEST_SMTP_ALIAS_LIST", "alias_list@sut.test"
+        )
 
     def get_subject(self, counter):
         """Create a unique subject, including a hashed timestamp."""
@@ -225,6 +228,32 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         logger.verbose("Test completed successfully")
 
+    def test_list_alias(self):
+        """Send a mail to an alias, that is actually a list.
+
+        This mail is expected to get delivered / to be accepted.
+        """
+        self._test_counter = self._test_counter + 1
+
+        logger.verbose("Mail to an alias (list)")
+        logger.debug("test_list_alias()")
+
+        message = GENERIC_VALID_MAIL.format(
+            self.get_subject(self._test_counter),
+            self.default_sender,
+            self.default_recipient,
+        )
+
+        try:
+            if self._sendmail(self.default_sender, self.alias_list, message) != {}:
+                raise self.SmtpTestSuiteError(
+                    "Mail to a valid alias (list) got rejected"
+                )
+        except smtplib.SMTPRecipientsRefused:
+            raise self.SmtpTestSuiteError("Mail to a valid alias (list) got rejected")
+
+        logger.verbose("Test completed successfully")
+
     def _pre_run(self):
         self._test_counter = 0
 
@@ -234,6 +263,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.test_single_mailbox()
         self.test_simple_alias()
         self.test_multiple_recipients()
+        self.test_list_alias()
 
         logger.info("All mails sent successfully.")
 
