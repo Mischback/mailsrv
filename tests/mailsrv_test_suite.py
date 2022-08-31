@@ -7,10 +7,15 @@ import sys
 
 # app imports
 # from test_suite.pop3 import Pop3sTestCase, Pop3TestCase
+from test_suite.log import add_level
 from test_suite.smtp import SmtpStarttlsTestSuite, SmtpTestSuite
 
 # get the general logger object
 logger = logging.getLogger("test_suite")
+
+# Add the VERBOSE / SUMMARY log level
+add_level("VERBOSE", logging.INFO - 1)
+add_level("SUMMARY", logging.INFO + 1)
 
 if __name__ == "__main__":
 
@@ -26,7 +31,7 @@ if __name__ == "__main__":
     )
     log_handler.setFormatter(log_formatter_default)
     logger.addHandler(log_handler)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.SUMMARY)
 
     # setup the argument parser
     parser = argparse.ArgumentParser(
@@ -40,43 +45,46 @@ if __name__ == "__main__":
 
     # optional arguments
     parser.add_argument(
-        "-v", "--verbose", help="Enable debug messages", action="store_true"
+        "-v", "--verbose", help="Enable verbose messages", action="store_true"
+    )
+    parser.add_argument(
+        "-d", "--debug", help="Enable debug messages", action="store_true"
     )
 
     args = parser.parse_args()
 
-    # enable debug messages
     if args.verbose:
+        logger.setLevel(logging.VERBOSE)
+        logger.verbose("Verbose logging enabled!")
+    # enable debug messages
+    if args.debug:
         # set a formatter that has more information
         log_handler.setFormatter(log_formatter_debug)
         # set the logging level to DEBUG
         logger.setLevel(logging.DEBUG)
-        logger.debug("Verbose logging enabled!")
+        logger.debug("Debug logging enabled!")
 
+    logger.summary("Starting test suites...")
     # Test plain old SMTP
     # These tests simulate getting mail from another server
     try:
         SmtpTestSuite(target_ip=args.target_host).run()
-    except SmtpTestSuite.SmtpOperationalError as e:
+    except SmtpTestSuite.SmtpOperationalError:
         logger.critical("Operational error! Aborting!")
-        logger.debug(e, exc_info=1)
         sys.exit(1)
     except SmtpTestSuite.SmtpTestSuiteError as e:
         logger.info("Error while running test suite: {}".format(e))
-        logger.debug(e, exc_info=1)
-        logger.critical("SMPT test suite finished with errors! Aborting!")
+        logger.error("SMPT test suite finished with errors! Aborting!")
         sys.exit(1)
 
     try:
         SmtpStarttlsTestSuite(target_ip=args.target_host).run()
-    except SmtpStarttlsTestSuite.SmtpOperationalError as e:
+    except SmtpStarttlsTestSuite.SmtpOperationalError:
         logger.critical("Operational error! Aborting!")
-        logger.debug(e, exc_info=1)
         sys.exit(1)
     except SmtpStarttlsTestSuite.SmtpTestSuiteError as e:
         logger.info("Error while running test suite: {}".format(e))
-        logger.debug(e, exc_info=1)
-        logger.critical("SMPT (STARTTLS) test suite finished with errors! Aborting!")
+        logger.error("SMPT (STARTTLS) test suite finished with errors! Aborting!")
         sys.exit(1)
 
     # Run pop3 related tests
@@ -118,5 +126,5 @@ if __name__ == "__main__":
     #    logger.critical("POP3 test suite finished with errors! Aborting!")
     #    sys.exit(1)
 
-    logger.info("Test suite completed successfully!")
+    logger.summary("Test suites completed successfully!")
     sys.exit(0)
