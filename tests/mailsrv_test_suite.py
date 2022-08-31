@@ -3,13 +3,11 @@
 # Python imports
 import argparse
 import logging
-import os
 import sys
 
 # app imports
-from test_suite.exceptions import MailsrvTestSuiteConfigurationException
-from test_suite.pop3 import Pop3sTestCase, Pop3TestCase
-from test_suite.smtp import SmtpStarttlsTestCase, SmtpTestCase
+# from test_suite.pop3 import Pop3sTestCase, Pop3TestCase
+from test_suite.smtp import SmtpTestSuite
 
 # get the general logger object
 logger = logging.getLogger("test_suite")
@@ -55,122 +53,58 @@ if __name__ == "__main__":
         logger.setLevel(logging.DEBUG)
         logger.debug("Verbose logging enabled!")
 
-    # get the actual configuration
-    from_address = os.getenv("MAILSRV_TEST_FROM_ADDRESS", "testuser@non.existent")
-    logger.debug("from_address: {}".format(from_address))
-    target_host = args.target_host
-    logger.debug("target_host: {}".format(target_host))
-    target_smtp_port = os.getenv("MAILSRV_TEST_TARGET_SMTP_PORT", 25)
-    logger.debug("target_smtp_port: {}".format(target_smtp_port))
-    target_recipient_1 = os.getenv(
-        "MAILSRV_TEST_TARGET_RECIPIENT_1", "mailbox01@test.setup"
-    )
-    logger.debug("target_recipient_1: {}".format(target_recipient_1))
-    target_alias_1 = os.getenv("MAILSRV_TEST_TARGET_ALIAS_1", "alias1@test.setup")
-    logger.debug("target_alias_1: {}".format(target_alias_1))
-    target_recipient_nonexistent = os.getenv(
-        "MAILSRV_TEST_TARGET_RECIPIENT_NONEXISTENT", "iam1337@test.setup"
-    )
-    logger.debug(
-        "target_recipient_nonexistent: {}".format(target_recipient_nonexistent)
-    )
-    relay_recipient_1 = os.getenv(
-        "MAILSRV_TEST_RELAY_RECIPIENT_1", "account01@relay.nonexistent"
-    )
-    logger.debug("relay_recipient_1: {}".format(relay_recipient_1))
-
-    # Prepare some feedback from SENDING mails
-    # This will be further processed while FETCHING mails
-    mails_queued = (0, 0)
-
     # Test plain old SMTP
     # These tests simulate getting mail from another server
     try:
-        smtp_tests = SmtpTestCase(
-            target_host=target_host,
-            target_smtp_port=target_smtp_port,
-            from_address=from_address,
-            target_recipient_1=target_recipient_1,
-            target_alias_1=target_alias_1,
-            target_recipient_nonexistent=target_recipient_nonexistent,
-            relay_recipient_1=relay_recipient_1,
-        )
-        mails_queued = tuple(map(sum, zip(mails_queued, smtp_tests.run())))
-    except MailsrvTestSuiteConfigurationException as e:
-        logger.error("Configuration error for SmtpTestCase: {}".format(e))
-        logger.error("Configuration invalid! Aborting!")
-        sys.exit(1)
-    except SmtpTestCase.SmtpTestOperationalError:
+        SmtpTestSuite(target_ip=args.target_host).run()
+    except SmtpTestSuite.SmtpOperationalError as e:
         logger.critical("Operational error! Aborting!")
+        logger.debug(e, exc_info=1)
         sys.exit(1)
-    except SmtpTestCase.SmtpTestError:
+    except SmtpTestSuite.SmtpTestSuiteError as e:
+        logger.info("Error while running test suite: {}".format(e))
+        logger.debug(e, exc_info=1)
         logger.critical("SMPT test suite finished with errors! Aborting!")
         sys.exit(1)
 
-    # Test SMTP with TLS (STARTTLS)
-    # These tests simulate getting mail from another server with TLS
-    try:
-        smtp_tests = SmtpStarttlsTestCase(
-            target_host=target_host,
-            target_smtp_port=target_smtp_port,
-            from_address=from_address,
-            target_recipient_1=target_recipient_1,
-            target_alias_1=target_alias_1,
-            target_recipient_nonexistent=target_recipient_nonexistent,
-            relay_recipient_1=relay_recipient_1,
-        )
-        mails_queued = tuple(map(sum, zip(mails_queued, smtp_tests.run())))
-    except MailsrvTestSuiteConfigurationException as e:
-        logger.error("Configuration error for SmtpTestCase (TLS): {}".format(e))
-        logger.error("Configuration invalid! Aborting!")
-        sys.exit(1)
-    except SmtpTestCase.SmtpTestOperationalError:
-        logger.critical("Operational error! Aborting!")
-        sys.exit(1)
-    except SmtpTestCase.SmtpTestError:
-        logger.critical("SMPT (TLS) test suite finished with errors! Aborting!")
-        sys.exit(1)
+    # Run pop3 related tests
+    # try:
+    #    pop3_tests = Pop3TestCase(
+    #        username=target_recipient_1,
+    #        password="foobar",
+    #        target_host=target_host,
+    #        expected_messages=mails_queued[0],
+    #    )
+    #    pop3_tests.run()
+    # except MailsrvTestSuiteConfigurationException as e:
+    #    logger.error("Configuration error for Pop3TestCase: {}".format(e))
+    #    logger.error("Configuration invalid! Aborting!")
+    #    sys.exit(1)
+    # except Pop3TestCase.Pop3TestOperationalError:
+    #    logger.critical("Operational error! Aborting!")
+    #    sys.exit(1)
+    # except Pop3TestCase.Pop3TestError:
+    #    logger.critical("POP3 test suite finished with errors! Aborting!")
+    #    sys.exit(1)
 
-    # just quickly check the results from SENDING mails
-    logger.debug("mails_queued: {}".format(mails_queued))
-
-    try:
-        pop3_tests = Pop3TestCase(
-            username=target_recipient_1,
-            password="foobar",
-            target_host=target_host,
-            expected_messages=mails_queued[0],
-        )
-        pop3_tests.run()
-    except MailsrvTestSuiteConfigurationException as e:
-        logger.error("Configuration error for Pop3TestCase: {}".format(e))
-        logger.error("Configuration invalid! Aborting!")
-        sys.exit(1)
-    except Pop3TestCase.Pop3TestOperationalError:
-        logger.critical("Operational error! Aborting!")
-        sys.exit(1)
-    except Pop3TestCase.Pop3TestError:
-        logger.critical("POP3 test suite finished with errors! Aborting!")
-        sys.exit(1)
-
-    try:
-        pop3_tests = Pop3sTestCase(
-            username=target_recipient_1,
-            password="foobar",
-            target_host=target_host,
-            expected_messages=mails_queued[0],
-        )
-        pop3_tests.run()
-    except MailsrvTestSuiteConfigurationException as e:
-        logger.error("Configuration error for Pop3TestCase: {}".format(e))
-        logger.error("Configuration invalid! Aborting!")
-        sys.exit(1)
-    except Pop3TestCase.Pop3TestOperationalError:
-        logger.critical("Operational error! Aborting!")
-        sys.exit(1)
-    except Pop3TestCase.Pop3TestError:
-        logger.critical("POP3 test suite finished with errors! Aborting!")
-        sys.exit(1)
+    # try:
+    #    pop3_tests = Pop3sTestCase(
+    #        username=target_recipient_1,
+    #        password="foobar",
+    #        target_host=target_host,
+    #        expected_messages=mails_queued[0],
+    #    )
+    #    pop3_tests.run()
+    # except MailsrvTestSuiteConfigurationException as e:
+    #    logger.error("Configuration error for Pop3TestCase: {}".format(e))
+    #    logger.error("Configuration invalid! Aborting!")
+    #    sys.exit(1)
+    # except Pop3TestCase.Pop3TestOperationalError:
+    #    logger.critical("Operational error! Aborting!")
+    #    sys.exit(1)
+    # except Pop3TestCase.Pop3TestError:
+    #    logger.critical("POP3 test suite finished with errors! Aborting!")
+    #    sys.exit(1)
 
     logger.info("Test suite completed successfully!")
     sys.exit(0)
