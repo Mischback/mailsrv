@@ -258,9 +258,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.verbose("Test completed successfully")
 
     def test_nonexistent_mailbox(self):
-        """Send a mail to a valid single mailbox.
+        """Send a mail to a invalid single mailbox.
 
-        This mail is expected to get delivered / to be accepted.
+        This mail is expected to be rejected.
         """
         self._test_counter = self._test_counter + 1
 
@@ -284,6 +284,32 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         logger.verbose("Test completed successfully")
 
+    def test_relay_mail(self):
+        """Send a mail to a mail address, the SUT is not responsible for.
+
+        This mail is expected to get delivered / to be accepted.
+        """
+        self._test_counter = self._test_counter + 1
+
+        logger.verbose("Mail to a relay host's mailbox")
+        logger.debug("test_relay_mail()")
+
+        message = GENERIC_VALID_MAIL.format(
+            self.get_subject(self._test_counter),
+            self.default_sender,
+            self.default_sender,
+        )
+
+        try:
+            if self._sendmail(self.default_sender, self.default_sender, message) == {}:
+                raise self.SmtpTestSuiteError(
+                    "Mail to a relay host's mailbox got accepted"
+                )
+        except smtplib.SMTPRecipientsRefused:
+            logger.debug("sendmail() raised SMTPRecipientsRefused as expected!")
+
+        logger.verbose("Test completed successfully")
+
     def _pre_connect(self):
         self._test_counter = 0
 
@@ -295,6 +321,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.test_multiple_recipients()
         self.test_list_alias()
         self.test_nonexistent_mailbox()
+        self.test_relay_mail()
 
         logger.info("All mails sent successfully.")
 
