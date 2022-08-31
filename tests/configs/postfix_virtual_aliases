@@ -1,0 +1,3 @@
+alias_one@sut.test       user_one@sut.test
+alias_list@sut.test      user_one@sut.test user_two@sut.test
+alias_invalid@sut.test   user_non@sut.test
