@@ -108,3 +108,42 @@ class SmtpGenericTestSuite:
             raise self.SmtpOperationalError("Connection refused")
 
         logger.summary("{} finished successfully".format(self._suite_name))
+
+
+class SmtpTestSuite(SmtpGenericTestSuite):
+    """Provide tests for a mail setup, simulating mails from another server."""
+
+    def __init__(self, target_ip=None):
+        super().__init__(target_ip=target_ip)
+
+        self._suite_name = "SMTP Suite"
+
+    def _run_tests(self):
+        logger.info("Start sending of mails...")
+
+        logger.info("All mails sent successfully.")
+
+
+class SmtpStarttlsTestSuite(SmtpTestSuite):
+    """Replicate ``SmtpTestSuite`` with a TLS connection."""
+
+    def __init__(self, target_ip=None):
+        super().__init__(target_ip=target_ip)
+
+        self._suite_name = "SMTP (STARTTLS) Suite"
+
+    def _pre_run(self):
+        logger.verbose("Sending command STARTTLS...")
+
+        try:
+            self.smtp.starttls()
+        except (
+            smtplib.SMTPNotSupportedError,
+            RuntimeError,
+            ValueError,
+            smtplib.SMTPResponseException,
+        ) as e:
+            logger.critical("Could not establish TLS connection using STARTTLS")
+            logger.debug(e, exc_info=1)
+            raise self.SmtpOperationalError("TLS failure")
+        logger.verbose("TLS encryption established")
