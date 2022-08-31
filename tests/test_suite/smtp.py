@@ -132,6 +132,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.default_recipient = os.getenv(
             "MAILSRV_TEST_SMTP_RECIPIENT_1", "user_one@sut.test"
         )
+        self.alternate_recipient = os.getenv(
+            "MAILSRV_TEST_SMTP_RECIPIENT_2", "user_two@sut.test"
+        )
         self.alias_1 = os.getenv("MAILSRV_TEST_SMTP_ALIAS_1", "alias_one@sut.test")
 
     def get_subject(self, counter):
@@ -189,6 +192,39 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         logger.verbose("Test completed successfully")
 
+    def test_multiple_recipients(self):
+        """Send a mail to multiple recipients.
+
+        This mail is expected to get delivered / to be accepted.
+        """
+        self._test_counter = self._test_counter + 1
+
+        logger.verbose("Mail to multiple recipients")
+        logger.debug("test_multiple_recipients()")
+
+        message = GENERIC_VALID_MAIL.format(
+            self.get_subject(self._test_counter),
+            self.default_sender,
+            "{}, {}".format(self.default_recipient, self.alternate_recipient),
+        )
+
+        try:
+            if (
+                self._sendmail(
+                    self.default_sender,
+                    [self.default_recipient, self.alternate_recipient],
+                    message,
+                )
+                != {}
+            ):
+                raise self.SmtpTestSuiteError(
+                    "Mail to multiple recipients got rejected"
+                )
+        except smtplib.SMTPRecipientsRefused:
+            raise self.SmtpTestSuiteError("Mail to multiple recipients got rejected")
+
+        logger.verbose("Test completed successfully")
+
     def _pre_run(self):
         self._test_counter = 0
 
@@ -197,6 +233,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         self.test_single_mailbox()
         self.test_simple_alias()
+        self.test_multiple_recipients()
 
         logger.info("All mails sent successfully.")
 
