@@ -78,7 +78,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
-        SmtpStarttlsTestSuite(target_ip=args.target_host).run()
+        SmtpStarttlsTestSuite(target_ip=args.target_host, mail_count_offset=7).run()
     except SmtpStarttlsTestSuite.SmtpOperationalError:
         logger.critical("Operational error! Aborting!")
         sys.exit(1)

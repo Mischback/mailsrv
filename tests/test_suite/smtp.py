@@ -119,11 +119,13 @@ class SmtpGenericTestSuite:
 class SmtpTestSuite(SmtpGenericTestSuite):
     """Provide tests for a mail setup, simulating mails from another server."""
 
-    def __init__(self, target_ip=None):
+    def __init__(self, target_ip=None, mail_count_offset=0):
         super().__init__(target_ip=target_ip)
 
         # Set the actual suite name of this instance
         self._suite_name = "SMTP Suite"
+
+        self._test_counter = mail_count_offset
 
         # provide some specific things
         self.default_sender = os.getenv(
@@ -346,9 +348,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         logger.verbose("Test completed successfully")
 
-    def _pre_connect(self):
-        self._test_counter = 0
-
     def _run_tests(self):
         logger.info("Start sending of mails...")
 
@@ -366,8 +365,8 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 class SmtpStarttlsTestSuite(SmtpTestSuite):
     """Replicate ``SmtpTestSuite`` with a TLS connection."""
 
-    def __init__(self, target_ip=None):
-        super().__init__(target_ip=target_ip)
+    def __init__(self, target_ip=None, mail_count_offset=0):
+        super().__init__(target_ip=target_ip, mail_count_offset=mail_count_offset)
 
         self._suite_name = "SMTP (STARTTLS) Suite"
 
