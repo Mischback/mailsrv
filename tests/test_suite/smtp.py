@@ -6,9 +6,11 @@ These tests are meant to test the smtp functions of a server.
 import logging
 import os
 import smtplib
+import time
 
 # app imports
 from test_suite.exceptions import MailsrvTestSuiteException
+from test_suite.fixture_mail import GENERIC_VALID_MAIL
 from test_suite.log import add_level
 
 # get a module-level logger
@@ -132,17 +134,29 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         )
         self.alias_1 = os.getenv("MAILSRV_TEST_SMTP_ALIAS_1", "alias_one@sut.test")
 
+    def get_subject(self, counter):
+        """Create a unique subject, including a hashed timestamp."""
+        return "{}: {}".format(counter, hash(time.time()))
+
     def test_single_mailbox(self):
         """Send a mail to a valid single mailbox.
 
         This mail is expected to get delivered / to be accepted.
         """
+        self._test_counter = self._test_counter + 1
+
         logger.verbose("Mail to a single mailbox")
         logger.debug("test_single_mailbox()")
 
+        message = GENERIC_VALID_MAIL.format(
+            self.get_subject(self._test_counter),
+            self.default_sender,
+            self.default_recipient,
+        )
+
         try:
             if (
-                self._sendmail(self.default_sender, self.default_recipient, "foobar")
+                self._sendmail(self.default_sender, self.default_recipient, message)
                 != {}
             ):
                 raise self.SmtpTestSuiteError("Mail to a valid mailbox got rejected")
@@ -156,16 +170,27 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         This mail is expected to get delivered / to be accepted.
         """
+        self._test_counter = self._test_counter + 1
+
         logger.verbose("Mail to an alias")
         logger.debug("test_simple_alias()")
 
+        message = GENERIC_VALID_MAIL.format(
+            self.get_subject(self._test_counter),
+            self.default_sender,
+            self.default_recipient,
+        )
+
         try:
-            if self._sendmail(self.default_sender, self.alias_1, "foobar") != {}:
+            if self._sendmail(self.default_sender, self.alias_1, message) != {}:
                 raise self.SmtpTestSuiteError("Mail to a valid alias got rejected")
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to a valid alias got rejected")
 
         logger.verbose("Test completed successfully")
+
+    def _pre_run(self):
+        self._test_counter = 0
 
     def _run_tests(self):
         logger.info("Start sending of mails...")
