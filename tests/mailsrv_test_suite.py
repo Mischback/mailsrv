@@ -13,7 +13,7 @@ from test_suite.smtp import SmtpStarttlsTestSuite, SmtpTestSuite
 # get the general logger object
 logger = logging.getLogger("test_suite")
 
-# Add the VERBOSE / SUMMARY log level
+# Add the VERBOSE / SUMMARY log levels
 add_level("VERBOSE", logging.INFO - 1)
 add_level("SUMMARY", logging.INFO + 1)
 

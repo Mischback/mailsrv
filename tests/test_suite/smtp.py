@@ -16,7 +16,7 @@ from test_suite.log import add_level
 # get a module-level logger
 logger = logging.getLogger(__name__)
 
-# Add the VERBOSE log level
+# Add the VERBOSE / SUMMARY log levels
 add_level("VERBOSE", logging.INFO - 1)
 add_level("SUMMARY", logging.INFO + 1)
 
