@@ -2,7 +2,9 @@
 
 # Python imports
 import logging
-import warnings
+
+# get a module-level logger
+logger = logging.getLogger(__name__)
 
 
 def add_level(level_name, level_number):
@@ -47,7 +49,7 @@ def add_level(level_name, level_number):
         setattr(logging.getLoggerClass(), _method_name, generic_log_class)
         setattr(logging, _method_name, generic_log_module)
     except AttributeError:
-        warnings.warn("Name {} already defined!".format(level_name))
+        logger.debug("Name {} already defined!".format(level_name))
     finally:
         # Release the lock to Python's logging module
         logging._releaseLock()
