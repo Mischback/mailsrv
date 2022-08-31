@@ -8,7 +8,11 @@ import sys
 # app imports
 # from test_suite.pop3 import Pop3sTestCase, Pop3TestCase
 from test_suite.log import add_level
-from test_suite.smtp import SmtpStarttlsTestSuite, SmtpTestSuite
+from test_suite.smtp import (
+    SmtpStarttlsTestSuite,
+    SmtpTestSuite,
+    combine_smtp_suite_results,
+)
 
 # get the general logger object
 logger = logging.getLogger("test_suite")
@@ -68,7 +72,8 @@ if __name__ == "__main__":
     # Test plain old SMTP
     # These tests simulate getting mail from another server
     try:
-        SmtpTestSuite(target_ip=args.target_host).run()
+        smtp = SmtpTestSuite(target_ip=args.target_host)
+        smtp.run()
     except SmtpTestSuite.SmtpOperationalError:
         logger.critical("Operational error! Aborting!")
         sys.exit(1)
@@ -78,7 +83,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
-        SmtpStarttlsTestSuite(target_ip=args.target_host, mail_count_offset=7).run()
+        smtp_tls = SmtpStarttlsTestSuite(
+            target_ip=args.target_host, mail_count_offset=7
+        )
+        smtp_tls.run()
     except SmtpStarttlsTestSuite.SmtpOperationalError:
         logger.critical("Operational error! Aborting!")
         sys.exit(1)
@@ -86,6 +94,9 @@ if __name__ == "__main__":
         logger.info("Error while running test suite: {}".format(e))
         logger.error("SMPT (STARTTLS) test suite finished with errors! Aborting!")
         sys.exit(1)
+
+    smtp_results = combine_smtp_suite_results(smtp.get_result(), smtp_tls.get_result())
+    logger.debug(smtp_results)
 
     # Run pop3 related tests
     # try:

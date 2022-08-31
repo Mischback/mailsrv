@@ -21,6 +21,14 @@ add_level("VERBOSE", logging.INFO - 1)
 add_level("SUMMARY", logging.INFO + 1)
 
 
+def combine_smtp_suite_results(result1, result2):
+    """Merge two dictionaries with identical keys."""
+    result_keys = [k for k in result1.keys()]
+    result_merged = {k: result1[k] + result2[k] for k in result_keys}
+
+    return result_merged
+
+
 class SmtpGenericTestSuite:
     """Wrap a test suite around the SMTP protocol."""
 
@@ -138,9 +146,18 @@ class SmtpTestSuite(SmtpGenericTestSuite):
             "MAILSRV_TEST_SMTP_RECIPIENT_2", "user_two@sut.test"
         )
 
+        # prepare the result dictionary
+        self.result = dict()
+        self.result[self.default_recipient] = list()
+        self.result[self.alternate_recipient] = list()
+
     def get_subject(self, counter):
         """Create a unique subject, including a hashed timestamp."""
         return "{}: {}".format(counter, hash(time.time()))
+
+    def get_result(self):
+        """Return the result dictionary."""
+        return self.result
 
     def test_single_mailbox(self):
         """Send a mail to a valid single mailbox.
@@ -168,6 +185,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to a valid mailbox got rejected")
 
+        self.result[self.default_recipient].append(subject)
         logger.verbose("Test completed successfully")
 
     def test_simple_alias(self):
@@ -194,6 +212,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to a valid alias got rejected")
 
+        self.result[self.default_recipient].append(subject)
         logger.verbose("Test completed successfully")
 
     def test_multiple_recipients(self):
@@ -228,6 +247,8 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to multiple recipients got rejected")
 
+        self.result[self.default_recipient].append(subject)
+        self.result[self.alternate_recipient].append(subject)
         logger.verbose("Test completed successfully")
 
     def test_list_alias(self):
@@ -256,6 +277,8 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to a valid alias (list) got rejected")
 
+        self.result[self.default_recipient].append(subject)
+        self.result[self.alternate_recipient].append(subject)
         logger.verbose("Test completed successfully")
 
     def test_nonexistent_mailbox(self):
@@ -360,6 +383,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.test_corrupt_alias()
 
         logger.info("All mails sent successfully.")
+        logger.debug(self.result)
 
 
 class SmtpStarttlsTestSuite(SmtpTestSuite):
