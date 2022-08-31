@@ -152,8 +152,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.verbose("Mail to a single mailbox")
         logger.debug("test_single_mailbox()")
 
+        subject = self.get_subject(self._test_counter)
         message = GENERIC_VALID_MAIL.format(
-            self.get_subject(self._test_counter),
+            subject,
             self.default_sender,
             self.default_recipient,
         )
@@ -180,9 +181,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.debug("test_simple_alias()")
 
         rcpt = os.getenv("MAILSRV_TEST_SMTP_ALIAS_1", "alias_one@sut.test")
-
+        subject = self.get_subject(self._test_counter)
         message = GENERIC_VALID_MAIL.format(
-            self.get_subject(self._test_counter),
+            subject,
             self.default_sender,
             rcpt,
         )
@@ -205,8 +206,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.verbose("Mail to multiple recipients")
         logger.debug("test_multiple_recipients()")
 
+        subject = self.get_subject(self._test_counter)
         message = GENERIC_VALID_MAIL.format(
-            self.get_subject(self._test_counter),
+            subject,
             self.default_sender,
             "{}, {}".format(self.default_recipient, self.alternate_recipient),
         )
@@ -239,9 +241,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.debug("test_list_alias()")
 
         rcpt = os.getenv("MAILSRV_TEST_SMTP_ALIAS_LIST", "alias_list@sut.test")
-
+        subject = self.get_subject(self._test_counter)
         message = GENERIC_VALID_MAIL.format(
-            self.get_subject(self._test_counter),
+            subject,
             self.default_sender,
             rcpt,
         )
@@ -269,9 +271,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         rcpt = os.getenv(
             "MAILSRV_TEST_SMTP_RECIPIENT_NONEXISTENT", "idontevenexist@sut.test"
         )
-
+        subject = self.get_subject(self._test_counter)
         message = GENERIC_VALID_MAIL.format(
-            self.get_subject(self._test_counter),
+            subject,
             self.default_sender,
             rcpt,
         )
@@ -294,8 +296,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.verbose("Mail to a relay host's mailbox")
         logger.debug("test_relay_mail()")
 
+        subject = self.get_subject(self._test_counter)
         message = GENERIC_VALID_MAIL.format(
-            self.get_subject(self._test_counter),
+            subject,
             self.default_sender,
             self.default_sender,
         )
@@ -326,9 +329,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.debug("test_corrupt_alias()")
 
         rcpt = os.getenv("MAILSRV_TEST_SMTP_ALIAS_INVALID", "alias_invalid@sut.test")
-
+        subject = self.get_subject(self._test_counter)
         message = GENERIC_VALID_MAIL.format(
-            self.get_subject(self._test_counter),
+            subject,
             self.default_sender,
             rcpt,
         )
