@@ -135,6 +135,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.alternate_recipient = os.getenv(
             "MAILSRV_TEST_SMTP_RECIPIENT_2", "user_two@sut.test"
         )
+        self.nonexistent_recipient = os.getenv(
+            "MAILSRV_TEST_SMTP_RECIPIENT_NONEXISTENT", "idontevenexist@sut.test"
+        )
         self.alias_1 = os.getenv("MAILSRV_TEST_SMTP_ALIAS_1", "alias_one@sut.test")
         self.alias_list = os.getenv(
             "MAILSRV_TEST_SMTP_ALIAS_LIST", "alias_list@sut.test"
@@ -241,7 +244,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         message = GENERIC_VALID_MAIL.format(
             self.get_subject(self._test_counter),
             self.default_sender,
-            self.default_recipient,
+            self.alias_list,
         )
 
         try:
@@ -254,7 +257,34 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         logger.verbose("Test completed successfully")
 
-    def _pre_run(self):
+    def test_nonexistent_mailbox(self):
+        """Send a mail to a valid single mailbox.
+
+        This mail is expected to get delivered / to be accepted.
+        """
+        self._test_counter = self._test_counter + 1
+
+        logger.verbose("Mail to a nonexistent mailbox")
+        logger.debug("test_nonexistent_mailbox()")
+
+        message = GENERIC_VALID_MAIL.format(
+            self.get_subject(self._test_counter),
+            self.default_sender,
+            self.nonexistent_recipient,
+        )
+
+        try:
+            if (
+                self._sendmail(self.default_sender, self.nonexistent_recipient, message)
+                == {}
+            ):
+                raise self.SmtpTestSuiteError("Mail to an invalid mailbox got accepted")
+        except smtplib.SMTPRecipientsRefused:
+            logger.debug("sendmail() raised SMTPRecipientsRefused as expected!")
+
+        logger.verbose("Test completed successfully")
+
+    def _pre_connect(self):
         self._test_counter = 0
 
     def _run_tests(self):
@@ -264,6 +294,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.test_simple_alias()
         self.test_multiple_recipients()
         self.test_list_alias()
+        self.test_nonexistent_mailbox()
 
         logger.info("All mails sent successfully.")
 
