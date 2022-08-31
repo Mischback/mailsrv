@@ -6,7 +6,6 @@ import logging
 import sys
 
 # app imports
-# from test_suite.pop3 import Pop3sTestCase, Pop3TestCase
 from test_suite.log import add_level
 from test_suite.smtp import (
     SmtpStarttlsTestSuite,
@@ -97,45 +96,6 @@ if __name__ == "__main__":
 
     smtp_results = combine_smtp_suite_results(smtp.get_result(), smtp_tls.get_result())
     logger.debug(smtp_results)
-
-    # Run pop3 related tests
-    # try:
-    #    pop3_tests = Pop3TestCase(
-    #        username=target_recipient_1,
-    #        password="foobar",
-    #        target_host=target_host,
-    #        expected_messages=mails_queued[0],
-    #    )
-    #    pop3_tests.run()
-    # except MailsrvTestSuiteConfigurationException as e:
-    #    logger.error("Configuration error for Pop3TestCase: {}".format(e))
-    #    logger.error("Configuration invalid! Aborting!")
-    #    sys.exit(1)
-    # except Pop3TestCase.Pop3TestOperationalError:
-    #    logger.critical("Operational error! Aborting!")
-    #    sys.exit(1)
-    # except Pop3TestCase.Pop3TestError:
-    #    logger.critical("POP3 test suite finished with errors! Aborting!")
-    #    sys.exit(1)
-
-    # try:
-    #    pop3_tests = Pop3sTestCase(
-    #        username=target_recipient_1,
-    #        password="foobar",
-    #        target_host=target_host,
-    #        expected_messages=mails_queued[0],
-    #    )
-    #    pop3_tests.run()
-    # except MailsrvTestSuiteConfigurationException as e:
-    #    logger.error("Configuration error for Pop3TestCase: {}".format(e))
-    #    logger.error("Configuration invalid! Aborting!")
-    #    sys.exit(1)
-    # except Pop3TestCase.Pop3TestOperationalError:
-    #    logger.critical("Operational error! Aborting!")
-    #    sys.exit(1)
-    # except Pop3TestCase.Pop3TestError:
-    #    logger.critical("POP3 test suite finished with errors! Aborting!")
-    #    sys.exit(1)
 
     logger.summary("Test suites completed successfully!")
     sys.exit(0)
