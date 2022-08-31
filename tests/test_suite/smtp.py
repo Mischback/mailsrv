@@ -137,16 +137,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.alternate_recipient = os.getenv(
             "MAILSRV_TEST_SMTP_RECIPIENT_2", "user_two@sut.test"
         )
-        self.nonexistent_recipient = os.getenv(
-            "MAILSRV_TEST_SMTP_RECIPIENT_NONEXISTENT", "idontevenexist@sut.test"
-        )
-        self.alias_1 = os.getenv("MAILSRV_TEST_SMTP_ALIAS_1", "alias_one@sut.test")
-        self.alias_list = os.getenv(
-            "MAILSRV_TEST_SMTP_ALIAS_LIST", "alias_list@sut.test"
-        )
-        self.alias_corrupt = os.getenv(
-            "MAILSRV_TEST_SMTP_ALIAS_INVALID", "alias_invalid@sut.test"
-        )
 
     def get_subject(self, counter):
         """Create a unique subject, including a hashed timestamp."""
@@ -189,14 +179,16 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.verbose("Mail to an alias")
         logger.debug("test_simple_alias()")
 
+        rcpt = os.getenv("MAILSRV_TEST_SMTP_ALIAS_1", "alias_one@sut.test")
+
         message = GENERIC_VALID_MAIL.format(
             self.get_subject(self._test_counter),
             self.default_sender,
-            self.default_recipient,
+            rcpt,
         )
 
         try:
-            if self._sendmail(self.default_sender, self.alias_1, message) != {}:
+            if self._sendmail(self.default_sender, rcpt, message) != {}:
                 raise self.SmtpTestSuiteError("Mail to a valid alias got rejected")
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to a valid alias got rejected")
@@ -246,14 +238,16 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.verbose("Mail to an alias (list)")
         logger.debug("test_list_alias()")
 
+        rcpt = os.getenv("MAILSRV_TEST_SMTP_ALIAS_LIST", "alias_list@sut.test")
+
         message = GENERIC_VALID_MAIL.format(
             self.get_subject(self._test_counter),
             self.default_sender,
-            self.alias_list,
+            rcpt,
         )
 
         try:
-            if self._sendmail(self.default_sender, self.alias_list, message) != {}:
+            if self._sendmail(self.default_sender, rcpt, message) != {}:
                 raise self.SmtpTestSuiteError(
                     "Mail to a valid alias (list) got rejected"
                 )
@@ -272,17 +266,18 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.verbose("Mail to a nonexistent mailbox")
         logger.debug("test_nonexistent_mailbox()")
 
+        rcpt = os.getenv(
+            "MAILSRV_TEST_SMTP_RECIPIENT_NONEXISTENT", "idontevenexist@sut.test"
+        )
+
         message = GENERIC_VALID_MAIL.format(
             self.get_subject(self._test_counter),
             self.default_sender,
-            self.nonexistent_recipient,
+            rcpt,
         )
 
         try:
-            if (
-                self._sendmail(self.default_sender, self.nonexistent_recipient, message)
-                == {}
-            ):
+            if self._sendmail(self.default_sender, rcpt, message) == {}:
                 raise self.SmtpTestSuiteError("Mail to an invalid mailbox got accepted")
         except smtplib.SMTPRecipientsRefused:
             logger.debug("sendmail() raised SMTPRecipientsRefused as expected!")
@@ -330,14 +325,16 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         logger.verbose("Mail to a corrupted alias")
         logger.debug("test_corrupt_alias()")
 
+        rcpt = os.getenv("MAILSRV_TEST_SMTP_ALIAS_INVALID", "alias_invalid@sut.test")
+
         message = GENERIC_VALID_MAIL.format(
             self.get_subject(self._test_counter),
             self.default_sender,
-            self.alias_corrupt,
+            rcpt,
         )
 
         try:
-            if self._sendmail(self.default_sender, self.alias_corrupt, message) != {}:
+            if self._sendmail(self.default_sender, rcpt, message) != {}:
                 raise self.SmtpTestSuiteError(
                     "Mail to a corrupt, though valid, alias got rejected"
                 )
