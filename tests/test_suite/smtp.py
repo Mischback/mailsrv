@@ -82,6 +82,9 @@ class SmtpGenericTestSuite:
                 port=self.target_port,
                 local_hostname=self.local_hostname,
             ) as self.smtp:
+                logger.verbose(
+                    "Connection to target ({}) established".format(self.target_ip)
+                )
 
                 self._pre_run()
                 self._run_tests()
@@ -127,6 +130,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.default_recipient = os.getenv(
             "MAILSRV_TEST_SMTP_RECIPIENT_1", "user_one@sut.test"
         )
+        self.alias_1 = os.getenv("MAILSRV_TEST_SMTP_ALIAS_1", "alias_one@sut.test")
 
     def test_single_mailbox(self):
         """Send a mail to a valid single mailbox.
@@ -145,10 +149,29 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to a valid mailbox got rejected")
 
+        logger.verbose("Test completed successfully")
+
+    def test_simple_alias(self):
+        """Send a mail to an alias.
+
+        This mail is expected to get delivered / to be accepted.
+        """
+        logger.verbose("Mail to an alias")
+        logger.debug("test_simple_alias()")
+
+        try:
+            if self._sendmail(self.default_sender, self.alias_1, "foobar") != {}:
+                raise self.SmtpTestSuiteError("Mail to a valid alias got rejected")
+        except smtplib.SMTPRecipientsRefused:
+            raise self.SmtpTestSuiteError("Mail to a valid alias got rejected")
+
+        logger.verbose("Test completed successfully")
+
     def _run_tests(self):
         logger.info("Start sending of mails...")
 
         self.test_single_mailbox()
+        self.test_simple_alias()
 
         logger.info("All mails sent successfully.")
 
