@@ -7,7 +7,7 @@ import sys
 
 # app imports
 # from test_suite.pop3 import Pop3sTestCase, Pop3TestCase
-from test_suite.smtp import SmtpTestSuite
+from test_suite.smtp import SmtpStarttlsTestSuite, SmtpTestSuite
 
 # get the general logger object
 logger = logging.getLogger("test_suite")
@@ -65,6 +65,18 @@ if __name__ == "__main__":
         logger.info("Error while running test suite: {}".format(e))
         logger.debug(e, exc_info=1)
         logger.critical("SMPT test suite finished with errors! Aborting!")
+        sys.exit(1)
+
+    try:
+        SmtpStarttlsTestSuite(target_ip=args.target_host).run()
+    except SmtpStarttlsTestSuite.SmtpOperationalError as e:
+        logger.critical("Operational error! Aborting!")
+        logger.debug(e, exc_info=1)
+        sys.exit(1)
+    except SmtpStarttlsTestSuite.SmtpTestSuiteError as e:
+        logger.info("Error while running test suite: {}".format(e))
+        logger.debug(e, exc_info=1)
+        logger.critical("SMPT (STARTTLS) test suite finished with errors! Aborting!")
         sys.exit(1)
 
     # Run pop3 related tests
