@@ -142,6 +142,9 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.alias_list = os.getenv(
             "MAILSRV_TEST_SMTP_ALIAS_LIST", "alias_list@sut.test"
         )
+        self.alias_corrupt = os.getenv(
+            "MAILSRV_TEST_SMTP_ALIAS_INVALID", "alias_invalid@sut.test"
+        )
 
     def get_subject(self, counter):
         """Create a unique subject, including a hashed timestamp."""
@@ -310,6 +313,39 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         logger.verbose("Test completed successfully")
 
+    def test_corrupt_alias(self):
+        """Send a mail to a valid alias that points to a non-existent mailbox.
+
+        This mail is expected to get delivered / to be accepted, but a BOUNCE
+        message will be created.
+
+        This test is considered "Passing" if the mail is accepted by the SUT.
+        In order to verify the actual behaviour of the SUT, the BOUNCE message
+        has to be checked.
+        """
+        self._test_counter = self._test_counter + 1
+
+        logger.verbose("Mail to a corrupted alias")
+        logger.debug("test_corrupt_alias()")
+
+        message = GENERIC_VALID_MAIL.format(
+            self.get_subject(self._test_counter),
+            self.default_sender,
+            self.alias_corrupt,
+        )
+
+        try:
+            if self._sendmail(self.default_sender, self.alias_corrupt, message) != {}:
+                raise self.SmtpTestSuiteError(
+                    "Mail to a corrupt, though valid, alias got rejected"
+                )
+        except smtplib.SMTPRecipientsRefused:
+            raise self.SmtpTestSuiteError(
+                "Mail to a corrupt, though valid, alias got rejected"
+            )
+
+        logger.verbose("Test completed successfully")
+
     def _pre_connect(self):
         self._test_counter = 0
 
@@ -322,6 +358,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.test_list_alias()
         self.test_nonexistent_mailbox()
         self.test_relay_mail()
+        self.test_corrupt_alias()
 
         logger.info("All mails sent successfully.")
 
