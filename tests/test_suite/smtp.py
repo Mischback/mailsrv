@@ -6,7 +6,7 @@ These tests are meant to test the smtp functions of a server.
 import logging
 import os
 import smtplib
-import time  # noqa: F401
+import time
 from collections import defaultdict
 from functools import total_ordering
 
@@ -149,20 +149,56 @@ class SmtpGenericTestSuite:
     def _run_tests(self):
         raise NotImplementedError("Has to be implemented in real test suite")
 
-    def _sendmail(self, from_addr, to_addrs, msg, mail_options=(), rcpt_options=()):
+    def _generate_subject(self):
+        return "{} {}".format(self._mail_counter, hash(time.time()))
+
+    def _increment_mail_counter(self):
+        self._mail_counter += 1
+
+    def _sendmail(
+        self, from_addr, to_addrs, msg_template, mail_options=(), rcpt_options=()
+    ):
+        # Prepare the actual mail for sending:
+        # 1) RCPT TO:
+        if isinstance(to_addrs, str):
+            to_addrs = [to_addrs]
+            header_to = to_addrs
+        else:
+            # to_addrs is already a list
+            header_to = ", ".join(to_addrs)
+
+        # 2) Generate the subject
+        header_subject = self._generate_subject()
+
+        # 3) Actualle generate the message from the template
+        # TODO: Actually name the parameters in ``tests/test_suite/fixture_mail.py``
+        msg = msg_template.format(
+            mail_from=from_addr,
+            rcpt_to=header_to,
+            subject=header_subject,
+        )
+
         logger.debug(
             "sendmail(): {}, {}, {:16.16}, {}, {}".format(
                 from_addr, to_addrs, msg, mail_options, rcpt_options
             )
         )
+
+        self._increment_mail_counter()
+        self._protocol.mail_sent(header_subject)
+
         try:
-            return self.smtp.sendmail(
+            # actually send the mail
+            resp = self.smtp.sendmail(
                 from_addr, to_addrs, msg, mail_options, rcpt_options
             )
-        except smtplib.SMTPHeloError as e:
-            logger.critical("SMTP HELO Error")
-            logger.debug(e, exc_info=1)
-            raise self.SmtpOperationalError("SMTP HELO Error")
+        except (smtplib.SMTPRecipientsRefused, smtplib.SMTPSenderRefused):
+            self._protocol.mail_rejected(header_subject)
+            raise
+
+        for addr in to_addrs:
+            if addr not in resp:
+                self._protocol.mail_accepted(addr, header_subject)
 
     def run(self):
         """Run the test suite."""
@@ -188,18 +224,10 @@ class SmtpGenericTestSuite:
                 logger.verbose(
                     "Connection to target ({}) terminated".format(self.target_ip)
                 )
-        except smtplib.SMTPConnectError as e:
-            logger.critical(
-                "Error while connecting to target ({})".format(self.target_ip)
-            )
+        except smtplib.SMTPException as e:
+            logger.critical("SMTP exception: '{}'".format(e))
             logger.debug(e, exc_info=1)
-            raise self.SmtpOperationalError("Connection failed")
-        except smtplib.SMTPServerDisconnected as e:
-            logger.critical(
-                "Target ({}) closed the connection unexpectedly".format(self.target_ip)
-            )
-            logger.debug(e, exc_info=1)
-            raise self.SmtpOperationalError("Connection to target lost")
+            raise self.SmtpOperationalError("SMTP exception")
         except ConnectionRefusedError as e:
             logger.critical("Target ({}) refused the connection".format(self.target_ip))
             logger.debug(e, exc_info=1)
