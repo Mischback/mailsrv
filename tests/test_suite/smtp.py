@@ -7,6 +7,8 @@ import logging
 import os
 import smtplib
 import time
+from collections import defaultdict
+from functools import total_ordering
 
 # app imports
 from test_suite.exceptions import MailsrvTestSuiteException
@@ -27,6 +29,82 @@ def combine_smtp_suite_results(result1, result2):
     result_merged = {k: result1[k] + result2[k] for k in result_keys}
 
     return result_merged
+
+
+@total_ordering
+class SmtpTestProtocol:
+    """Data class to store the results of running a test suite."""
+
+    def __init__(self, sent=None, rejected=None, accepted=None):
+        if sent is None:
+            self._mails_sent = list()
+        else:
+            self._mails_sent = sent
+
+        if rejected is None:
+            self._mails_rejected = list()
+        else:
+            self._mails_rejected = rejected
+
+        if accepted is None:
+            self._mails_accepted = defaultdict(list)
+        else:
+            self._mails_accepted = accepted
+
+    def mail_sent(self, subject):
+        """Add the subject of a mail to the list of sent mails."""
+        self._mails_sent.append(subject)
+
+    def mail_rejected(self, subject):
+        """Add the subject of a mail to the list of rejected mails."""
+        self._mails_rejected.append(subject)
+
+    def mail_accepted(self, recipient, subject):
+        """Add the subject of a mail to the list of accepted mails."""
+        self._mails_accepted[recipient].append(subject)
+
+    def __bool__(self):
+        """Return ``True`` if there were some mails sent."""
+        return self._mails_sent.len() != 0
+
+    def __eq__(self, other):
+        """Check equality with ``other`` object."""
+        # see https://stackoverflow.com/a/2909119
+        # see https://stackoverflow.com/a/8796908
+        # see https://stackoverflow.com/a/44575926
+        if isinstance(other, SmtpTestProtocol):
+            return self.__key() == other.__key()
+        return NotImplemented
+
+    def __lt__(self, other):
+        """Comparing these objects does not make sense semantically."""  # noqa: D401
+        # see https://stackoverflow.com/a/44575926
+        return NotImplemented
+
+    def __hash__(self):
+        """Provide a unique representation of the instance."""
+        # see https://stackoverflow.com/a/2909119
+        return hash(self.__key())
+
+    def __repr__(self):
+        """Provide an instance's `representation`."""
+        # see https://stackoverflow.com/a/12448200
+        return "<SmtpTestProtocol(sent={}, rejected={}, accepted={})>".format(
+            self._mails_sent.__repr__(),
+            self._mails_rejected.__repr__(),
+            self._mails_accepted.__repr__(),
+        )
+
+    def __str__(self):
+        """Provide a string representation."""
+        return "Mails sent: {} ({} rejected)".format(
+            self._mails_sent.len(), self._mails_rejected.len()
+        )
+
+    def __key(self):
+        """Provide internal representation of the instance."""
+        # see https://stackoverflow.com/a/2909119
+        return (self._mails_sent, self._mails_rejected, self._mails_accepted)
 
 
 class SmtpGenericTestSuite:
