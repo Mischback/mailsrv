@@ -6,7 +6,7 @@ These tests are meant to test the smtp functions of a server.
 import logging
 import os
 import smtplib
-import time
+import time  # noqa: F401
 from collections import defaultdict
 from functools import total_ordering
 
@@ -123,13 +123,19 @@ class SmtpGenericTestSuite:
         self,
         target_ip="127.0.0.1",
         target_port=smtplib.SMTP_PORT,
+        suite_name="Generic Suite",
         local_hostname="mail.another-host.test",
+        mail_count_offset=0,
     ):
         self.target_ip = target_ip
         self.target_port = target_port
+        self.suite_name = suite_name
         self.local_hostname = local_hostname
-
-        self._suite_name = "Generic Suite"
+        # ``__init__()``'s parameter is called ``_offset``, but this attribute
+        # will only be incremented at the end of ``_sendmail()``, so in order
+        # to let the numbering start with *1*, this has to be added here.
+        self._mail_counter = mail_count_offset + 1
+        self._protocol = SmtpTestProtocol()
 
     def _pre_connect(self):
         pass
@@ -206,12 +212,11 @@ class SmtpTestSuite(SmtpGenericTestSuite):
     """Provide tests for a mail setup, simulating mails from another server."""
 
     def __init__(self, target_ip=None, mail_count_offset=0):
-        super().__init__(target_ip=target_ip)
-
-        # Set the actual suite name of this instance
-        self._suite_name = "SMTP Suite"
-
-        self._test_counter = mail_count_offset
+        super().__init__(
+            target_ip=target_ip,
+            suite_name="SMTP Suite",
+            mail_count_offset=mail_count_offset,
+        )
 
         # provide some specific things
         self.default_sender = os.getenv(
@@ -224,26 +229,11 @@ class SmtpTestSuite(SmtpGenericTestSuite):
             "MAILSRV_TEST_SMTP_RECIPIENT_2", "user_two@sut.test"
         )
 
-        # prepare the result dictionary
-        self.result = dict()
-        self.result[self.default_recipient] = list()
-        self.result[self.alternate_recipient] = list()
-
-    def get_subject(self, counter):
-        """Create a unique subject, including a hashed timestamp."""
-        return "{}: {}".format(counter, hash(time.time()))
-
-    def get_result(self):
-        """Return the result dictionary."""
-        return self.result
-
     def test_single_mailbox(self):
         """Send a mail to a valid single mailbox.
 
         This mail is expected to get delivered / to be accepted.
         """
-        self._test_counter = self._test_counter + 1
-
         logger.verbose("Mail to a single mailbox")
         logger.debug("test_single_mailbox()")
 
@@ -263,7 +253,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to a valid mailbox got rejected")
 
-        self.result[self.default_recipient].append(subject)
         logger.verbose("Test completed successfully")
 
     def test_simple_alias(self):
@@ -271,8 +260,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         This mail is expected to get delivered / to be accepted.
         """
-        self._test_counter = self._test_counter + 1
-
         logger.verbose("Mail to an alias")
         logger.debug("test_simple_alias()")
 
@@ -290,7 +277,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to a valid alias got rejected")
 
-        self.result[self.default_recipient].append(subject)
         logger.verbose("Test completed successfully")
 
     def test_multiple_recipients(self):
@@ -298,8 +284,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         This mail is expected to get delivered / to be accepted.
         """
-        self._test_counter = self._test_counter + 1
-
         logger.verbose("Mail to multiple recipients")
         logger.debug("test_multiple_recipients()")
 
@@ -325,8 +309,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to multiple recipients got rejected")
 
-        self.result[self.default_recipient].append(subject)
-        self.result[self.alternate_recipient].append(subject)
         logger.verbose("Test completed successfully")
 
     def test_list_alias(self):
@@ -334,8 +316,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         This mail is expected to get delivered / to be accepted.
         """
-        self._test_counter = self._test_counter + 1
-
         logger.verbose("Mail to an alias (list)")
         logger.debug("test_list_alias()")
 
@@ -355,8 +335,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         except smtplib.SMTPRecipientsRefused:
             raise self.SmtpTestSuiteError("Mail to a valid alias (list) got rejected")
 
-        self.result[self.default_recipient].append(subject)
-        self.result[self.alternate_recipient].append(subject)
         logger.verbose("Test completed successfully")
 
     def test_nonexistent_mailbox(self):
@@ -364,8 +342,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         This mail is expected to be rejected.
         """
-        self._test_counter = self._test_counter + 1
-
         logger.verbose("Mail to a nonexistent mailbox")
         logger.debug("test_nonexistent_mailbox()")
 
@@ -392,8 +368,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         This mail is expected to get delivered / to be accepted.
         """
-        self._test_counter = self._test_counter + 1
-
         logger.verbose("Mail to a relay host's mailbox")
         logger.debug("test_relay_mail()")
 
@@ -424,8 +398,6 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         In order to verify the actual behaviour of the SUT, the BOUNCE message
         has to be checked.
         """
-        self._test_counter = self._test_counter + 1
-
         logger.verbose("Mail to a corrupted alias")
         logger.debug("test_corrupt_alias()")
 
@@ -468,9 +440,11 @@ class SmtpStarttlsTestSuite(SmtpTestSuite):
     """Replicate ``SmtpTestSuite`` with a TLS connection."""
 
     def __init__(self, target_ip=None, mail_count_offset=0):
-        super().__init__(target_ip=target_ip, mail_count_offset=mail_count_offset)
-
-        self._suite_name = "SMTP (STARTTLS) Suite"
+        super().__init__(
+            target_ip=target_ip,
+            suite_name="SMTP (STARTTLS) Suite",
+            mail_count_offset=mail_count_offset,
+        )
 
     def _pre_run(self):
         logger.verbose("Sending command STARTTLS...")
