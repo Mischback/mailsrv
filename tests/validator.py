@@ -40,6 +40,9 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "dovecot_userdb", action="store", help="Dovecot's passwd-like userdb file"
     )
+    arg_parser.add_argument(
+        "postfix_vmailbox", action="store", help="Postfix's virtual_mailbox file"
+    )
 
     # optional arguments
     arg_parser.add_argument(
@@ -68,5 +71,7 @@ if __name__ == "__main__":
 
     # DEVELOPMENT IN PROGRESS
     userdb = parser.DovecotUserdbPasswdfileParser(args.dovecot_userdb)
-
     logger.debug(userdb.get_usernames())
+
+    v_mailboxes = parser.PostfixVirtualMailboxParser(args.postfix_vmailbox)
+    logger.debug(v_mailboxes.get_mailboxes())

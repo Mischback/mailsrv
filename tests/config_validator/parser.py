@@ -20,3 +20,15 @@ class DovecotUserdbPasswdfileParser:
         substring until that occurrence, repeat for every line".
         """
         return [line[: line.index(":")] for line in self._raw_lines]
+
+
+class PostfixVirtualMailboxParser:
+    """Parses Postfix's virtual_mailbox files, provided as text files."""
+
+    def __init__(self, file_path):
+        with open(file_path, "r") as f:
+            self._raw_lines = [line.strip() for line in f.readlines()]
+
+    def get_mailboxes(self):
+        """Return the mailboxes."""
+        return [line[: line.index(" ")] for line in self._raw_lines]
