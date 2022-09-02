@@ -214,7 +214,7 @@ class SmtpGenericTestSuite:
                 port=self.target_port,
                 local_hostname=self.local_hostname,
             ) as self.smtp:
-                logger.verbose(
+                logger.info(
                     "Connection to target ({}) established".format(self.target_ip)
                 )
 
@@ -235,7 +235,7 @@ class SmtpGenericTestSuite:
             logger.debug(e, exc_info=1)
             raise self.SmtpOperationalError("Connection refused")
 
-        logger.summary("{} finished successfully".format(self.suite_name))
+        logger.summary("[OK] {} finished successfully".format(self.suite_name))
 
 
 class SmtpTestSuite(SmtpGenericTestSuite):
@@ -265,6 +265,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         This mail is expected to get delivered / to be accepted.
         """
         logger.debug("test_single_mailbox()")
+        logger.verbose("Sending mail to a single mailbox")
 
         if not self._sendmail(
             self.default_sender, self.default_recipient, GENERIC_VALID_MAIL
@@ -277,6 +278,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         This mail is expected to get delivered / to be accepted.
         """
         logger.debug("test_simple_alias()")
+        logger.verbose("Sending mail to an alias")
 
         if not self._sendmail(
             self.default_sender,
@@ -291,6 +293,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         This mail is expected to get delivered / to be accepted.
         """
         logger.debug("test_multiple_recipients()")
+        logger.verbose("Sending mail to multiple recipients")
 
         if not self._sendmail(
             self.default_sender,
@@ -305,6 +308,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         This mail is expected to get delivered / to be accepted.
         """
         logger.debug("test_list_alias()")
+        logger.verbose("Sending mail to an alias that distributes the message")
 
         if not self._sendmail(
             self.default_sender,
@@ -319,6 +323,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         This mail is expected to be rejected.
         """
         logger.debug("test_nonexistent_mailbox()")
+        logger.verbose("Sending mail to a non-existing recipient")
 
         if self._sendmail(
             self.default_sender,
@@ -335,6 +340,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         This mail is expected to get delivered / to be accepted.
         """
         logger.debug("test_relay_mail()")
+        logger.verbose("Sending mail for an off-host recipient (relay)")
 
         if self._sendmail(
             self.default_sender,
@@ -354,6 +360,7 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         has to be checked.
         """
         logger.debug("test_corrupt_alias()")
+        logger.verbose("Sending mail to an alias that points to a non-existing mailbox")
 
         if not self._sendmail(
             self.default_sender,
@@ -375,7 +382,8 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.test_relay_mail()
         self.test_corrupt_alias()
 
-        logger.info("All mails sent successfully.")
+        logger.info(self._protocol)
+        logger.info("[OK] All server reactions as expected.")
 
 
 class SmtpStarttlsTestSuite(SmtpTestSuite):

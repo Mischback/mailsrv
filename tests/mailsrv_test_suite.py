@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # optional arguments
     parser.add_argument(
-        "-v", "--verbose", help="Enable verbose messages", action="store_true"
+        "-v", "--verbose", help="Enable verbose messages", action="count", default=0
     )
     parser.add_argument(
         "-d", "--debug", help="Enable debug messages", action="store_true"
@@ -52,7 +52,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.verbose:
+    if args.verbose == 1:
+        logger.setLevel(logging.INFO)
+    if args.verbose == 2:
         logger.setLevel(logging.VERBOSE)
         logger.verbose("Verbose logging enabled!")
     # enable debug messages
@@ -93,5 +95,5 @@ if __name__ == "__main__":
     # smtp_results = combine_smtp_suite_results(smtp.get_result(), smtp_tls.get_result())
     # logger.debug(smtp_results)
 
-    logger.summary("Test suites completed successfully!")
+    logger.summary("[OK] Test suites completed successfully!")
     sys.exit(0)
