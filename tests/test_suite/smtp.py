@@ -236,6 +236,7 @@ class SmtpGenericTestSuite:
             raise self.SmtpOperationalError("Connection refused")
 
         logger.summary("[OK] {} finished successfully".format(self.suite_name))
+        return self._protocol
 
 
 class SmtpTestSuite(SmtpGenericTestSuite):

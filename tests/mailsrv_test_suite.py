@@ -70,7 +70,7 @@ if __name__ == "__main__":
     # These tests simulate getting mail from another server
     try:
         smtp = SmtpTestSuite(target_ip=args.target_host)
-        smtp.run()
+        smtp_result = smtp.run()
     except SmtpTestSuite.SmtpOperationalError:
         logger.critical("Operational error! Aborting!")
         sys.exit(1)
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         smtp_tls = SmtpStarttlsTestSuite(
             target_ip=args.target_host, mail_count_offset=7
         )
-        smtp_tls.run()
+        smtp_tls_result = smtp_tls.run()
     except SmtpStarttlsTestSuite.SmtpOperationalError:
         logger.critical("Operational error! Aborting!")
         sys.exit(1)
