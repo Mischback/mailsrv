@@ -10,10 +10,12 @@ import time
 from collections import defaultdict
 from functools import total_ordering
 
+# external imports
+from utility.log import add_level
+
 # app imports
 from test_suite.exceptions import MailsrvTestSuiteException
 from test_suite.fixture_mail import GENERIC_VALID_MAIL
-from test_suite.log import add_level
 
 # get a module-level logger
 logger = logging.getLogger(__name__)

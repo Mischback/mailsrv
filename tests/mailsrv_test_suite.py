@@ -5,8 +5,10 @@ import argparse
 import logging
 import sys
 
+# external imports
+from utility.log import add_level
+
 # app imports
-from test_suite.log import add_level
 from test_suite.smtp import SmtpStarttlsTestSuite, SmtpTestSuite
 
 # get the general logger object
