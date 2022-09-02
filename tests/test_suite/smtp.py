@@ -202,7 +202,7 @@ class SmtpGenericTestSuite:
 
     def run(self):
         """Run the test suite."""
-        logger.summary("Running {}...".format(self._suite_name))
+        logger.summary("Running {}...".format(self.suite_name))
 
         self._pre_connect()
 
@@ -233,7 +233,7 @@ class SmtpGenericTestSuite:
             logger.debug(e, exc_info=1)
             raise self.SmtpOperationalError("Connection refused")
 
-        logger.summary("{} finished successfully".format(self._suite_name))
+        logger.summary("{} finished successfully".format(self.suite_name))
 
 
 class SmtpTestSuite(SmtpGenericTestSuite):
