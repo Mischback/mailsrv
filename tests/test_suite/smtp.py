@@ -23,14 +23,6 @@ add_level("VERBOSE", logging.INFO - 1)
 add_level("SUMMARY", logging.INFO + 1)
 
 
-def combine_smtp_suite_results(result1, result2):
-    """Merge two dictionaries with identical keys."""
-    result_keys = [k for k in result1.keys()]
-    result_merged = {k: result1[k] + result2[k] for k in result_keys}
-
-    return result_merged
-
-
 @total_ordering
 class SmtpTestProtocol:
     """Data class to store the results of running a test suite."""
@@ -51,6 +43,10 @@ class SmtpTestProtocol:
         else:
             self._mails_accepted = accepted
 
+    def get_mail_count(self):
+        """Return the number of mails sent during the run."""
+        return len(self._mails_sent)
+
     def mail_sent(self, subject):
         """Add the subject of a mail to the list of sent mails."""
         self._mails_sent.append(subject)
@@ -62,6 +58,26 @@ class SmtpTestProtocol:
     def mail_accepted(self, recipient, subject):
         """Add the subject of a mail to the list of accepted mails."""
         self._mails_accepted[recipient].append(subject)
+
+    def __add__(self, other):
+        """Add is implemented as *merging* two instances.
+
+        The method returns a **new** instance of ``SmtpTestProtocol``!
+        """
+        if not isinstance(other, SmtpTestProtocol):
+            return NotImplemented
+
+        return SmtpTestProtocol(
+            sent=self._mails_sent + other._mails_sent,
+            rejected=self._mails_rejected + other._mails_rejected,
+            accepted=defaultdict(
+                list,
+                {
+                    k: self._mails_accepted[k] + other._mails_accepted[k]
+                    for k in self._mails_accepted
+                },
+            ),
+        )
 
     def __bool__(self):
         """Return ``True`` if there were some mails sent."""

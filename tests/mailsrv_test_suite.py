@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     try:
         smtp_tls = SmtpStarttlsTestSuite(
-            target_ip=args.target_host, mail_count_offset=7
+            target_ip=args.target_host, mail_count_offset=smtp_result.get_mail_count()
         )
         smtp_tls_result = smtp_tls.run()
     except SmtpStarttlsTestSuite.SmtpOperationalError:
@@ -92,8 +92,8 @@ if __name__ == "__main__":
         logger.error("SMPT (STARTTLS) test suite finished with errors! Aborting!")
         sys.exit(1)
 
-    # smtp_results = combine_smtp_suite_results(smtp.get_result(), smtp_tls.get_result())
-    # logger.debug(smtp_results)
+    smtp_results = smtp_result + smtp_tls_result
+    logger.debug(smtp_results)
 
     logger.summary("[OK] Test suites completed successfully!")
     sys.exit(0)
