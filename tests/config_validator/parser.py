@@ -22,13 +22,13 @@ class DovecotUserdbPasswdfileParser:
         return [line[: line.index(":")] for line in self._raw_lines]
 
 
-class PostfixVirtualMailboxParser:
+class PostfixOnlyKeysParser:
     """Parses Postfix's virtual_mailbox files, provided as text files."""
 
     def __init__(self, file_path):
         with open(file_path, "r") as f:
             self._raw_lines = [line.strip() for line in f.readlines()]
 
-    def get_mailboxes(self):
+    def get_keys(self):
         """Return the mailboxes."""
         return [line[: line.index(" ")] for line in self._raw_lines]
