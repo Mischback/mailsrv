@@ -7,11 +7,7 @@ import sys
 
 # app imports
 from test_suite.log import add_level
-from test_suite.smtp import (
-    SmtpStarttlsTestSuite,
-    SmtpTestSuite,
-    combine_smtp_suite_results,
-)
+from test_suite.smtp import SmtpStarttlsTestSuite, SmtpTestSuite
 
 # get the general logger object
 logger = logging.getLogger("test_suite")
@@ -94,8 +90,8 @@ if __name__ == "__main__":
         logger.error("SMPT (STARTTLS) test suite finished with errors! Aborting!")
         sys.exit(1)
 
-    smtp_results = combine_smtp_suite_results(smtp.get_result(), smtp_tls.get_result())
-    logger.debug(smtp_results)
+    # smtp_results = combine_smtp_suite_results(smtp.get_result(), smtp_tls.get_result())
+    # logger.debug(smtp_results)
 
     logger.summary("Test suites completed successfully!")
     sys.exit(0)

@@ -98,7 +98,7 @@ class SmtpTestProtocol:
     def __str__(self):
         """Provide a string representation."""
         return "Mails sent: {} ({} rejected)".format(
-            self._mails_sent.len(), self._mails_rejected.len()
+            len(self._mails_sent), len(self._mails_rejected)
         )
 
     def __key(self):
@@ -144,7 +144,7 @@ class SmtpGenericTestSuite:
         pass
 
     def _post_run(self):
-        pass
+        logger.debug(self._protocol)
 
     def _run_tests(self):
         raise NotImplementedError("Has to be implemented in real test suite")
@@ -194,11 +194,13 @@ class SmtpGenericTestSuite:
             )
         except (smtplib.SMTPRecipientsRefused, smtplib.SMTPSenderRefused):
             self._protocol.mail_rejected(header_subject)
-            raise
+            return False
 
         for addr in to_addrs:
             if addr not in resp:
                 self._protocol.mail_accepted(addr, header_subject)
+
+        return True
 
     def run(self):
         """Run the test suite."""
@@ -239,10 +241,10 @@ class SmtpGenericTestSuite:
 class SmtpTestSuite(SmtpGenericTestSuite):
     """Provide tests for a mail setup, simulating mails from another server."""
 
-    def __init__(self, target_ip=None, mail_count_offset=0):
+    def __init__(self, target_ip=None, suite_name="SMTP Suite", mail_count_offset=0):
         super().__init__(
             target_ip=target_ip,
-            suite_name="SMTP Suite",
+            suite_name=suite_name,
             mail_count_offset=mail_count_offset,
         )
 
@@ -262,159 +264,84 @@ class SmtpTestSuite(SmtpGenericTestSuite):
 
         This mail is expected to get delivered / to be accepted.
         """
-        logger.verbose("Mail to a single mailbox")
         logger.debug("test_single_mailbox()")
 
-        subject = self.get_subject(self._test_counter)
-        message = GENERIC_VALID_MAIL.format(
-            subject,
-            self.default_sender,
-            self.default_recipient,
-        )
-
-        try:
-            if (
-                self._sendmail(self.default_sender, self.default_recipient, message)
-                != {}
-            ):
-                raise self.SmtpTestSuiteError("Mail to a valid mailbox got rejected")
-        except smtplib.SMTPRecipientsRefused:
+        if not self._sendmail(
+            self.default_sender, self.default_recipient, GENERIC_VALID_MAIL
+        ):
             raise self.SmtpTestSuiteError("Mail to a valid mailbox got rejected")
-
-        logger.verbose("Test completed successfully")
 
     def test_simple_alias(self):
         """Send a mail to an alias.
 
         This mail is expected to get delivered / to be accepted.
         """
-        logger.verbose("Mail to an alias")
         logger.debug("test_simple_alias()")
 
-        rcpt = os.getenv("MAILSRV_TEST_SMTP_ALIAS_1", "alias_one@sut.test")
-        subject = self.get_subject(self._test_counter)
-        message = GENERIC_VALID_MAIL.format(
-            subject,
+        if not self._sendmail(
             self.default_sender,
-            rcpt,
-        )
-
-        try:
-            if self._sendmail(self.default_sender, rcpt, message) != {}:
-                raise self.SmtpTestSuiteError("Mail to a valid alias got rejected")
-        except smtplib.SMTPRecipientsRefused:
+            os.getenv("MAILSRV_TEST_SMTP_ALIAS_1", "alias_one@sut.test"),
+            GENERIC_VALID_MAIL,
+        ):
             raise self.SmtpTestSuiteError("Mail to a valid alias got rejected")
-
-        logger.verbose("Test completed successfully")
 
     def test_multiple_recipients(self):
         """Send a mail to multiple recipients.
 
         This mail is expected to get delivered / to be accepted.
         """
-        logger.verbose("Mail to multiple recipients")
         logger.debug("test_multiple_recipients()")
 
-        subject = self.get_subject(self._test_counter)
-        message = GENERIC_VALID_MAIL.format(
-            subject,
+        if not self._sendmail(
             self.default_sender,
-            "{}, {}".format(self.default_recipient, self.alternate_recipient),
-        )
-
-        try:
-            if (
-                self._sendmail(
-                    self.default_sender,
-                    [self.default_recipient, self.alternate_recipient],
-                    message,
-                )
-                != {}
-            ):
-                raise self.SmtpTestSuiteError(
-                    "Mail to multiple recipients got rejected"
-                )
-        except smtplib.SMTPRecipientsRefused:
+            [self.default_recipient, self.alternate_recipient],
+            GENERIC_VALID_MAIL,
+        ):
             raise self.SmtpTestSuiteError("Mail to multiple recipients got rejected")
-
-        logger.verbose("Test completed successfully")
 
     def test_list_alias(self):
         """Send a mail to an alias, that is actually a list.
 
         This mail is expected to get delivered / to be accepted.
         """
-        logger.verbose("Mail to an alias (list)")
         logger.debug("test_list_alias()")
 
-        rcpt = os.getenv("MAILSRV_TEST_SMTP_ALIAS_LIST", "alias_list@sut.test")
-        subject = self.get_subject(self._test_counter)
-        message = GENERIC_VALID_MAIL.format(
-            subject,
+        if not self._sendmail(
             self.default_sender,
-            rcpt,
-        )
-
-        try:
-            if self._sendmail(self.default_sender, rcpt, message) != {}:
-                raise self.SmtpTestSuiteError(
-                    "Mail to a valid alias (list) got rejected"
-                )
-        except smtplib.SMTPRecipientsRefused:
+            os.getenv("MAILSRV_TEST_SMTP_ALIAS_LIST", "alias_list@sut.test"),
+            GENERIC_VALID_MAIL,
+        ):
             raise self.SmtpTestSuiteError("Mail to a valid alias (list) got rejected")
-
-        logger.verbose("Test completed successfully")
 
     def test_nonexistent_mailbox(self):
         """Send a mail to a invalid single mailbox.
 
         This mail is expected to be rejected.
         """
-        logger.verbose("Mail to a nonexistent mailbox")
         logger.debug("test_nonexistent_mailbox()")
 
-        rcpt = os.getenv(
-            "MAILSRV_TEST_SMTP_RECIPIENT_NONEXISTENT", "idontevenexist@sut.test"
-        )
-        subject = self.get_subject(self._test_counter)
-        message = GENERIC_VALID_MAIL.format(
-            subject,
+        if self._sendmail(
             self.default_sender,
-            rcpt,
-        )
-
-        try:
-            if self._sendmail(self.default_sender, rcpt, message) == {}:
-                raise self.SmtpTestSuiteError("Mail to an invalid mailbox got accepted")
-        except smtplib.SMTPRecipientsRefused:
-            logger.debug("sendmail() raised SMTPRecipientsRefused as expected!")
-
-        logger.verbose("Test completed successfully")
+            os.getenv(
+                "MAILSRV_TEST_SMTP_RECIPIENT_NONEXISTENT", "idontevenexist@sut.test"
+            ),
+            GENERIC_VALID_MAIL,
+        ):
+            raise self.SmtpTestSuiteError("Mail to an invalid mailbox got accepted")
 
     def test_relay_mail(self):
         """Send a mail to a mail address, the SUT is not responsible for.
 
         This mail is expected to get delivered / to be accepted.
         """
-        logger.verbose("Mail to a relay host's mailbox")
         logger.debug("test_relay_mail()")
 
-        subject = self.get_subject(self._test_counter)
-        message = GENERIC_VALID_MAIL.format(
-            subject,
+        if self._sendmail(
             self.default_sender,
             self.default_sender,
-        )
-
-        try:
-            if self._sendmail(self.default_sender, self.default_sender, message) == {}:
-                raise self.SmtpTestSuiteError(
-                    "Mail to a relay host's mailbox got accepted"
-                )
-        except smtplib.SMTPRecipientsRefused:
-            logger.debug("sendmail() raised SMTPRecipientsRefused as expected!")
-
-        logger.verbose("Test completed successfully")
+            GENERIC_VALID_MAIL,
+        ):
+            raise self.SmtpTestSuiteError("Mail to a relay host's mailbox got accepted")
 
     def test_corrupt_alias(self):
         """Send a mail to a valid alias that points to a non-existent mailbox.
@@ -426,28 +353,16 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         In order to verify the actual behaviour of the SUT, the BOUNCE message
         has to be checked.
         """
-        logger.verbose("Mail to a corrupted alias")
         logger.debug("test_corrupt_alias()")
 
-        rcpt = os.getenv("MAILSRV_TEST_SMTP_ALIAS_INVALID", "alias_invalid@sut.test")
-        subject = self.get_subject(self._test_counter)
-        message = GENERIC_VALID_MAIL.format(
-            subject,
+        if not self._sendmail(
             self.default_sender,
-            rcpt,
-        )
-
-        try:
-            if self._sendmail(self.default_sender, rcpt, message) != {}:
-                raise self.SmtpTestSuiteError(
-                    "Mail to a corrupt, though valid, alias got rejected"
-                )
-        except smtplib.SMTPRecipientsRefused:
+            os.getenv("MAILSRV_TEST_SMTP_ALIAS_INVALID", "alias_invalid@sut.test"),
+            GENERIC_VALID_MAIL,
+        ):
             raise self.SmtpTestSuiteError(
-                "Mail to a corrupt, though valid, alias got rejected"
+                "Mail to a valid, though corrupted, alias got rejected"
             )
-
-        logger.verbose("Test completed successfully")
 
     def _run_tests(self):
         logger.info("Start sending of mails...")
@@ -461,16 +376,17 @@ class SmtpTestSuite(SmtpGenericTestSuite):
         self.test_corrupt_alias()
 
         logger.info("All mails sent successfully.")
-        logger.debug(self.result)
 
 
 class SmtpStarttlsTestSuite(SmtpTestSuite):
     """Replicate ``SmtpTestSuite`` with a TLS connection."""
 
-    def __init__(self, target_ip=None, mail_count_offset=0):
+    def __init__(
+        self, target_ip=None, suite_name="SMTP (STARTTLS) Suite", mail_count_offset=0
+    ):
         super().__init__(
             target_ip=target_ip,
-            suite_name="SMTP (STARTTLS) Suite",
+            suite_name=suite_name,
             mail_count_offset=mail_count_offset,
         )
 
