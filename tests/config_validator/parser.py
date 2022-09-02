@@ -1,13 +1,31 @@
 """Provide parsers for the different configuration files."""
 
+# Python imports
+import logging
 
-class DovecotUserdbPasswdfileParser:
-    """Parses *passwd*-file-based user databases."""
+logger = logging.getLogger(__name__)
+
+
+class ConfigValidatorOperationalError(Exception):
+    """Indicate operational error."""
+
+
+class GenericFileReader:
+    """Reads a plain-text config file and strips comment lines."""
 
     def __init__(self, file_path):
 
-        with open(file_path, "r") as f:
-            self._raw_lines = [line.strip() for line in f.readlines()]
+        try:
+            with open(file_path, "r") as f:
+                self._raw_lines = [line.strip() for line in f.readlines()]
+        except FileNotFoundError as e:
+            logger.error("File not found")
+            logger.debug(e, exc_info=1)
+            raise ConfigValidatorOperationalError("File not found")
+
+
+class DovecotUserdbPasswdfileParser(GenericFileReader):
+    """Parse *passwd*-file-based user databases."""
 
     def get_usernames(self):
         """Return the usernames.
@@ -22,13 +40,16 @@ class DovecotUserdbPasswdfileParser:
         return [line[: line.index(":")] for line in self._raw_lines]
 
 
-class PostfixOnlyKeysParser:
-    """Parses Postfix's virtual_mailbox files, provided as text files."""
-
-    def __init__(self, file_path):
-        with open(file_path, "r") as f:
-            self._raw_lines = [line.strip() for line in f.readlines()]
+class PostfixOnlyKeysParser(GenericFileReader):
+    """Parse Postfix's database files, that only depend on the keys."""
 
     def get_keys(self):
-        """Return the mailboxes."""
+        """Return the left-hand side of the entries."""
         return [line[: line.index(" ")] for line in self._raw_lines]
+
+
+class PostfixKeyValueParser(GenericFileReader):
+    """Parse Postfix's database files, that actually have meaninful values."""
+
+    def get_key_value(self):  # noqa: D102
+        raise NotImplementedError("to be done")
