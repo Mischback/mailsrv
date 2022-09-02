@@ -26,7 +26,7 @@ if __name__ == "__main__":
     log_handler.setLevel(logging.DEBUG)
     log_formatter_default = logging.Formatter("%(message)s")
     log_formatter_debug = logging.Formatter(
-        "[%(levelname)s] - [%(name)s] - %(message)s"
+        "%(levelname)-8s - [%(module)s] - %(message)s (%(filename)s:%(lineno)d)"
     )
     log_handler.setFormatter(log_formatter_default)
     logger.addHandler(log_handler)
