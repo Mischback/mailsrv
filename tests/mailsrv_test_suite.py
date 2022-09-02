@@ -93,7 +93,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     smtp_results = smtp_result + smtp_tls_result
-    logger.debug(smtp_results)
+    logger.info(smtp_results)
+    logger.debug(smtp_results._mails_sent)
+    logger.debug(smtp_results._mails_rejected)
+    logger.debug(smtp_results._mails_accepted)
 
     logger.summary("[OK] Test suites completed successfully!")
     sys.exit(0)
