@@ -5,11 +5,11 @@ import logging
 import sys
 
 # external imports
-from config_validator import parser
+from config_validator import checks, parser
 from utility.log import add_level
 
 # get the general logger object
-logger = logging.getLogger("validator")
+logger = logging.getLogger("config_validator")
 
 # Add the VERBOSE / SUMMARY log levels
 add_level("VERBOSE", logging.INFO - 1)
@@ -72,7 +72,6 @@ if __name__ == "__main__":
 
     logger.summary("Running validation...")
 
-    # DEVELOPMENT IN PROGRESS
     userdb = parser.DovecotUserdbPasswdfileParser(args.dovecot_userdb)
     logger.debug(userdb.get_usernames())
 
@@ -81,3 +80,8 @@ if __name__ == "__main__":
 
     v_mailboxes = parser.PostfixOnlyKeysParser(args.postfix_vmailbox).get_keys()
     logger.debug(v_mailboxes)
+
+    # DEVELOPMENT IN PROGRESS
+    checks.mailbox_has_account(v_mailboxes, userdb.get_usernames())
+
+    logger.summary("Validation of configuration completed successfully")
