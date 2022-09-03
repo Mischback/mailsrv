@@ -17,11 +17,15 @@ class GenericFileReader:
 
         try:
             with open(file_path, "r") as f:
-                self._raw_lines = [line.strip() for line in f.readlines()]
-        except FileNotFoundError as e:
-            logger.error("File not found")
+                self._raw_lines = [
+                    line.strip() for line in f.readlines() if line[0] != "#"
+                ]
+        except OSError as e:
+            logger.error("Error while accessing {}".format(file_path))
             logger.debug(e, exc_info=1)
-            raise ConfigValidatorOperationalError("File not found")
+            raise ConfigValidatorOperationalError(
+                "Error while accessing {}".format(file_path)
+            )
 
 
 class DovecotUserdbPasswdfileParser(GenericFileReader):
