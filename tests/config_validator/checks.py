@@ -30,3 +30,18 @@ def mailbox_has_account(postfix_mailboxes, dovecot_usernames):
         raise ConfigValidatorError("{} not found in Dovecot's userdb".format(not_found))
 
     logger.verbose("[OK] All mailboxes have a corresponding Dovecot user")
+
+
+def address_matches_domains(postfix_addresses, postfix_domains):
+    """All addresses' domain parts must have an entry in the virtual domains."""
+    logger.debug("Check: address_matches_domains()")
+
+    logger.debug(postfix_addresses)
+    logger.debug(postfix_domains)
+    for address in postfix_addresses:
+        if address[address.index("@") + 1 :] not in postfix_domains:
+            raise ConfigValidatorError(
+                "{} not found in Postfix's virtual domains".format(address)
+            )
+
+    logger.verbose("[OK] All addresses have a corresponding (virtual) domain")

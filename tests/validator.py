@@ -89,6 +89,7 @@ if __name__ == "__main__":
 
     # Actually run the checks
     checks.mailbox_has_account(v_mailboxes, userdb.get_usernames())
+    checks.address_matches_domains(list(v_aliases.keys()) + v_mailboxes, v_domains)
 
     # DEVELOPMENT IN PROGRESS
 
