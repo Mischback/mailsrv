@@ -41,7 +41,9 @@ def address_matches_domains(postfix_addresses, postfix_domains):
     for address in postfix_addresses:
         if address[address.index("@") + 1 :] not in postfix_domains:
             raise ConfigValidatorError(
-                "{} not found in Postfix's virtual domains".format(address)
+                "{} without corresponding entry in Postfix's virtual domains".format(
+                    address
+                )
             )
 
     logger.verbose("[OK] All addresses have a corresponding (virtual) domain")

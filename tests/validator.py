@@ -88,9 +88,14 @@ if __name__ == "__main__":
     logger.debug(v_aliases)
 
     # Actually run the checks
-    checks.mailbox_has_account(v_mailboxes, userdb.get_usernames())
-    checks.address_matches_domains(list(v_aliases.keys()) + v_mailboxes, v_domains)
-
-    # DEVELOPMENT IN PROGRESS
+    try:
+        checks.mailbox_has_account(v_mailboxes, userdb.get_usernames())
+        checks.address_matches_domains(list(v_aliases.keys()) + v_mailboxes, v_domains)
+    except checks.ConfigValidatorWarning as e:
+        # TODO: Include logic to treat warnings as errors here
+        logger.warning(e)
+    except checks.ConfigValidatorError as e:
+        logger.error("[FAIL] {}".format(e))
+        sys.exit(1)
 
     logger.summary("Validation of configuration completed successfully")
