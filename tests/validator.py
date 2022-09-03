@@ -46,6 +46,9 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "postfix_vmailbox", action="store", help="Postfix's virtual_mailbox file"
     )
+    arg_parser.add_argument(
+        "postfix_valias", action="store", help="Postfix's virtual_alias file"
+    )
 
     # optional arguments
     arg_parser.add_argument(
@@ -81,7 +84,12 @@ if __name__ == "__main__":
     v_mailboxes = parser.PostfixOnlyKeysParser(args.postfix_vmailbox).get_keys()
     logger.debug(v_mailboxes)
 
-    # DEVELOPMENT IN PROGRESS
+    v_aliases = parser.PostfixKeyValueParser(args.postfix_valias).get_key_value()
+    logger.debug(v_aliases)
+
+    # Actually run the checks
     checks.mailbox_has_account(v_mailboxes, userdb.get_usernames())
+
+    # DEVELOPMENT IN PROGRESS
 
     logger.summary("Validation of configuration completed successfully")

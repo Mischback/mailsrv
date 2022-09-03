@@ -55,5 +55,12 @@ class PostfixOnlyKeysParser(GenericFileReader):
 class PostfixKeyValueParser(GenericFileReader):
     """Parse Postfix's database files, that actually have meaninful values."""
 
-    def get_key_value(self):  # noqa: D102
-        raise NotImplementedError("to be done")
+    def get_key_value(self):
+        """Return the actual key / value combinations as dictionary."""
+        result = dict()
+        for line in self._raw_lines:
+            key = line[: line.index(" ")]
+            value = line[line.index(" ") :].strip().split(" ")
+            result[key] = value
+
+        return result
