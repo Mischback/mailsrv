@@ -231,7 +231,7 @@ def address_can_send(postfix_addresses, postfix_senders):
 
     for address in postfix_addresses:
         if address not in sender_lhs:
-            logger.debug("{} not in sender map".format(address))
+            logger.verbose("{} not in sender map".format(address))
             na_addresses.append(address)
 
     if na_addresses:
@@ -253,3 +253,31 @@ def sender_valid_login(postfix_senders, dovecot_users):
             )
 
     logger.verbose("[OK] All configured senders can actually login")
+
+
+def user_has_function(dovecot_users, postfix_mailboxes, postfix_senders):
+    """Users *should have* some function.
+
+    The function is probably a dedicated mailbox, but there might be users,
+    who are only used to send mails using one of the provided aliases (with an
+    corresponding entry in sender_login_maps).
+    """
+    logger.debug("Check: user_has_function()")
+
+    sender_rhs = set([item for sublist in postfix_senders.values() for item in sublist])
+    na_users = list()
+
+    for user in dovecot_users:
+        if user in postfix_mailboxes:
+            continue
+
+        if user in sender_rhs:
+            continue
+
+        logger.verbose("{} has no mailbox and is not in sender map".format(user))
+        na_users.append(user)
+
+    if na_users:
+        raise ConfigValidatorWarning("Unused users!", more_context=na_users)
+
+    logger.verbose("[OK] All users actually have a function")
