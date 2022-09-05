@@ -47,3 +47,25 @@ def address_matches_domains(postfix_addresses, postfix_domains):
             )
 
     logger.verbose("[OK] All addresses have a corresponding (virtual) domain")
+
+
+def external_alias_targets(postfix_aliases, postfix_domains):
+    """Alias targets *should not* be external addresses."""
+    # This check might be run WITHOUT actually resolving the alias file!
+
+    logger.debug("Check: external_alias_targets()")
+
+    postfix_alias_targets = [
+        item for sublist in postfix_aliases.values() for item in sublist
+    ]
+    logger.debug("Alias targets: {}".format(postfix_alias_targets))
+
+    for target in postfix_alias_targets:
+        if target[target.index("@") + 1 :] not in postfix_domains:
+            logger.verbose("{} is an external address!".format(target))
+            logger.verbose(
+                "This might pose a severe risk to make the server be considered a spam relay."
+            )
+            raise ConfigValidatorWarning("{} is an external address".format(target))
+
+    logger.verbose("[OK] No alias pointing to an external domain")
