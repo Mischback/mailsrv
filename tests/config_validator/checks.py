@@ -1,6 +1,7 @@
 """Provide the actual validation logic."""
 
 # Python imports
+import copy
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,6 +13,54 @@ class ConfigValidatorWarning(Exception):
 
 class ConfigValidatorError(Exception):
     """Indicate some configuration that makes the service unusable."""
+
+
+class PostfixAliasResolver:  # noqa: D101
+    def __init__(self, postfix_aliases, postfix_mailboxes):
+        self.src_aliases = postfix_aliases
+        self.src_mailboxes = postfix_mailboxes
+
+        logger.debug(self.src_aliases)
+        logger.debug(self.src_mailboxes)
+
+        self._work_aliases = copy.deepcopy(self.src_aliases)
+        self.result = dict()
+        self._iteration = 0
+
+    def resolve(self, max_iterations=5):  # noqa: D102
+        self._iteration = self._iteration + 1
+        logger.debug("max_iterations = {}".format(max_iterations))
+        logger.debug("this iteration = {}".format(self._iteration))
+
+        tmp_aliases = copy.deepcopy(self._work_aliases)
+        for alias in tmp_aliases:
+            logger.debug("{}: {}".format(alias, tmp_aliases[alias]))
+
+            targets_are_mailboxes = True
+            for target in tmp_aliases[alias]:
+                logger.debug("Checking alias target '{}'".format(target))
+                if target not in self.src_mailboxes:
+                    logger.debug("{} not a mailbox".format(target))
+                    targets_are_mailboxes = False
+                if target in self.result.keys():
+                    logger.debug("{} present in result!".format(target))
+                    logger.debug("BEFORE resolving: {}".format(tmp_aliases[alias]))
+                    tmp_aliases[alias].remove(target)
+                    tmp_aliases[alias] = tmp_aliases[alias] + self.result[target]
+                    logger.debug("AFTER resolving: {}".format(tmp_aliases[alias]))
+                    self._work_aliases[alias] = tmp_aliases[alias]
+
+            if targets_are_mailboxes:
+                self.result[alias] = tmp_aliases[alias]
+                del self._work_aliases[alias]
+
+        if self._work_aliases:
+            if self._iteration == max_iterations:
+                logger.error("Unresolved aliases: {}".format(self._work_aliases))
+                logger.verbose("Resolved aliases: {}".format(self.result))
+                raise Exception("Could not complete resolving of aliases")
+
+            self.resolve(max_iterations=max_iterations)
 
 
 def mailbox_has_account(postfix_mailboxes, dovecot_usernames):

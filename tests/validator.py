@@ -92,6 +92,11 @@ if __name__ == "__main__":
         checks.mailbox_has_account(v_mailboxes, userdb.get_usernames())
         checks.address_matches_domains(list(v_aliases.keys()) + v_mailboxes, v_domains)
         checks.external_alias_targets(v_aliases, v_domains)
+
+        # FIXME: just for development, wrap with an actual check function
+        resolver = checks.PostfixAliasResolver(v_aliases, v_mailboxes)
+        resolver.resolve()
+        logger.info(resolver.result)
     except checks.ConfigValidatorWarning as e:
         # TODO: Include logic to treat warnings as errors here
         logger.warning(e)
