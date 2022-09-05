@@ -38,92 +38,81 @@ class PostfixAliasResolver:
 
         self._work_aliases = copy.deepcopy(self.src_aliases)
         self.resolved = dict()
-        self.external = collections.defaultdict(list)
+        self.external = collections.defaultdict(set)
+        self.unresolved = collections.defaultdict(set)
         self._iteration = 0
-        self._resolve_external = False
+        self._resolve_external = 0
+        self._resolve_failed = 0
 
-    def resolve(self, max_iterations=5):
-        """Perform the resolving and raise warnings.
+    def resolve(self):
+        """Resolve the alias configuration.
 
-        This method does not return the results of resolving. They have to be
-        accessed dedicatedly by fetching ``self.result``.
+        The method returns the resolved configuration, mapping all aliases to
+        a local mailbox or an external address.
+        *Unresolvable* aliases are still provided, with an empty target list.
+
+        The method returns the status of resolving by including instances of
+        ``ConfigValidatorWarning`` for unresolvable and external addresses.
         """
-        try:
-            self._resolve(max_iterations=max_iterations)
-        except self.CouldNotResolve:
-            raise ConfigValidatorWarning(
-                "Could not resolve aliases with {} iterations".format(max_iterations)
+        self.resolved = self._resolve()
+
+        if self._resolve_external > 0:
+            # TODO: provide the list of external addresses as context to the exception object
+            ret_external = ConfigValidatorWarning("External addresses detected!")
+        else:
+            ret_external = None
+
+        if self._resolve_failed > 0:
+            # TODO: provide the list of failed resolves as context to the exception object
+            ret_failed = ConfigValidatorWarning("Resolve failed!")
+        else:
+            ret_failed = None
+
+        return ret_failed, ret_external, self.resolved
+
+    def _resolve(self):
+
+        for alias in self._work_aliases:
+            logger.debug("[PROCESSING] {}: {}".format(alias, self._work_aliases[alias]))
+            self._work_aliases[alias] = self._resolve_alias(
+                alias, self._work_aliases[alias]
             )
 
-        if self._resolve_external:
-            raise ConfigValidatorWarning("Alias config contains external address")
+        return self._work_aliases
 
-    def _resolve(self, max_iterations):
-        self._iteration = self._iteration + 1
-        logger.debug("iteration {}/{}".format(self._iteration, max_iterations))
+    def _resolve_alias(self, alias, targets):
+        result = list()
 
-        tmp_aliases = copy.deepcopy(self._work_aliases)
-        for alias in tmp_aliases:
-            logger.debug("{}: {}".format(alias, tmp_aliases[alias]))
-
-            targets_are_mailboxes = True
-            for target in tmp_aliases[alias]:
-                logger.debug("Checking alias target '{}'".format(target))
-                if target == alias:
-                    logger.debug(
-                        "Alias '{}' included in {}".format(alias, tmp_aliases[alias])
-                    )
-                    raise ConfigValidatorError(
-                        "Alias included in targets; unresolvable cirle"
-                    )
-
-                if target not in self.ref_mailboxes:
-                    logger.debug("{} not a mailbox".format(target))
-                    targets_are_mailboxes = False
-                else:
-                    logger.debug("[OK] {} is a mailbox".format(target))
-
-                if target[target.index("@") + 1 :] not in self.ref_domains:
-                    logger.debug(
-                        "[kind of OK] {} is an external address".format(target)
-                    )
-                    self.external[alias].append(target)
-                    self._resolve_external = True
-                    targets_are_mailboxes = True
-
-                if target in self.resolved.keys():
-                    targets_are_mailboxes = False
-                    logger.debug("{} present in resolved aliases!".format(target))
-                    logger.debug("BEFORE resolving: {}".format(tmp_aliases[alias]))
-                    # tmp_aliases[alias].remove(target)
-                    # tmp_aliases[alias] = self.resolved[target] + tmp_aliases[alias]
-                    tmp_resolved = copy.deepcopy(tmp_aliases)
-                    tmp_resolved[alias].remove(target)
-                    tmp_resolved[alias] = self.resolved[target] + tmp_resolved[alias]
-                    logger.debug("AFTER resolving: {}".format(tmp_resolved[alias]))
-                    self._work_aliases[alias] = tmp_resolved[alias]
-                    break
-
-            if targets_are_mailboxes:
-                logger.debug("[RESOLVED] {}: {}".format(alias, tmp_aliases[alias]))
-                self.resolved[alias] = tmp_aliases[alias]
-                del self._work_aliases[alias]
-            else:
-                logger.debug("[DELAYED] {}: {}".format(alias, tmp_aliases[alias]))
-
-        if self._work_aliases:
-            if self._iteration == max_iterations:
-                logger.debug("Reached 'max_iterations' ({})!".format(max_iterations))
-                logger.debug("Unresolved aliases: {}".format(self._work_aliases))
-                logger.debug("Resolved aliases: {}".format(self.resolved))
-                self.unresolved = self._work_aliases
-                raise self.CouldNotResolve(
-                    "Could not resolve aliases: {}".format(
-                        list(self._work_aliases.keys())
-                    )
+        for target in targets:
+            logger.debug("[CHECKING] {}".format(target))
+            if target == alias:
+                raise ConfigValidatorError(
+                    "Alias included in targets; unresolvable cirle"
                 )
 
-            self._resolve(max_iterations=max_iterations)
+            if target in self.ref_mailboxes:
+                logger.debug("[OK] {} is a valid mailbox!".format(target))
+                result.append(target)
+                continue
+
+            if target[target.index("@") + 1 :] not in self.ref_domains:
+                logger.debug("[OK'ish] {} is an external address!".format(target))
+                self.external[alias].add(target)
+                self._resolve_external += 1
+                result.append(target)
+                continue
+
+            # at this point, ``target`` is another alias
+            try:
+                result = result + self._resolve_alias(
+                    target, self._work_aliases[target]
+                )
+            except KeyError:
+                self.unresolved[alias].add(target)
+                self._resolve_failed += 1
+                logger.warning("WARNING: {} is not resolvable!".format(target))
+
+        return result
 
 
 def mailbox_has_account(postfix_mailboxes, dovecot_usernames):
