@@ -11,9 +11,19 @@ logger = logging.getLogger(__name__)
 class ConfigValidatorWarning(Exception):
     """Indicate some configuration that might result in problems."""
 
+    def __init__(self, *args, more_context=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.more_context = more_context
+
 
 class ConfigValidatorError(Exception):
     """Indicate some configuration that makes the service unusable."""
+
+    def __init__(self, *args, more_context=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.more_context = more_context
 
 
 class PostfixAliasResolver:
@@ -58,13 +68,17 @@ class PostfixAliasResolver:
 
         if self._resolve_external > 0:
             # TODO: provide the list of external addresses as context to the exception object
-            ret_external = ConfigValidatorWarning("External addresses detected!")
+            ret_external = ConfigValidatorWarning(
+                "External addresses detected!", more_context=self.external
+            )
         else:
             ret_external = None
 
         if self._resolve_failed > 0:
             # TODO: provide the list of failed resolves as context to the exception object
-            ret_failed = ConfigValidatorWarning("Resolve failed!")
+            ret_failed = ConfigValidatorWarning(
+                "Resolve failed!", more_context=self.unresolved
+            )
         else:
             ret_failed = None
 
@@ -192,16 +206,17 @@ def resolve_alias_configuration(postfix_aliases, postfix_mailboxes, postfix_doma
     tmp_fail, tmp_ext, resolve = resolver.resolve()
 
     if tmp_fail is not None:
-        logger.verbose("Some aliases could not be resolved!")
-        # TODO: Provide the failed entries from the exceptions context and list them here!
+        logger.info("Some aliases could not be resolved!")
+        logger.info(dict(tmp_fail.more_context))
         raise ConfigValidatorError(tmp_fail)
 
     if tmp_ext is not None:
-        logger.verbose("Some aliases resolved to external addresses!")
+        logger.info("Some aliases resolved to external addresses!")
         logger.verbose(
             "This might pose a severe rist to make the server be considered a spam relay."
         )
         # TODO: Provide the external entries from the exception context and list them here!
+        logger.info(tmp_fail.more_context)
         raise ConfigValidatorWarning(tmp_ext)
 
     logger.verbose("[OK] Alias configuration valid!")
