@@ -1,6 +1,7 @@
 """Provide the actual validation logic."""
 
 # Python imports
+import collections
 import copy
 import logging
 
@@ -36,7 +37,8 @@ class PostfixAliasResolver:
         logger.debug(self.ref_domains)
 
         self._work_aliases = copy.deepcopy(self.src_aliases)
-        self.result = dict()
+        self.resolved = dict()
+        self.external = collections.defaultdict(list)
         self._iteration = 0
         self._resolve_external = False
 
@@ -78,29 +80,43 @@ class PostfixAliasResolver:
                 if target not in self.ref_mailboxes:
                     logger.debug("{} not a mailbox".format(target))
                     targets_are_mailboxes = False
+                else:
+                    logger.debug("[OK] {} is a mailbox".format(target))
 
                 if target[target.index("@") + 1 :] not in self.ref_domains:
-                    logger.debug("{} is an external address".format(target))
+                    logger.debug(
+                        "[kind of OK] {} is an external address".format(target)
+                    )
+                    self.external[alias].append(target)
                     self._resolve_external = True
                     targets_are_mailboxes = True
 
-                if target in self.result.keys():
-                    logger.debug("{} present in result!".format(target))
+                if target in self.resolved.keys():
+                    targets_are_mailboxes = False
+                    logger.debug("{} present in resolved aliases!".format(target))
                     logger.debug("BEFORE resolving: {}".format(tmp_aliases[alias]))
-                    tmp_aliases[alias].remove(target)
-                    tmp_aliases[alias] = tmp_aliases[alias] + self.result[target]
-                    logger.debug("AFTER resolving: {}".format(tmp_aliases[alias]))
-                    self._work_aliases[alias] = tmp_aliases[alias]
+                    # tmp_aliases[alias].remove(target)
+                    # tmp_aliases[alias] = self.resolved[target] + tmp_aliases[alias]
+                    tmp_resolved = copy.deepcopy(tmp_aliases)
+                    tmp_resolved[alias].remove(target)
+                    tmp_resolved[alias] = self.resolved[target] + tmp_resolved[alias]
+                    logger.debug("AFTER resolving: {}".format(tmp_resolved[alias]))
+                    self._work_aliases[alias] = tmp_resolved[alias]
+                    break
 
             if targets_are_mailboxes:
-                self.result[alias] = tmp_aliases[alias]
+                logger.debug("[RESOLVED] {}: {}".format(alias, tmp_aliases[alias]))
+                self.resolved[alias] = tmp_aliases[alias]
                 del self._work_aliases[alias]
+            else:
+                logger.debug("[DELAYED] {}: {}".format(alias, tmp_aliases[alias]))
 
         if self._work_aliases:
             if self._iteration == max_iterations:
                 logger.debug("Reached 'max_iterations' ({})!".format(max_iterations))
                 logger.debug("Unresolved aliases: {}".format(self._work_aliases))
-                logger.debug("Resolved aliases: {}".format(self.result))
+                logger.debug("Resolved aliases: {}".format(self.resolved))
+                self.unresolved = self._work_aliases
                 raise self.CouldNotResolve(
                     "Could not resolve aliases: {}".format(
                         list(self._work_aliases.keys())

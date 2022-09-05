@@ -118,6 +118,9 @@ if __name__ == "__main__":
         # FIXME: just for development, wrap with an actual check function
         resolver = checks.PostfixAliasResolver(v_aliases, v_mailboxes, v_domains)
         warnings_as_errors(resolver.resolve)
+        logger.info(resolver.resolved)
+        logger.info(dict(resolver.external))
+        logger.warning(resolver.unresolved)
     except checks.ConfigValidatorError as e:
         logger.error("[FAIL] {}".format(e))
         sys.exit(1)
