@@ -52,10 +52,16 @@ if __name__ == "__main__":
 
     # optional arguments
     arg_parser.add_argument(
+        "-d", "--debug", help="Enable debug messages", action="store_true"
+    )
+    arg_parser.add_argument(
         "-v", "--verbose", help="Enable verbose messages", action="count", default=0
     )
     arg_parser.add_argument(
-        "-d", "--debug", help="Enable debug messages", action="store_true"
+        "-w",
+        "--warnings_as_errors",
+        help="Treat warnings as errors",
+        action="store_true",
     )
 
     args = arg_parser.parse_args()
@@ -87,19 +93,32 @@ if __name__ == "__main__":
     v_aliases = parser.PostfixKeyValueParser(args.postfix_valias).get_key_value()
     logger.debug(v_aliases)
 
+    def warnings_as_errors(function, *args, ctrl=args.warnings_as_errors, **kwargs):
+        """Wrap a check function to enable warnings as errors."""
+        try:
+            return function(*args, **kwargs)
+        except checks.ConfigValidatorWarning as e:
+            if ctrl:
+                logger.debug("Caught warning, treating as error")
+                raise checks.ConfigValidatorError(e)
+            logger.warning(e)
+
     # Actually run the checks
     try:
-        checks.mailbox_has_account(v_mailboxes, userdb.get_usernames())
-        checks.address_matches_domains(list(v_aliases.keys()) + v_mailboxes, v_domains)
-        checks.external_alias_targets(v_aliases, v_domains)
+        warnings_as_errors(
+            checks.mailbox_has_account, v_mailboxes, userdb.get_usernames()
+        )
+        warnings_as_errors(
+            checks.address_matches_domains,
+            list(v_aliases.keys()) + v_mailboxes,
+            v_domains,
+        )
+        warnings_as_errors(checks.external_alias_targets, v_aliases, v_domains)
 
         # FIXME: just for development, wrap with an actual check function
         resolver = checks.PostfixAliasResolver(v_aliases, v_mailboxes)
         resolver.resolve()
         logger.info(resolver.result)
-    except checks.ConfigValidatorWarning as e:
-        # TODO: Include logic to treat warnings as errors here
-        logger.warning(e)
     except checks.ConfigValidatorError as e:
         logger.error("[FAIL] {}".format(e))
         sys.exit(1)
