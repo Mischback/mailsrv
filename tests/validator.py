@@ -113,15 +113,10 @@ if __name__ == "__main__":
             list(v_aliases.keys()) + v_mailboxes,
             v_domains,
         )
-        warnings_as_errors(checks.external_alias_targets, v_aliases, v_domains)
-
-        # FIXME: just for development, wrap with an actual check function
-        resolver = checks.PostfixAliasResolver(v_aliases, v_mailboxes, v_domains)
-        tmp_fail, tmp_ext, resolve = warnings_as_errors(resolver.resolve)
-        logger.info(resolve)
-        logger.info("{}, {}".format(tmp_fail, tmp_ext))
-        # logger.info(dict(resolver.external))
-        # logger.warning(dict(resolver.unresolved))
+        # warnings_as_errors(checks.external_alias_targets, v_aliases, v_domains)
+        warnings_as_errors(
+            checks.resolve_alias_configuration, v_aliases, v_mailboxes, v_domains
+        )
     except checks.ConfigValidatorError as e:
         logger.error("[FAIL] {}".format(e))
         sys.exit(1)

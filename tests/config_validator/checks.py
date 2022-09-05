@@ -151,7 +151,12 @@ def address_matches_domains(postfix_addresses, postfix_domains):
 
 
 def external_alias_targets(postfix_aliases, postfix_domains):
-    """Alias targets *should not* be external addresses."""
+    """Alias targets *should not* be external addresses.
+
+    This function is made obsolete by ``resolve_alias_configuration()``, but
+    kept for reference or when actual parsing of the alias configuration is
+    not desired.
+    """
     # This check might be run WITHOUT actually resolving the alias file!
 
     logger.debug("Check: external_alias_targets()")
@@ -170,3 +175,34 @@ def external_alias_targets(postfix_aliases, postfix_domains):
             raise ConfigValidatorWarning("{} is an external address".format(target))
 
     logger.verbose("[OK] No alias pointing to an external domain")
+
+
+def resolve_alias_configuration(postfix_aliases, postfix_mailboxes, postfix_domains):
+    """Check and resolve the alias configuration.
+
+    Raise an error, if an alias can not be resolved, raise a warning if there
+    are external addresses detected.
+
+    Makes ``external_alias_targets()`` obsolete.
+    """
+    logger.debug("Check: resolve_alias_configuration()")
+
+    resolver = PostfixAliasResolver(postfix_aliases, postfix_mailboxes, postfix_domains)
+
+    tmp_fail, tmp_ext, resolve = resolver.resolve()
+
+    if tmp_fail is not None:
+        logger.verbose("Some aliases could not be resolved!")
+        # TODO: Provide the failed entries from the exceptions context and list them here!
+        raise ConfigValidatorError(tmp_fail)
+
+    if tmp_ext is not None:
+        logger.verbose("Some aliases resolved to external addresses!")
+        logger.verbose(
+            "This might pose a severe rist to make the server be considered a spam relay."
+        )
+        # TODO: Provide the external entries from the exception context and list them here!
+        raise ConfigValidatorWarning(tmp_ext)
+
+    logger.verbose("[OK] Alias configuration valid!")
+    return resolve
