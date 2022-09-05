@@ -18,7 +18,9 @@ class GenericFileReader:
         try:
             with open(file_path, "r") as f:
                 self._raw_lines = [
-                    line.strip() for line in f.readlines() if line[0] != "#"
+                    line.strip()
+                    for line in f.readlines()
+                    if line[0] != "#" and line.strip()
                 ]
         except OSError as e:
             logger.error("Error while accessing {}".format(file_path))

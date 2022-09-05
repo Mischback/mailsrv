@@ -220,3 +220,21 @@ def resolve_alias_configuration(postfix_aliases, postfix_mailboxes, postfix_doma
 
     logger.verbose("[OK] Alias configuration valid!")
     return resolve
+
+
+def address_can_send(postfix_addresses, postfix_senders):
+    """Addresses *should* be included in Postfix's sender login map."""
+    logger.debug("Check: address_can_send()")
+
+    sender_lhs = list(postfix_senders.keys())
+    na_addresses = list()
+
+    for address in postfix_addresses:
+        if address not in sender_lhs:
+            logger.debug("{} not in sender map".format(address))
+            na_addresses.append(address)
+
+    if na_addresses:
+        raise ConfigValidatorWarning("Not all addresses can send emails!")
+
+    logger.verbose("[OK] All addresses can send mails")

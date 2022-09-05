@@ -49,6 +49,9 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "postfix_valias", action="store", help="Postfix's virtual_alias file"
     )
+    arg_parser.add_argument(
+        "postfix_sender_map", action="store", help="Postfix's sender_login_maps file"
+    )
 
     # optional arguments
     arg_parser.add_argument(
@@ -93,6 +96,11 @@ if __name__ == "__main__":
     v_aliases = parser.PostfixKeyValueParser(args.postfix_valias).get_key_value()
     logger.debug(v_aliases)
 
+    sender_logins = parser.PostfixKeyValueParser(
+        args.postfix_sender_map
+    ).get_key_value()
+    logger.debug(sender_logins)
+
     def warnings_as_errors(function, *args, ctrl=args.warnings_as_errors, **kwargs):
         """Wrap a check function to enable warnings as errors."""
         try:
@@ -114,8 +122,12 @@ if __name__ == "__main__":
             v_domains,
         )
         # warnings_as_errors(checks.external_alias_targets, v_aliases, v_domains)
+        # warnings_as_errors(
+        #    checks.resolve_alias_configuration, v_aliases, v_mailboxes, v_domains
+        # )
+
         warnings_as_errors(
-            checks.resolve_alias_configuration, v_aliases, v_mailboxes, v_domains
+            checks.address_can_send, list(v_aliases.keys()) + v_mailboxes, sender_logins
         )
     except checks.ConfigValidatorError as e:
         logger.error("[FAIL] {}".format(e))
