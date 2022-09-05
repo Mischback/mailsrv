@@ -101,7 +101,7 @@ if __name__ == "__main__":
             if ctrl:
                 logger.debug("Caught warning, treating as error")
                 raise checks.ConfigValidatorError(e)
-            logger.warning(e)
+            logger.warning("WARNING: {}".format(e))
 
     # Actually run the checks
     try:
@@ -116,9 +116,8 @@ if __name__ == "__main__":
         warnings_as_errors(checks.external_alias_targets, v_aliases, v_domains)
 
         # FIXME: just for development, wrap with an actual check function
-        resolver = checks.PostfixAliasResolver(v_aliases, v_mailboxes)
-        resolver.resolve()
-        logger.info(resolver.result)
+        resolver = checks.PostfixAliasResolver(v_aliases, v_mailboxes, v_domains)
+        warnings_as_errors(resolver.resolve)
     except checks.ConfigValidatorError as e:
         logger.error("[FAIL] {}".format(e))
         sys.exit(1)
