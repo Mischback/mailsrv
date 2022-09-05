@@ -238,3 +238,18 @@ def address_can_send(postfix_addresses, postfix_senders):
         raise ConfigValidatorWarning("Not all addresses can send emails!")
 
     logger.verbose("[OK] All addresses can send mails")
+
+
+def sender_valid_login(postfix_senders, dovecot_users):
+    """All configured senders **must have** a matching account in Dovecot's userdb."""
+    logger.debug("Check: sender_valid_login()")
+
+    sender_rhs = set([item for sublist in postfix_senders.values() for item in sublist])
+
+    for sender in sender_rhs:
+        if sender not in dovecot_users:
+            raise ConfigValidatorError(
+                "Sender {} without matching login".format(sender)
+            )
+
+    logger.verbose("[OK] All configured senders can actually login")

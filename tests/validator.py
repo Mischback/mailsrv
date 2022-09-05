@@ -129,6 +129,9 @@ if __name__ == "__main__":
         warnings_as_errors(
             checks.address_can_send, list(v_aliases.keys()) + v_mailboxes, sender_logins
         )
+        warnings_as_errors(
+            checks.sender_valid_login, sender_logins, userdb.get_usernames()
+        )
     except checks.ConfigValidatorError as e:
         logger.error("[FAIL] {}".format(e))
         sys.exit(1)
