@@ -215,8 +215,7 @@ def resolve_alias_configuration(postfix_aliases, postfix_mailboxes, postfix_doma
         logger.verbose(
             "This might pose a severe rist to make the server be considered a spam relay."
         )
-        # TODO: Provide the external entries from the exception context and list them here!
-        logger.info(tmp_fail.more_context)
+        logger.info(dict(tmp_fail.more_context))
         raise ConfigValidatorWarning(tmp_ext)
 
     logger.verbose("[OK] Alias configuration valid!")
