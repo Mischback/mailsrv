@@ -281,3 +281,18 @@ def user_has_function(dovecot_users, postfix_mailboxes, postfix_senders):
         raise ConfigValidatorWarning("Unused users!", more_context=na_users)
 
     logger.verbose("[OK] All users actually have a function")
+
+
+def virtual_domain_has_postmaster_and_abuse(postfix_domains, postfix_addresses):
+    """All domains *should have* the postmaster and abuse addresses."""
+    for domain in postfix_domains:
+        if "postmaster@{}".format(domain) not in postfix_addresses:
+            raise ConfigValidatorWarning(
+                "'{}' is missing the 'postmaster' address".format(domain)
+            )
+        if "abuse@{}".format(domain) not in postfix_addresses:
+            raise ConfigValidatorWarning(
+                "'{}' is missing the 'abuse' address".format(domain)
+            )
+
+    logger.verbose("[OK] All domains have postmaster and abuse addresses")
