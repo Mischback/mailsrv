@@ -9,6 +9,7 @@ import logging.config
 import sys
 
 # external imports
+from mailsrv_aux.common.exceptions import MailsrvBaseException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
 
 # get a module-level logger
@@ -36,4 +37,9 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    sys.exit(0)
+    try:
+        sys.exit(0)
+    except MailsrvBaseException as e:
+        logger.critical("Execution failed!")
+        logger.exception(e)  # noqa: G200
+        sys.exit(1)
