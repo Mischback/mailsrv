@@ -4,10 +4,25 @@
 
 # Python imports
 import argparse
+import logging
+import logging.config
 import sys
 
-if __name__ == "__main__":
+# external imports
+from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
 
+# get a module-level logger
+logger = logging.getLogger()
+
+# add the VERBOSE / SUMMARY log levels
+add_level("VERBOSE", logging.INFO - 1)
+add_level("SUMMARY", logging.INFO + 1)
+
+if __name__ == "__main__":
+    # setup the logging module
+    logging.config.dictConfig(LOGGING_DEFAULT_CONFIG)
+
+    # prepare the argument parser
     arg_parser = argparse.ArgumentParser(
         description="Check and validate the interdependent configuration files of the mail setup"
     )
@@ -20,7 +35,5 @@ if __name__ == "__main__":
     )
 
     args = arg_parser.parse_args()
-
-    print(args)
 
     sys.exit(0)
