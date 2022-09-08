@@ -47,7 +47,7 @@ $(PRE_COMMIT_READY) : $(UTIL_VENV_INSTALLED)
 
 # Create the utility virtual environment
 $(UTIL_VENV_CREATED) :
-	python -m venv $(UTIL_VENV_DIR)
+	/usr/bin/env python3 -m venv $(UTIL_VENV_DIR)
 
 # Install the required packages in the utility virtual environments
 $(UTIL_VENV_INSTALLED) : $(UTIL_VENV_CREATED) requirements/util.txt
