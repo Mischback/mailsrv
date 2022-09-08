@@ -31,6 +31,10 @@ util/flake8 :
 	$(MAKE) util/pre-commit pre-commit_id="flake8" pre-commit_files="--all-files"
 .PHONY : util/isort
 
+util/mypy :
+	$(MAKE) util/pre-commit pre-commit_id="mypy" pre-commit_files="--all-files"
+.PHONY : util/mypy
+
 pre-commit_id ?= ""
 pre-commit_files ?= ""
 util/pre-commit : $(PRE_COMMIT_READY)

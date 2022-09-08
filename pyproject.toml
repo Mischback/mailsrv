@@ -20,7 +20,7 @@ known_first_party          = "test_suite"
 
 
 [tool.mypy]
-python_version = "3"
+python_version = "3.9"
 disallow_untyped_defs = true
 disallow_any_unimported = true
 no_implicit_optional = true
