@@ -5,6 +5,8 @@ extend-select =
     B, B902, B903,
     # pydocstyle (by flake8-docstrings)
     D,
+    # logging-format (by flake8-logging-format)
+    G0,
 
 # just don't use these...
 ignore =
