@@ -2,7 +2,7 @@
 
 # Python imports
 import logging
-from typing import Optional
+from typing import Optional, TypeVar
 
 # local imports
 from .exceptions import MailsrvValidationOperationalError
@@ -41,3 +41,14 @@ class ValidationMessage:
             id=self.id,
             hint=self.hint,
         )
+
+
+class ValidationError(ValidationMessage):
+    """Indicate an actual error in the configuration."""
+
+    def __init__(self, msg: str, id: str, hint: Optional[str] = None) -> None:
+        super().__init__(INFO, msg, id, hint=hint)
+
+
+# Typing stuff
+TValidationMessage = TypeVar("TValidationMessage", bound=ValidationMessage)
