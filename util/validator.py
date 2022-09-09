@@ -7,10 +7,12 @@ import argparse
 import logging
 import logging.config
 import sys
+from typing import Any, Callable, Dict, Optional, Tuple  # noqa: F401
 
 # app imports
 from mailsrv_aux.common.exceptions import MailsrvBaseException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
+from mailsrv_aux.validation import checks, messages
 from mailsrv_aux.validation.exceptions import MailsrvValidationException
 
 # get a module-level logger
@@ -25,6 +27,39 @@ class MailsrvValidationFailedException(MailsrvValidationException):
     """Indicate a failure during validation."""
 
 
+class MailsrvValidationFailFastException(MailsrvValidationException):
+    """Indicate a failure while running if fail-fast mode."""
+
+
+def check_wrapper(
+    check_func: Callable[
+        [checks.TCheckArg, checks.TCheckArg], list[messages.TValidationMessage]
+    ],
+    *args: checks.TCheckArg,
+    fail_fast: bool = False,
+    ignore: tuple = tuple(),
+    **kwargs: Optional[Any],
+) -> bool:
+    """Wrap a check function and handle its return value."""
+    got_errors = False
+    ret_val = check_func(*args, **kwargs)
+
+    for message in ret_val:
+        if message.id in ignore:
+            # log_message(message, True)
+            continue
+        else:
+            # log_message(message)
+            pass
+
+        if message.level > messages.WARNING:
+            got_errors = True
+            if fail_fast:
+                raise MailsrvValidationFailFastException("Fail fast, fail hard")
+
+    return got_errors
+
+
 def run_checks(fail_fast: bool = False, ignore: tuple = tuple()) -> None:
     """Run the actual check functions.
 
@@ -36,13 +71,13 @@ def run_checks(fail_fast: bool = False, ignore: tuple = tuple()) -> None:
     got_errors = False
 
     # actually run the check functions with a wrapper
-    # got_errors = got_errors or check_wrapper(
-    #    checks.check_mailbox_has_account,
-    #    postfix_vmailboxes,
-    #    dovecot_users,
-    #    fail_fast=fail_fast,
-    #    ignore=ignore
-    # )
+    got_errors = got_errors or check_wrapper(
+        checks.check_mailbox_has_account,
+        ["foo"],  # postfix_vmailboxes,
+        ["bar"],  # dovecot_users,
+        fail_fast=fail_fast,
+        ignore=ignore,
+    )
 
     if got_errors:
         raise MailsrvValidationFailedException("There were errors during validation")

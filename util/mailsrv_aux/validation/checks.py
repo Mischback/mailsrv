@@ -2,16 +2,26 @@
 
 # Python imports
 import logging
+from typing import Optional, Tuple, TypeVar  # noqa: F401
 
 # local imports
 from .messages import TValidationMessage, ValidationError  # noqa: F401
+
+# Typing stuff
+
+# FIXME: The arguments to the check functions may have different types, but
+#        list[int] is not included.
+#        As TypeVar requires more than one parameter, list[int] is added as a
+#        placeholder and will be replaced.
+TCheckArg = TypeVar("TCheckArg", list[str], list[int])
+
 
 # get a module-level logger
 logger = logging.getLogger(__name__)
 
 
 def check_mailbox_has_account(
-    postfix_mailboxes: list[str], dovecot_accounts: list[str]
+    postfix_mailboxes: TCheckArg, dovecot_accounts: TCheckArg
 ) -> list[TValidationMessage]:
     """Temporary fix."""
     return []
