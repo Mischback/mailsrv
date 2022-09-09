@@ -131,6 +131,7 @@ def run_checks(
     postfix_vmailboxes: list[str],
     postfix_valiases: dict[str, list[str]],
     postfix_vdomains: list[str],
+    postfix_sender_map: dict[str, list[str]],
     dovecot_users: list[str],
     fail_fast: bool = False,
     skip: tuple = tuple(),
@@ -195,6 +196,9 @@ if __name__ == "__main__":
     )
     arg_parser.add_argument(
         "postfix_vdomain_file", action="store", help="Postfix's virtual domain file"
+    )
+    arg_parser.add_argument(
+        "postfix_sender_map_file", action="store", help="Postfix's sender login map"
     )
 
     # optional arguments (keyword arguments)
@@ -261,11 +265,18 @@ if __name__ == "__main__":
         postfix_vdomains = parser.KeyParser(args.postfix_vdomain_file).get_values()
         logger.debug("postfix_vdomains: %r", postfix_vdomains)
 
+        logger.debug("postfix_sender_map_file=%s", args.postfix_sender_map_file)
+        postfix_sender_map = parser.KeyValueParser(
+            args.postfix_sender_map_file
+        ).get_values()
+        logger.debug("postfix_sender_map: %r", postfix_sender_map)
+
         try:
             run_checks(
                 postfix_vmailboxes,
                 postfix_valiases,
                 postfix_vdomains,
+                postfix_sender_map,
                 dovecot_users,
                 fail_fast=args.fail_fast,
                 skip=skip,
