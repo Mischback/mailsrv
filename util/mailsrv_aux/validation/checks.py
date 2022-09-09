@@ -2,7 +2,7 @@
 
 # Python imports
 import logging
-from typing import Optional, Tuple, TypeVar  # noqa: F401
+from typing import Optional, Tuple, Type, TypeVar  # noqa: F401
 
 # local imports
 from .messages import TValidationMessage, ValidationError  # noqa: F401
@@ -24,4 +24,19 @@ def check_mailbox_has_account(
     postfix_mailboxes: TCheckArg, dovecot_accounts: TCheckArg
 ) -> list[TValidationMessage]:
     """Temporary fix."""
-    return []
+    logger.debug("check_mailbox_has_account()")
+
+    findings: list[TValidationMessage] = list()
+
+    for box in postfix_mailboxes:
+        if box not in dovecot_accounts:
+            logger.warning(box)
+            findings.append(
+                ValidationError(
+                    "Mailbox {} has no matching account".format(box),
+                    id="e001",
+                    hint="Every Postfix *mailbox* requires a matching entry in Dovecot's *userdb*",
+                )
+            )
+
+    return findings

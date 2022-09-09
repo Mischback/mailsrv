@@ -39,24 +39,19 @@ def log_message(
     Skipped checks are still put to log level VERBOSE. Hints are always printed
     to VERBOSE.
     """
-    template = "{msg_id} {msg_level}: {msg_body}"
-    template_hint = "Hint: {msg_hint}"
+    template = "%s %d: %s"
+    template_hint = "Hint: %s"
 
     if skip:
         template = "[SKIPPED] " + template
         template_hint = "[SKIPPED] " + template_hint
         logger.verbose(  # type: ignore [attr-defined]
-            template,
-            dict(msg_id=message.id, msg_level=message.level, msg_body=message.msg),
+            template, message.id, message.level, message.msg
         )
     else:
-        logger.log(
-            message.level,
-            template,
-            dict(msg_id=message.id, msg_level=message.level, msg_body=message.msg),
-        )
+        logger.log(message.level, template, message.id, message.level, message.msg)
 
-    logger.verbose(template_hint, dict(msg_hint=message.hint))  # type: ignore [attr-defined]
+    logger.verbose(template_hint, message.hint)  # type: ignore [attr-defined]
 
 
 def check_wrapper(
@@ -147,9 +142,11 @@ if __name__ == "__main__":
         logger.verbose("Verbose logging enabled")  # type: ignore [attr-defined]
 
     try:
-        # temporary
         run_checks()
         sys.exit(0)
+    except (MailsrvValidationFailedException, MailsrvValidationFailFastException):
+        logger.error("Validation failed!")
+        sys.exit(2)
     except MailsrvBaseException as e:
         logger.critical("Execution failed!")
         logger.exception(e)  # noqa: G200

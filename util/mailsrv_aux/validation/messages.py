@@ -11,7 +11,7 @@ INFO = logging.INFO
 WARNING = logging.WARNING
 ERROR = logging.ERROR
 
-__levels = [INFO, WARNING, ERROR]
+_levels = [INFO, WARNING, ERROR]
 
 
 class ValidationMessage:
@@ -20,7 +20,7 @@ class ValidationMessage:
     def __init__(
         self, level: int, msg: str, id: str, hint: Optional[str] = None
     ) -> None:
-        if level not in __levels:
+        if level not in _levels:
             raise MailsrvValidationOperationalError("Invalid message level")
 
         self.level = level
@@ -47,8 +47,8 @@ class ValidationError(ValidationMessage):
     """Indicate an actual error in the configuration."""
 
     def __init__(self, msg: str, id: str, hint: Optional[str] = None) -> None:
-        super().__init__(INFO, msg, id, hint=hint)
+        super().__init__(ERROR, msg, id, hint=hint)
 
 
 # Typing stuff
-TValidationMessage = TypeVar("TValidationMessage", bound=ValidationMessage)
+TValidationMessage = TypeVar("TValidationMessage", ValidationMessage, ValidationError)
