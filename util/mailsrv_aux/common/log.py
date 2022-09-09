@@ -83,7 +83,7 @@ def add_level(level_name: str, level_number: int) -> None:
         setattr(logging.getLoggerClass(), _method_name, generic_log_class)
         setattr(logging, _method_name, generic_log_module)
     except AttributeError:
-        logger.debug("Name {level_name} already defined!", dict(level_name=level_name))
+        logger.debug("Name '%s' already defined!", level_name)
     finally:
         # Release the lock to Python's logging module
         logging._releaseLock()  # type: ignore [attr-defined]
