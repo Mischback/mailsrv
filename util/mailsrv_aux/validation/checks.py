@@ -13,7 +13,7 @@ from .messages import TValidationMessage, ValidationError
 #        list[int] is not included.
 #        As TypeVar requires more than one parameter, list[int] is added as a
 #        placeholder and will be replaced.
-TCheckArg = TypeVar("TCheckArg", list[str], list[int])
+TCheckArg = TypeVar("TCheckArg", list[str], list[str])
 
 
 # get a module-level logger
@@ -57,6 +57,48 @@ def check_mailbox_has_account(
                     "Mailbox {} has no matching account".format(box),
                     id="e001",
                     hint="Every Postfix *mailbox* requires a matching entry in Dovecot's *userdb*",
+                )
+            )
+
+    return findings
+
+
+def check_addresses_match_domains(
+    postfix_addresses: TCheckArg, postfix_domains: TCheckArg
+) -> list[TValidationMessage]:
+    """All Postfix addresses **must have** a matching entry in Postfix's virtual domains.
+
+    Parameters
+    ----------
+    postfix_addresses : list
+        A ``list`` of ``str``, representing all addresses of the Postfix
+        server.
+    postfix_domains : list
+        A ``list`` of ``str``, representing all virtual domains.
+
+    Returns
+    -------
+    list
+        A list of ``ValidationError`` instances.
+
+    Notes
+    -----
+    This documentation mentions the actual expected input parameter types and
+    output types, while the source code uses a slight abstraction while working
+    with ``mypy`` for static type checking.
+    """
+    logger.debug("check_addresses_match_domains()")
+
+    findings: list[TValidationMessage] = list()
+
+    for address in postfix_addresses:
+        if address[address.index("@") + 1 :] not in postfix_domains:
+            logger.debug("Address '%s' not in postfix_domains", address)
+            findings.append(
+                ValidationError(
+                    "Address {} not in virtual domains".format(address),
+                    id="e002",
+                    hint="The domain parts of the addresses require a matching entry in Postfix's virtual domains",
                 )
             )
 

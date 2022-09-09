@@ -129,6 +129,8 @@ def check_wrapper(
 
 def run_checks(
     postfix_vmailboxes: list[str],
+    postfix_valiases: dict[str, list[str]],
+    postfix_vdomains: list[str],
     dovecot_users: list[str],
     fail_fast: bool = False,
     skip: tuple = tuple(),
@@ -143,6 +145,10 @@ def run_checks(
     logger.info("Running checks")
     logger.verbose("Skipping: %r", skip)  # type: ignore [attr-defined]
 
+    # Build temporary lists
+    postfix_addresses = postfix_vmailboxes + list(postfix_valiases.keys())
+    logger.debug("postfix_adresses: %r", postfix_addresses)
+
     got_errors = False
 
     # actually run the check functions with a wrapper
@@ -150,6 +156,14 @@ def run_checks(
         checks.check_mailbox_has_account,
         postfix_vmailboxes,
         dovecot_users,
+        fail_fast=fail_fast,
+        skip=skip,
+    )
+
+    got_errors = got_errors or check_wrapper(
+        checks.check_addresses_match_domains,
+        postfix_addresses,
+        postfix_vdomains,
         fail_fast=fail_fast,
         skip=skip,
     )
@@ -176,12 +190,17 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "postfix_vmailbox_file", action="store", help="Postfix's virtual mailbox file"
     )
+    arg_parser.add_argument(
+        "postfix_valias_file", action="store", help="Postfix's virtual alias file"
+    )
+    arg_parser.add_argument(
+        "postfix_vdomain_file", action="store", help="Postfix's virtual domain file"
+    )
 
     # optional arguments (keyword arguments)
     arg_parser.add_argument(
         "-d", "--debug", action="store_true", help="Enable debug messages"
     )
-
     arg_parser.add_argument(
         "-f",
         "--fail-fast",
@@ -215,6 +234,11 @@ if __name__ == "__main__":
         logger.setLevel(logging.VERBOSE)  # type: ignore [attr-defined]
         logger.verbose("Verbose logging enabled")  # type: ignore [attr-defined]
 
+    try:
+        skip = tuple(args.skip)
+    except TypeError:
+        skip = tuple()
+
     # Read and parse the configuration files
     try:
         logger.verbose("Reading configuration files")  # type: ignore [attr-defined]
@@ -229,12 +253,22 @@ if __name__ == "__main__":
         postfix_vmailboxes = parser.KeyParser(args.postfix_vmailbox_file).get_values()
         logger.debug("postfix_vmailboxes: %r", postfix_vmailboxes)
 
+        logger.debug("postfix_valias_file=%s", args.postfix_valias_file)
+        postfix_valiases = parser.KeyValueParser(args.postfix_valias_file).get_values()
+        logger.debug("postfix_valiases: %r", postfix_valiases)
+
+        logger.debug("postfix_vdomain_file=%s", args.postfix_vdomain_file)
+        postfix_vdomains = parser.KeyParser(args.postfix_vdomain_file).get_values()
+        logger.debug("postfix_vdomains: %r", postfix_vdomains)
+
         try:
             run_checks(
                 postfix_vmailboxes,
+                postfix_valiases,
+                postfix_vdomains,
                 dovecot_users,
                 fail_fast=args.fail_fast,
-                skip=tuple(args.skip),
+                skip=skip,
             )
             logger.summary("Validation successful!")  # type: ignore [attr-defined]
             sys.exit(0)
