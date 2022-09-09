@@ -16,7 +16,7 @@ import_heading_stdlib      = "Python imports"
 import_heading_thirdparty  = "external imports"
 import_heading_firstparty  = "app imports"
 import_heading_localfolder = "local imports"
-known_first_party          = "test_suite"
+known_first_party          = "mailsrv_aux"
 
 
 [tool.mypy]
