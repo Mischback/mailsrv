@@ -72,7 +72,7 @@ def check_wrapper(
     ],
     *args: checks.TCheckArg,
     fail_fast: bool = False,
-    ignore: tuple = tuple(),
+    skip: tuple = tuple(),
     **kwargs: Optional[Any],
 ) -> bool:
     """Wrap a check function and handle its return value.
@@ -90,7 +90,7 @@ def check_wrapper(
         These list of arguments is passed to the ``check_func``.
     fail_fast : bool
         Enable the fast failing, if set to ``True`` (default: ``False``)
-    ignore : tuple
+    skip : tuple
         A ``tuple`` of ``ValidationMessage`` *id*'s that will be ignored.
     **kwargs :
         Any other keyword arguments are passed to the ``check_func``.
@@ -113,7 +113,7 @@ def check_wrapper(
     ret_val = check_func(*args, **kwargs)
 
     for message in ret_val:
-        if message.id in ignore:
+        if message.id in skip:
             log_message(message, True)
             continue
         else:
@@ -131,7 +131,7 @@ def run_checks(
     postfix_vmailboxes: list[str],
     dovecot_users: list[str],
     fail_fast: bool = False,
-    ignore: tuple = tuple(),
+    skip: tuple = tuple(),
 ) -> None:
     """Run the actual check functions.
 
@@ -141,6 +141,7 @@ def run_checks(
     # FIXME: Function documentation must be completed when all parameters are
     #        included in the function definition!
     logger.info("Running checks")
+    logger.verbose("Skipping: %r", skip)  # type: ignore [attr-defined]
 
     got_errors = False
 
@@ -150,7 +151,7 @@ def run_checks(
         postfix_vmailboxes,
         dovecot_users,
         fail_fast=fail_fast,
-        ignore=ignore,
+        skip=skip,
     )
 
     if got_errors:
@@ -188,6 +189,14 @@ if __name__ == "__main__":
         help="Fail and abort on the first error",
     )
     arg_parser.add_argument(
+        "-s",
+        "--skip",
+        action="extend",
+        help="Do not care about these errors; may be specified multiple times; accepts a list",
+        nargs="+",
+        type=str,
+    )
+    arg_parser.add_argument(
         "-v",
         "--verbose",
         action="count",
@@ -221,7 +230,12 @@ if __name__ == "__main__":
         logger.debug("postfix_vmailboxes: %r", postfix_vmailboxes)
 
         try:
-            run_checks(postfix_vmailboxes, dovecot_users, fail_fast=args.fail_fast)
+            run_checks(
+                postfix_vmailboxes,
+                dovecot_users,
+                fail_fast=args.fail_fast,
+                skip=tuple(args.skip),
+            )
             logger.summary("Validation successful!")  # type: ignore [attr-defined]
             sys.exit(0)
         except (MailsrvValidationFailedException, MailsrvValidationFailFastException):
