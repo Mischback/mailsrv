@@ -139,3 +139,46 @@ def check_address_can_send(
             )
 
     return findings
+
+
+def check_sender_has_login(
+    postfix_senders: TCheckArg, dovecot_accounts: TCheckArg
+) -> list[ValidationMessage]:
+    """All senders **must have** a matching entry in Dovecot's user database.
+
+    Parameters
+    ----------
+    postfix_senders : list
+        A ``list`` of ``str``, representing all senders.
+    dovecot_accounts : list
+        A ``list`` of ``str``, representing the available user accounts for
+        Dovecot.
+
+    Returns
+    -------
+    list
+        A list of ``ValidationError`` instances. One instance per missing
+        account.
+
+    Notes
+    -----
+    This documentation mentions the actual expected input parameter types and
+    output types, while the source code uses a slight abstraction while working
+    with ``mypy`` for static type checking.
+    """
+    logger.debug("check_sender_has_login()")
+
+    findings: list[ValidationMessage] = list()
+
+    for sender in postfix_senders:
+        if sender not in dovecot_accounts:
+            logger.debug("Sender '%s' not in dovecot_accounts", sender)
+            findings.append(
+                ValidationError(
+                    "Sender {} has no matching account".format(sender),
+                    id="e004",
+                    hint="Every Postfix *sender* requires a matching entry in Dovecot's *userdb*",
+                )
+            )
+
+    return findings

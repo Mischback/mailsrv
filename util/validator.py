@@ -176,6 +176,14 @@ def run_checks(
         skip=skip,
     )
 
+    got_errors = got_errors or check_wrapper(
+        checks.check_sender_has_login,
+        list(postfix_sender_map.keys()),
+        dovecot_users,
+        fail_fast=fail_fast,
+        skip=skip,
+    )
+
     if got_errors:
         raise MailsrvValidationFailedException("There were errors during validation")
 
