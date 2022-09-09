@@ -5,7 +5,7 @@ import logging
 from typing import TypeVar
 
 # local imports
-from .messages import TValidationMessage, ValidationError
+from .messages import TValidationMessage, ValidationError, ValidationWarning
 
 # Typing stuff
 
@@ -99,6 +99,27 @@ def check_addresses_match_domains(
                     "Address {} not in virtual domains".format(address),
                     id="e002",
                     hint="The domain parts of the addresses require a matching entry in Postfix's virtual domains",
+                )
+            )
+
+    return findings
+
+
+def check_address_can_send(
+    postfix_addresses: TCheckArg, postfix_senders: TCheckArg
+) -> list[TValidationMessage]:
+    """fooo."""
+    logger.debug("check_address_can_send()")
+
+    findings: list[TValidationMessage] = list()
+
+    for address in postfix_addresses:
+        if address not in postfix_senders:
+            logger.debug("Address '%s' can not send", address)
+            findings.append(
+                ValidationWarning(
+                    "Address {} not in sender_login_map".format(address),
+                    id="w003",
                 )
             )
 

@@ -51,19 +51,18 @@ def log_message(
     """
     # NOTE: This function uses dynamically added logging levels. The statements
     #       have to be marked with an ``type: ignore`` comment.
-    template = "%s %d: %s"
+    template = "%s: %s"
     template_hint = "Hint: %s"
 
     if skip:
         template = "[SKIPPED] " + template
         template_hint = "[SKIPPED] " + template_hint
-        logger.verbose(  # type: ignore [attr-defined]
-            template, message.id, message.level, message.msg
-        )
+        logger.verbose(template, message.id, message.msg)  # type: ignore [attr-defined]
     else:
-        logger.log(message.level, template, message.id, message.level, message.msg)
+        logger.log(message.level, template, message.id, message.msg)
 
-    logger.verbose(template_hint, message.hint)  # type: ignore [attr-defined]
+    if message.hint:
+        logger.verbose(template_hint, message.hint)  # type: ignore [attr-defined]
 
 
 def check_wrapper(
@@ -165,6 +164,14 @@ def run_checks(
         checks.check_addresses_match_domains,
         postfix_addresses,
         postfix_vdomains,
+        fail_fast=fail_fast,
+        skip=skip,
+    )
+
+    got_errors = got_errors or check_wrapper(
+        checks.check_address_can_send,
+        postfix_addresses,
+        list(postfix_sender_map.keys()),
         fail_fast=fail_fast,
         skip=skip,
     )

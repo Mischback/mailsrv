@@ -63,5 +63,14 @@ class ValidationError(ValidationMessage):
         super().__init__(ERROR, msg, id, hint=hint)
 
 
+class ValidationWarning(ValidationMessage):
+    """Indicate an something fishy in the configuration."""
+
+    def __init__(self, msg: str, id: str, hint: Optional[str] = None) -> None:
+        super().__init__(WARNING, msg, id, hint=hint)
+
+
 # Typing stuff
-TValidationMessage = TypeVar("TValidationMessage", ValidationMessage, ValidationError)
+TValidationMessage = TypeVar(
+    "TValidationMessage", ValidationMessage, ValidationError, ValidationWarning
+)
