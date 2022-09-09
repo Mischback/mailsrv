@@ -28,7 +28,10 @@ LOGGING_DEFAULT_CONFIG = {
         "": {
             "handlers": ["default"],
             "level": "SUMMARY",
-            "propagate": False,
+            "propagate": True,
+        },
+        "mailsrv_aux": {
+            "propagate": True,
         },
     },
 }
