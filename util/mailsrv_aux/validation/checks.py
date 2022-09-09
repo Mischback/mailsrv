@@ -2,10 +2,10 @@
 
 # Python imports
 import logging
-from typing import Optional, Tuple, Type, TypeVar  # noqa: F401
+from typing import TypeVar
 
 # local imports
-from .messages import TValidationMessage, ValidationError  # noqa: F401
+from .messages import TValidationMessage, ValidationError
 
 # Typing stuff
 
@@ -23,7 +23,28 @@ logger = logging.getLogger(__name__)
 def check_mailbox_has_account(
     postfix_mailboxes: TCheckArg, dovecot_accounts: TCheckArg
 ) -> list[TValidationMessage]:
-    """Temporary fix."""
+    """All Postfix mailboxes **must have** a matching entry in Dovecot's user database.
+
+    Parameters
+    ----------
+    postfix_mailboxes : list
+        A ``list`` of ``str``, representing the actual mailboxes of Postfix.
+    dovecot_accounts : list
+        A ``list`` of ``str``, representing the available user accounts for
+        Dovecot.
+
+    Returns
+    -------
+    list
+        A list of ``ValidationError`` instances. One instance per missing
+        mailbox.
+
+    Notes
+    -----
+    This documentation mentions the actual expected input parameter types and
+    output types, while the source code uses a slight abstraction while working
+    with ``mypy`` for static type checking.
+    """
     logger.debug("check_mailbox_has_account()")
 
     findings: list[TValidationMessage] = list()

@@ -15,7 +15,20 @@ _levels = [INFO, WARNING, ERROR]
 
 
 class ValidationMessage:
-    """Provide the actual feedback of the validation process."""
+    """Provide the actual feedback of the validation process.
+
+    Parameters
+    ----------
+    level : int
+        A number representing the level.
+    msg : str
+        The actual textual message.
+    id : str
+        A custom ID, specific to the message. Might be used to filter results
+        of check-function results.
+    hint : str, optional
+        A possible solution to the problem that caused the message.
+    """
 
     def __init__(
         self, level: int, msg: str, id: str, hint: Optional[str] = None
