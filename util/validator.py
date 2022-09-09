@@ -7,7 +7,7 @@ import argparse
 import logging
 import logging.config
 import sys
-from typing import Any, Callable, Dict, Optional, Tuple  # noqa: F401
+from typing import Any, Callable, Optional
 
 # app imports
 from mailsrv_aux.common import parser
@@ -39,7 +39,18 @@ def log_message(
 
     Skipped checks are still put to log level VERBOSE. Hints are always printed
     to VERBOSE.
+
+    Parameters
+    ----------
+    message : ``ValidationMessage``
+        An instance of ``ValidationMessage`` or its derived classes.
+    skip : bool, optional
+        Flag to indicate, that this message should be *skipped*. In fact, this
+        only causes the message to be printed to VERBOSE level, instead of the
+        actual level.
     """
+    # NOTE: This function uses dynamically added logging levels. The statements
+    #       have to be marked with an ``type: ignore`` comment.
     template = "%s %d: %s"
     template_hint = "Hint: %s"
 
@@ -64,7 +75,40 @@ def check_wrapper(
     ignore: tuple = tuple(),
     **kwargs: Optional[Any],
 ) -> bool:
-    """Wrap a check function and handle its return value."""
+    """Wrap a check function and handle its return value.
+
+    The basic interface of check functions is returning a list of
+    ``ValidationMessage`` instances. These messages are processed in this
+    wrapper by a) logging them (using ``log_message()``) and b) evaluating
+    them to decide if an error causes a fast failing of the validator.
+
+    Parameters
+    ----------
+    check_func : func
+        The function to run.
+    *args :
+        These list of arguments is passed to the ``check_func``.
+    fail_fast : bool
+        Enable the fast failing, if set to ``True`` (default: ``False``)
+    ignore : tuple
+        A ``tuple`` of ``ValidationMessage`` *id*'s that will be ignored.
+    **kwargs :
+        Any other keyword arguments are passed to the ``check_func``.
+
+    Returns
+    -------
+    bool
+        Returns ``True`` if the ``check_func`` did return with
+        ``ValidationMessage`` instances of ``level`` ``ERROR``, otherwise
+        ``False``.
+
+    Raises
+    ------
+    MailsrvValidationFailFastException
+        If a ``ValidationMessage`` with level above ``WARNING`` is encountered
+        while ``fail_fast`` is ``True``, this exception is raised to stop the
+        run of checks immediatly.
+    """
     got_errors = False
     ret_val = check_func(*args, **kwargs)
 
@@ -94,6 +138,8 @@ def run_checks(
     The check functions are provided in the ``validation`` package. They are
     run from this function, wrapped to aggregate the results.
     """
+    # FIXME: Function documentation must be completed when all parameters are
+    #        included in the function definition!
     logger.info("Running checks")
 
     got_errors = False
