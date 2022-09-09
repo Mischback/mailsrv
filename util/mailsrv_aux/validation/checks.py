@@ -30,7 +30,7 @@ def check_mailbox_has_account(
 
     for box in postfix_mailboxes:
         if box not in dovecot_accounts:
-            logger.warning(box)
+            logger.debug("Mailbox '%s' not in dovecot_accounts", box)
             findings.append(
                 ValidationError(
                     "Mailbox {} has no matching account".format(box),

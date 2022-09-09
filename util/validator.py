@@ -134,6 +134,13 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "-d", "--debug", action="store_true", help="Enable debug messages"
     )
+
+    arg_parser.add_argument(
+        "-f",
+        "--fail-fast",
+        action="store_true",
+        help="Fail and abort on the first error",
+    )
     arg_parser.add_argument(
         "-v",
         "--verbose",
@@ -168,7 +175,7 @@ if __name__ == "__main__":
         logger.debug("postfix_vmailboxes: %r", postfix_vmailboxes)
 
         try:
-            run_checks(postfix_vmailboxes, dovecot_users)
+            run_checks(postfix_vmailboxes, dovecot_users, fail_fast=args.fail_fast)
             sys.exit(0)
         except (MailsrvValidationFailedException, MailsrvValidationFailFastException):
             logger.error("Validation failed!")
