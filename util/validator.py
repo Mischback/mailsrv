@@ -10,6 +10,7 @@ import sys
 from typing import Any, Callable, Dict, Optional, Tuple  # noqa: F401
 
 # app imports
+from mailsrv_aux.common import parser
 from mailsrv_aux.common.exceptions import MailsrvBaseException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
 from mailsrv_aux.validation import checks, messages
@@ -126,6 +127,9 @@ if __name__ == "__main__":
 
     # optional arguments (keyword arguments)
     arg_parser.add_argument(
+        "-d", "--debug", action="store_true", help="Enable debug messages"
+    )
+    arg_parser.add_argument(
         "-v",
         "--verbose",
         action="count",
@@ -135,18 +139,35 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    if args.verbose == 1:
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+        logger.debug("DEBUG messages enabled")
+    elif args.verbose == 1:
         logger.setLevel(logging.INFO)
-    if args.verbose == 2:
+    elif args.verbose == 2:
         logger.setLevel(logging.VERBOSE)  # type: ignore [attr-defined]
         logger.verbose("Verbose logging enabled")  # type: ignore [attr-defined]
 
+    # Read and parse the configuration files
     try:
-        run_checks()
-        sys.exit(0)
-    except (MailsrvValidationFailedException, MailsrvValidationFailFastException):
-        logger.error("Validation failed!")
-        sys.exit(2)
+        logger.verbose("Reading configuration files")  # type: ignore [attr-defined]
+
+        logger.debug("dovecot_userdb_file=%s", args.dovecot_userdb_file)
+        dovecot_users = parser.PasswdFileParser(
+            args.dovecot_userdb_file
+        ).get_usernames()
+        logger.debug("dovecot_users: %r", dovecot_users)
+
+        logger.debug("postfix_vmailbox_file=%s", args.postfix_vmailbox_file)
+        postfix_vmailboxes = parser.KeyParser(args.postfix_vmailbox_file).get_values()
+        logger.debug("postfix_vmailboxes: %r", postfix_vmailboxes)
+
+        try:
+            run_checks()
+            sys.exit(0)
+        except (MailsrvValidationFailedException, MailsrvValidationFailFastException):
+            logger.error("Validation failed!")
+            sys.exit(2)
     except MailsrvBaseException as e:
         logger.critical("Execution failed!")
         logger.exception(e)  # noqa: G200
