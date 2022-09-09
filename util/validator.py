@@ -83,7 +83,12 @@ def check_wrapper(
     return got_errors
 
 
-def run_checks(fail_fast: bool = False, ignore: tuple = tuple()) -> None:
+def run_checks(
+    postfix_vmailboxes: list[str],
+    dovecot_users: list[str],
+    fail_fast: bool = False,
+    ignore: tuple = tuple(),
+) -> None:
     """Run the actual check functions.
 
     The check functions are provided in the ``validation`` package. They are
@@ -96,8 +101,8 @@ def run_checks(fail_fast: bool = False, ignore: tuple = tuple()) -> None:
     # actually run the check functions with a wrapper
     got_errors = got_errors or check_wrapper(
         checks.check_mailbox_has_account,
-        ["foo"],  # postfix_vmailboxes,
-        ["bar"],  # dovecot_users,
+        postfix_vmailboxes,
+        dovecot_users,
         fail_fast=fail_fast,
         ignore=ignore,
     )
@@ -163,7 +168,7 @@ if __name__ == "__main__":
         logger.debug("postfix_vmailboxes: %r", postfix_vmailboxes)
 
         try:
-            run_checks()
+            run_checks(postfix_vmailboxes, dovecot_users)
             sys.exit(0)
         except (MailsrvValidationFailedException, MailsrvValidationFailFastException):
             logger.error("Validation failed!")
