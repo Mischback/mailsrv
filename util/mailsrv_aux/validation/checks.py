@@ -5,7 +5,7 @@ import logging
 from typing import TypeVar
 
 # local imports
-from .messages import TValidationMessage, ValidationError, ValidationWarning
+from .messages import ValidationError, ValidationMessage, ValidationWarning
 
 # Typing stuff
 
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def check_mailbox_has_account(
     postfix_mailboxes: TCheckArg, dovecot_accounts: TCheckArg
-) -> list[TValidationMessage]:
+) -> list[ValidationMessage]:
     """All Postfix mailboxes **must have** a matching entry in Dovecot's user database.
 
     Parameters
@@ -47,7 +47,7 @@ def check_mailbox_has_account(
     """
     logger.debug("check_mailbox_has_account()")
 
-    findings: list[TValidationMessage] = list()
+    findings: list[ValidationMessage] = list()
 
     for box in postfix_mailboxes:
         if box not in dovecot_accounts:
@@ -65,7 +65,7 @@ def check_mailbox_has_account(
 
 def check_addresses_match_domains(
     postfix_addresses: TCheckArg, postfix_domains: TCheckArg
-) -> list[TValidationMessage]:
+) -> list[ValidationMessage]:
     """All Postfix addresses **must have** a matching entry in Postfix's virtual domains.
 
     Parameters
@@ -89,7 +89,7 @@ def check_addresses_match_domains(
     """
     logger.debug("check_addresses_match_domains()")
 
-    findings: list[TValidationMessage] = list()
+    findings: list[ValidationMessage] = list()
 
     for address in postfix_addresses:
         if address[address.index("@") + 1 :] not in postfix_domains:
@@ -107,11 +107,26 @@ def check_addresses_match_domains(
 
 def check_address_can_send(
     postfix_addresses: TCheckArg, postfix_senders: TCheckArg
-) -> list[TValidationMessage]:
-    """fooo."""
+) -> list[ValidationMessage]:
+    """Check if addresses are included in the senders map.
+
+    Parameters
+    ----------
+    postfix_addresses : list
+        A ``list`` of ``str``, representing all addresses of the Postfix
+        server.
+    postfix_senders : list
+        A ``list`` of ``str``, representing all senders.
+
+    Notes
+    -----
+    This documentation mentions the actual expected input parameter types and
+    output types, while the source code uses a slight abstraction while working
+    with ``mypy`` for static type checking.
+    """
     logger.debug("check_address_can_send()")
 
-    findings: list[TValidationMessage] = list()
+    findings: list[ValidationMessage] = list()
 
     for address in postfix_addresses:
         if address not in postfix_senders:

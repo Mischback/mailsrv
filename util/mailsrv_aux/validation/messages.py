@@ -2,7 +2,7 @@
 
 # Python imports
 import logging
-from typing import Optional, TypeVar
+from typing import Optional
 
 # local imports
 from .exceptions import MailsrvValidationOperationalError
@@ -68,9 +68,3 @@ class ValidationWarning(ValidationMessage):
 
     def __init__(self, msg: str, id: str, hint: Optional[str] = None) -> None:
         super().__init__(WARNING, msg, id, hint=hint)
-
-
-# Typing stuff
-TValidationMessage = TypeVar(
-    "TValidationMessage", ValidationMessage, ValidationError, ValidationWarning
-)

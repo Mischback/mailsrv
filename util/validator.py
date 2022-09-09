@@ -33,7 +33,7 @@ class MailsrvValidationFailFastException(MailsrvValidationException):
 
 
 def log_message(
-    message: messages.TValidationMessage, skip: Optional[bool] = False
+    message: messages.ValidationMessage, skip: Optional[bool] = False
 ) -> None:
     """Log a message of a check function.
 
@@ -67,7 +67,7 @@ def log_message(
 
 def check_wrapper(
     check_func: Callable[
-        [checks.TCheckArg, checks.TCheckArg], list[messages.TValidationMessage]
+        [checks.TCheckArg, checks.TCheckArg], list[messages.ValidationMessage]
     ],
     *args: checks.TCheckArg,
     fail_fast: bool = False,
