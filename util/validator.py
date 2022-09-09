@@ -31,6 +31,34 @@ class MailsrvValidationFailFastException(MailsrvValidationException):
     """Indicate a failure while running if fail-fast mode."""
 
 
+def log_message(
+    message: messages.TValidationMessage, skip: Optional[bool] = False
+) -> None:
+    """Log a message of a check function.
+
+    Skipped checks are still put to log level VERBOSE. Hints are always printed
+    to VERBOSE.
+    """
+    template = "{msg_id} {msg_level}: {msg_body}"
+    template_hint = "Hint: {msg_hint}"
+
+    if skip:
+        template = "[SKIPPED] " + template
+        template_hint = "[SKIPPED] " + template_hint
+        logger.verbose(  # type: ignore [attr-defined]
+            template,
+            dict(msg_id=message.id, msg_level=message.level, msg_body=message.msg),
+        )
+    else:
+        logger.log(
+            message.level,
+            template,
+            dict(msg_id=message.id, msg_level=message.level, msg_body=message.msg),
+        )
+
+    logger.verbose(template_hint, dict(msg_hint=message.hint))  # type: ignore [attr-defined]
+
+
 def check_wrapper(
     check_func: Callable[
         [checks.TCheckArg, checks.TCheckArg], list[messages.TValidationMessage]
@@ -46,11 +74,10 @@ def check_wrapper(
 
     for message in ret_val:
         if message.id in ignore:
-            # log_message(message, True)
+            log_message(message, True)
             continue
         else:
-            # log_message(message)
-            pass
+            log_message(message)
 
         if message.level > messages.WARNING:
             got_errors = True
