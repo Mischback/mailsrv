@@ -176,6 +176,7 @@ if __name__ == "__main__":
 
         try:
             run_checks(postfix_vmailboxes, dovecot_users, fail_fast=args.fail_fast)
+            logger.summary("Validation successful!")  # type: ignore [attr-defined]
             sys.exit(0)
         except (MailsrvValidationFailedException, MailsrvValidationFailFastException):
             logger.error("Validation failed!")
