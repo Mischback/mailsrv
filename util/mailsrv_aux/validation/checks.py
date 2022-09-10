@@ -118,6 +118,11 @@ def check_address_can_send(
     postfix_senders : list
         A ``list`` of ``str``, representing all senders.
 
+    Returns
+    -------
+    list
+        A list of ``ValidationWarning`` instances.
+
     Notes
     -----
     This documentation mentions the actual expected input parameter types and
@@ -180,5 +185,58 @@ def check_sender_has_login(
                     hint="Every Postfix *sender* requires a matching entry in Dovecot's *userdb*",
                 )
             )
+
+    return findings
+
+
+def check_account_has_function(
+    postfix_mailboxes: TCheckArg,
+    postfix_senders: TCheckArg,
+    dovecot_accounts: TCheckArg,
+) -> list[ValidationMessage]:
+    """All Dovecot accounts *should have* some sort of function.
+
+    A *function* might be either an associated Postfix mailbox or the usage
+    as a sender login.
+
+    Parameters
+    ----------
+    postfix_mailboxes : list
+        A ``list`` of ``str``, representing the actual mailboxes of Postfix.
+    postfix_senders : dict
+        A ``dict``, representing the sender to login mapping.
+    dovecot_accounts : list
+        A ``list`` of ``str``, representing the available user accounts for
+        Dovecot.
+
+    Returns
+    -------
+    list
+        A list of ``ValidationWarning`` instances.
+
+    Notes
+    -----
+    This documentation mentions the actual expected input parameter types and
+    output types, while the source code uses a slight abstraction while working
+    with ``mypy`` for static type checking.
+    """
+    logger.debug("check_account_has_function()")
+
+    findings: list[ValidationMessage] = list()
+
+    for account in dovecot_accounts:
+        if account in postfix_mailboxes:
+            continue
+
+        if account in postfix_senders:
+            continue
+
+        logger.debug("Account '%s' has neither mailbox nor is a sender", account)
+        findings.append(
+            ValidationWarning(
+                "Account {} has neither mailbox nor is a sender".format(account),
+                id="w005",
+            )
+        )
 
     return findings
