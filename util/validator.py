@@ -121,6 +121,7 @@ def check_wrapper(
         if message.level > messages.WARNING:
             got_errors = True
             if fail_fast:
+                logger.debug("Encountered an error while running in fail-fast mode")
                 raise MailsrvValidationFailFastException("Fail fast, fail hard")
 
     return got_errors
@@ -152,36 +153,60 @@ def run_checks(
     got_errors = False
 
     # actually run the check functions with a wrapper
-    got_errors = got_errors or check_wrapper(
-        checks.check_mailbox_has_account,
-        postfix_vmailboxes,
-        dovecot_users,
-        fail_fast=fail_fast,
-        skip=skip,
+    got_errors = (
+        check_wrapper(
+            checks.check_mailbox_has_account,
+            postfix_vmailboxes,
+            dovecot_users,
+            fail_fast=fail_fast,
+            skip=skip,
+        )
+        or got_errors
     )
 
-    got_errors = got_errors or check_wrapper(
-        checks.check_addresses_match_domains,
-        postfix_addresses,
-        postfix_vdomains,
-        fail_fast=fail_fast,
-        skip=skip,
+    got_errors = (
+        check_wrapper(
+            checks.check_addresses_match_domains,
+            postfix_addresses,
+            postfix_vdomains,
+            fail_fast=fail_fast,
+            skip=skip,
+        )
+        or got_errors
     )
 
-    got_errors = got_errors or check_wrapper(
-        checks.check_address_can_send,
-        postfix_addresses,
-        list(postfix_sender_map.keys()),
-        fail_fast=fail_fast,
-        skip=skip,
+    got_errors = (
+        check_wrapper(
+            checks.check_address_can_send,
+            postfix_addresses,
+            list(postfix_sender_map.keys()),
+            fail_fast=fail_fast,
+            skip=skip,
+        )
+        or got_errors
     )
 
-    got_errors = got_errors or check_wrapper(
-        checks.check_sender_has_login,
-        list(postfix_sender_map.keys()),
-        dovecot_users,
-        fail_fast=fail_fast,
-        skip=skip,
+    got_errors = (
+        check_wrapper(
+            checks.check_sender_has_login,
+            list(postfix_sender_map.keys()),
+            dovecot_users,
+            fail_fast=fail_fast,
+            skip=skip,
+        )
+        or got_errors
+    )
+
+    got_errors = (
+        check_wrapper(
+            checks.check_account_has_function,
+            postfix_vmailboxes,
+            list(postfix_sender_map.keys()),
+            dovecot_users,
+            fail_fast=fail_fast,
+            skip=skip,
+        )
+        or got_errors
     )
 
     if got_errors:
