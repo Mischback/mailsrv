@@ -7,7 +7,7 @@ import argparse
 import logging
 import logging.config
 import sys
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, TypeVar
 
 # app imports
 from mailsrv_aux.common import parser
@@ -15,6 +15,9 @@ from mailsrv_aux.common.exceptions import MailsrvBaseException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
 from mailsrv_aux.validation import checks, messages
 from mailsrv_aux.validation.exceptions import MailsrvValidationException
+
+# Typing stuff
+TCheckFunc = TypeVar("TCheckFunc", bound=Callable[..., Any])
 
 # get a module-level logger
 logger = logging.getLogger()
@@ -66,10 +69,8 @@ def log_message(
 
 
 def check_wrapper(
-    check_func: Callable[
-        [checks.TCheckArg, checks.TCheckArg], list[messages.ValidationMessage]
-    ],
-    *args: checks.TCheckArg,
+    check_func: TCheckFunc,
+    *args: Any,
     fail_fast: bool = False,
     skip: tuple = tuple(),
     **kwargs: Optional[Any],
@@ -179,7 +180,7 @@ def run_checks(
         check_wrapper(
             checks.check_address_can_send,
             postfix_addresses,
-            list(postfix_sender_map.keys()),
+            postfix_sender_map,
             fail_fast=fail_fast,
             skip=skip,
         )
@@ -189,7 +190,7 @@ def run_checks(
     got_errors = (
         check_wrapper(
             checks.check_sender_has_login,
-            list(postfix_sender_map.keys()),
+            postfix_sender_map,
             dovecot_users,
             fail_fast=fail_fast,
             skip=skip,
@@ -201,7 +202,7 @@ def run_checks(
         check_wrapper(
             checks.check_account_has_function,
             postfix_vmailboxes,
-            list(postfix_sender_map.keys()),
+            postfix_sender_map,
             dovecot_users,
             fail_fast=fail_fast,
             skip=skip,

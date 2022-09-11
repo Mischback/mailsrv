@@ -2,26 +2,16 @@
 
 # Python imports
 import logging
-from typing import TypeVar
 
 # local imports
 from .messages import ValidationError, ValidationMessage, ValidationWarning
-
-# Typing stuff
-
-# FIXME: The arguments to the check functions may have different types, but
-#        list[int] is not included.
-#        As TypeVar requires more than one parameter, list[int] is added as a
-#        placeholder and will be replaced.
-TCheckArg = TypeVar("TCheckArg", list[str], list[str])
-
 
 # get a module-level logger
 logger = logging.getLogger(__name__)
 
 
 def check_mailbox_has_account(
-    postfix_mailboxes: TCheckArg, dovecot_accounts: TCheckArg
+    postfix_mailboxes: list[str], dovecot_accounts: list[str]
 ) -> list[ValidationMessage]:
     """All Postfix mailboxes **must have** a matching entry in Dovecot's user database.
 
@@ -38,12 +28,6 @@ def check_mailbox_has_account(
     list
         A list of ``ValidationError`` instances. One instance per missing
         mailbox.
-
-    Notes
-    -----
-    This documentation mentions the actual expected input parameter types and
-    output types, while the source code uses a slight abstraction while working
-    with ``mypy`` for static type checking.
     """
     logger.debug("check_mailbox_has_account()")
 
@@ -64,7 +48,7 @@ def check_mailbox_has_account(
 
 
 def check_addresses_match_domains(
-    postfix_addresses: TCheckArg, postfix_domains: TCheckArg
+    postfix_addresses: list[str], postfix_domains: list[str]
 ) -> list[ValidationMessage]:
     """All Postfix addresses **must have** a matching entry in Postfix's virtual domains.
 
@@ -80,12 +64,6 @@ def check_addresses_match_domains(
     -------
     list
         A list of ``ValidationError`` instances.
-
-    Notes
-    -----
-    This documentation mentions the actual expected input parameter types and
-    output types, while the source code uses a slight abstraction while working
-    with ``mypy`` for static type checking.
     """
     logger.debug("check_addresses_match_domains()")
 
@@ -106,7 +84,7 @@ def check_addresses_match_domains(
 
 
 def check_address_can_send(
-    postfix_addresses: TCheckArg, postfix_senders: TCheckArg
+    postfix_addresses: list[str], postfix_senders: dict[str, list[str]]
 ) -> list[ValidationMessage]:
     """Check if addresses are included in the senders map.
 
@@ -115,26 +93,22 @@ def check_address_can_send(
     postfix_addresses : list
         A ``list`` of ``str``, representing all addresses of the Postfix
         server.
-    postfix_senders : list
-        A ``list`` of ``str``, representing all senders.
+    postfix_senders : dict
+        A ``dict``, representing the sender to login mapping.
 
     Returns
     -------
     list
         A list of ``ValidationWarning`` instances.
-
-    Notes
-    -----
-    This documentation mentions the actual expected input parameter types and
-    output types, while the source code uses a slight abstraction while working
-    with ``mypy`` for static type checking.
     """
     logger.debug("check_address_can_send()")
 
     findings: list[ValidationMessage] = list()
 
+    senders_lhs = list(postfix_senders.keys())
+
     for address in postfix_addresses:
-        if address not in postfix_senders:
+        if address not in senders_lhs:
             logger.debug("Address '%s' can not send", address)
             findings.append(
                 ValidationWarning(
@@ -147,14 +121,14 @@ def check_address_can_send(
 
 
 def check_sender_has_login(
-    postfix_senders: TCheckArg, dovecot_accounts: TCheckArg
+    postfix_senders: dict[str, list[str]], dovecot_accounts: list[str]
 ) -> list[ValidationMessage]:
     """All senders **must have** a matching entry in Dovecot's user database.
 
     Parameters
     ----------
-    postfix_senders : list
-        A ``list`` of ``str``, representing all senders.
+    postfix_senders : dict
+        A ``dict``, representing the sender to login mapping.
     dovecot_accounts : list
         A ``list`` of ``str``, representing the available user accounts for
         Dovecot.
@@ -164,18 +138,19 @@ def check_sender_has_login(
     list
         A list of ``ValidationError`` instances. One instance per missing
         account.
-
-    Notes
-    -----
-    This documentation mentions the actual expected input parameter types and
-    output types, while the source code uses a slight abstraction while working
-    with ``mypy`` for static type checking.
     """
     logger.debug("check_sender_has_login()")
 
     findings: list[ValidationMessage] = list()
 
-    for sender in postfix_senders:
+    # Crazy Python list comprehension: All values in ``postfix_senders`` (which
+    # are ``lists``) combined into one ``list``; then apply a ``set`` to purge
+    # duplicates.
+    senders_rhs = set(
+        [item for sublist in postfix_senders.values() for item in sublist]
+    )
+
+    for sender in senders_rhs:
         if sender not in dovecot_accounts:
             logger.debug("Sender '%s' not in dovecot_accounts", sender)
             findings.append(
@@ -190,9 +165,9 @@ def check_sender_has_login(
 
 
 def check_account_has_function(
-    postfix_mailboxes: TCheckArg,
-    postfix_senders: TCheckArg,
-    dovecot_accounts: TCheckArg,
+    postfix_mailboxes: list[str],
+    postfix_senders: dict[str, list[str]],
+    dovecot_accounts: list[str],
 ) -> list[ValidationMessage]:
     """All Dovecot accounts *should have* some sort of function.
 
@@ -213,22 +188,23 @@ def check_account_has_function(
     -------
     list
         A list of ``ValidationWarning`` instances.
-
-    Notes
-    -----
-    This documentation mentions the actual expected input parameter types and
-    output types, while the source code uses a slight abstraction while working
-    with ``mypy`` for static type checking.
     """
     logger.debug("check_account_has_function()")
 
     findings: list[ValidationMessage] = list()
 
+    # Crazy Python list comprehension: All values in ``postfix_senders`` (which
+    # are ``lists``) combined into one ``list``; then apply a ``set`` to purge
+    # duplicates.
+    senders_rhs = set(
+        [item for sublist in postfix_senders.values() for item in sublist]
+    )
+
     for account in dovecot_accounts:
         if account in postfix_mailboxes:
             continue
 
-        if account in postfix_senders:
+        if account in senders_rhs:
             continue
 
         logger.debug("Account '%s' has neither mailbox nor is a sender", account)
