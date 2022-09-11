@@ -4,10 +4,14 @@
 import logging
 
 # local imports
+from ..common.log import add_level
 from .messages import ValidationError, ValidationMessage, ValidationWarning
 
 # get a module-level logger
 logger = logging.getLogger(__name__)
+
+# add the VERBOSE log level
+add_level("VERBOSE", logging.INFO - 1)
 
 
 def check_mailbox_has_account(
@@ -30,6 +34,7 @@ def check_mailbox_has_account(
         mailbox.
     """
     logger.debug("check_mailbox_has_account()")
+    logger.verbose("Check: Postfix's virtual mailboxes must have a Dovecot account")  # type: ignore [attr-defined]
 
     findings: list[ValidationMessage] = list()
 
@@ -66,6 +71,7 @@ def check_addresses_match_domains(
         A list of ``ValidationError`` instances.
     """
     logger.debug("check_addresses_match_domains()")
+    logger.verbose("Check: Postfix's addresses must have a matchin virtual domain")  # type: ignore [attr-defined]
 
     findings: list[ValidationMessage] = list()
 
@@ -102,6 +108,7 @@ def check_address_can_send(
         A list of ``ValidationWarning`` instances.
     """
     logger.debug("check_address_can_send()")
+    logger.verbose("Check: Can the addresses send?")  # type: ignore [attr-defined]
 
     findings: list[ValidationMessage] = list()
 
@@ -140,6 +147,7 @@ def check_sender_has_login(
         account.
     """
     logger.debug("check_sender_has_login()")
+    logger.verbose("Check: Can the sender login?")  # type: ignore [attr-defined]
 
     findings: list[ValidationMessage] = list()
 
@@ -190,6 +198,7 @@ def check_account_has_function(
         A list of ``ValidationWarning`` instances.
     """
     logger.debug("check_account_has_function()")
+    logger.verbose("Check: Dovecot's accounts should have a function")  # type: ignore [attr-defined]
 
     findings: list[ValidationMessage] = list()
 
