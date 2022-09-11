@@ -225,3 +225,44 @@ def check_account_has_function(
         )
 
     return findings
+
+
+def check_domain_has_admin_addresses(
+    postfix_domains: list[str], postfix_addresses: list[str]
+) -> list[ValidationMessage]:
+    """All virtual domains should have postmaster and abuse addresses.
+
+    Parameters
+    ----------
+    postfix_domains : list
+        A ``list`` of ``str``, representing the virtual domains.
+    postfix_addresses : list
+        A ``list`` of ``str``, representing all addresses.
+
+    Returns
+    -------
+    list
+        A list of ``ValidationWarning`` instances.
+    """
+    logger.debug("check_domain_has_admin_addresses()")
+    logger.verbose("Check: All domains should have postmaster and abuse addresses")  # type: ignore [attr-defined]
+
+    findings: list[ValidationMessage] = list()
+
+    for domain in postfix_domains:
+        if "postmaster@{}".format(domain) in postfix_addresses:
+            continue
+
+        if "abuse@{}".format(domain) in postfix_addresses:
+            continue
+
+        logger.debug("Domain '%s' is missing admin addresses", domain)
+        findings.append(
+            ValidationWarning(
+                "Domain '{}' is missing admin addresses".format(domain),
+                id="w006",
+                hint="The domain should have 'postmaster@' and 'abuse@' addresses",
+            )
+        )
+
+    return findings
