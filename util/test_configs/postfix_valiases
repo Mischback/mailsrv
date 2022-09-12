@@ -1,0 +1,10 @@
+# Provide the virtual aliases for the mail setup
+# These will be applied in Postfix's ``virtual_alias_maps`` setting.
+#
+# FORMAT: [key][BLANK][list of targets]
+alias_one@sut-one.test      user_one@sut-one.test
+alias_list@sut-one.test     user_one@sut-one.test user_two@sut-one.test
+alias_list2@sut-one.test    user_one@sut-one.test alias_extern@sut-one.test
+alias_cross@sut-one.test    user@sut-two.test
+alias_invalid@sut-one.test  user_non@sut-one.test
+alias_extern@sut-one.test   recipient@another-host.test
