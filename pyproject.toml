@@ -16,4 +16,17 @@ import_heading_stdlib      = "Python imports"
 import_heading_thirdparty  = "external imports"
 import_heading_firstparty  = "app imports"
 import_heading_localfolder = "local imports"
-known_first_party          = "test_suite"
+known_first_party          = "mailsrv_aux"
+
+
+[tool.mypy]
+python_version = "3.9"
+disallow_untyped_defs   = true
+disallow_any_unimported = true
+no_implicit_optional    = true
+check_untyped_defs      = true
+warn_return_any         = true
+show_error_codes        = true
+warn_unused_ignores     = true
+warn_unused_configs     = true
+ignore_missing_imports  = false
