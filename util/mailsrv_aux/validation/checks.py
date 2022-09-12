@@ -44,7 +44,7 @@ def check_mailbox_has_account(
             logger.debug("Mailbox '%s' not in dovecot_accounts", box)
             findings.append(
                 ValidationError(
-                    "Mailbox {} has no matching account".format(box),
+                    "Mailbox '{}' has no matching account".format(box),
                     id="e001",
                     hint="Every Postfix *mailbox* requires a matching entry in Dovecot's *userdb*",
                 )
@@ -81,7 +81,7 @@ def check_addresses_match_domains(
             logger.debug("Address '%s' not in postfix_domains", address)
             findings.append(
                 ValidationError(
-                    "Address {} not in virtual domains".format(address),
+                    "Address '{}' not in virtual domains".format(address),
                     id="e002",
                     hint="The domain parts of the addresses require a matching entry in Postfix's virtual domains",
                 )
@@ -120,7 +120,7 @@ def check_address_can_send(
             logger.debug("Address '%s' can not send", address)
             findings.append(
                 ValidationWarning(
-                    "Address {} not in sender_login_map".format(address),
+                    "Address '{}' not in sender_login_map".format(address),
                     id="w003",
                 )
             )
@@ -164,7 +164,7 @@ def check_sender_has_login(
             logger.debug("Sender '%s' not in dovecot_accounts", sender)
             findings.append(
                 ValidationError(
-                    "Sender {} has no matching account".format(sender),
+                    "Sender '{}' has no matching account".format(sender),
                     id="e004",
                     hint="Every Postfix *sender* requires a matching entry in Dovecot's *userdb*",
                 )
@@ -220,7 +220,7 @@ def check_account_has_function(
         logger.debug("Account '%s' has neither mailbox nor is a sender", account)
         findings.append(
             ValidationWarning(
-                "Account {} has neither mailbox nor is a sender".format(account),
+                "Account '{}' has neither mailbox nor is a sender".format(account),
                 id="w005",
             )
         )
@@ -308,6 +308,7 @@ def check_resolve_alias_configuration(
 
     if tmp_fail is not None:
         for alias in tmp_fail:
+            logger.debug("Alias '%s' could not be resolved", alias)
             findings.append(
                 ValidationError(
                     "Alias '{}' could not be resolved. Target was: {}".format(
@@ -320,6 +321,7 @@ def check_resolve_alias_configuration(
 
     if tmp_external is not None:
         for alias in tmp_external:
+            logger.debug("Alias '%s' resolves to external address", alias)
             findings.append(
                 ValidationWarning(
                     "Alias '{}' resolves to external addresses: {}".format(
