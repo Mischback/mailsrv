@@ -221,6 +221,18 @@ def run_checks(
         or got_errors
     )
 
+    got_errors = (
+        check_wrapper(
+            checks.check_resolve_alias_configuration,
+            postfix_vmailboxes,
+            postfix_valiases,
+            postfix_vdomains,
+            fail_fast=fail_fast,
+            skip=skip,
+        )
+        or got_errors
+    )
+
     if got_errors:
         raise MailsrvValidationFailedException("There were errors during validation")
 

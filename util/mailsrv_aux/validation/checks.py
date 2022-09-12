@@ -5,6 +5,7 @@ import logging
 
 # local imports
 from ..common.log import add_level
+from ..common.parser import PostfixAliasResolver
 from .messages import ValidationError, ValidationMessage, ValidationWarning
 
 # get a module-level logger
@@ -264,5 +265,72 @@ def check_domain_has_admin_addresses(
                 hint="The domain should have 'postmaster@' and 'abuse@' addresses",
             )
         )
+
+    return findings
+
+
+def check_resolve_alias_configuration(
+    postfix_mailboxes: list[str],
+    postfix_aliases: dict[str, list[str]],
+    postfix_domains: list[str],
+) -> list[ValidationMessage]:
+    """All aliases **must** resolve to a mailbox or external address.
+
+    Resolving to an external address will be handled by a warning, see the
+    provided hint.
+
+    Parameters
+    ----------
+    postfix_mailboxes : list
+        A ``list`` of ``str``, representing the virtual mailboxes.
+    postfix_aliases : dict
+        A ``dict`` containing the acutal alias configuration.
+    postfix_domains : list
+        A ``list`` of ``str``, representing the virtual domains.
+
+    Returns
+    -------
+    list
+        A list of ``ValidationWarning`` and/or ``ValidationError`` instances.
+
+    Notes
+    -----
+    Uses ``PostfixAliasResolver`` internally.
+    """
+    logger.debug("check_resolve_alias_configuration()")
+    logger.verbose("Check: Resolve the alias configuration")  # type: ignore [attr-defined]
+
+    findings: list[ValidationMessage] = list()
+
+    resolver = PostfixAliasResolver(postfix_mailboxes, postfix_aliases, postfix_domains)
+
+    resolve, tmp_fail, tmp_external = resolver.resolve()
+
+    if tmp_fail is not None:
+        for alias in tmp_fail:
+            findings.append(
+                ValidationError(
+                    "Alias '{}' could not be resolved. Target was: {}".format(
+                        alias, tmp_fail[alias]
+                    ),
+                    id="e007",
+                    hint="Target is neither a mailbox nor an external address.",
+                )
+            )
+
+    if tmp_external is not None:
+        for alias in tmp_external:
+            findings.append(
+                ValidationWarning(
+                    "Alias '{}' resolves to external addresses: {}".format(
+                        alias, tmp_external[alias]
+                    ),
+                    id="w008",
+                    hint="Mails to this alias are forwarded to an external address."
+                    " This poses a severe risk to the mail setup, as spam might"
+                    " be forwarded and this server will be considered a spam"
+                    " relay. Other problems regarding SPF and DMARC may arise.",
+                )
+            )
 
     return findings
