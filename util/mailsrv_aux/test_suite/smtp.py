@@ -171,3 +171,37 @@ class SmtpGenericTestSuite:
 
         logger.summary("%s finished successfully", self.suite_name)  # type: ignore [attr-defined]
         return self._protocol
+
+
+class ReceiveMailTestSuite(SmtpGenericTestSuite):
+    """Test the mail setup (receiving mails from another server).
+
+    Parameters
+    ----------
+    valid_recipients : list
+    invalid_recipient : list
+    target_ip : str
+    from_address : str
+    relay_recipient : str
+    mail_count_offset : int
+    """
+
+    def __init__(
+        self,
+        valid_recipients: list[str],
+        invalid_recipients: list[str],
+        target_ip: str = "127.0.0.1",
+        from_address: str = "sender@another-host.test",
+        relay_recipient: str = "relay@another-host.test",
+        mail_count_offset: int = 0,
+    ) -> None:
+        super().__init__(
+            target_ip=target_ip,
+            suite_name="Receive Mail Suite",
+            mail_count_offset=mail_count_offset,
+        )
+
+        self._valid_recipients = valid_recipients
+        self._invalid_recipients = invalid_recipients
+        self._from_address = from_address
+        self._relay_recipient = relay_recipient
