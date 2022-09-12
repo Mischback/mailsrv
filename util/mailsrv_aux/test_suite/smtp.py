@@ -10,7 +10,7 @@ import time
 from typing import Union
 
 # local imports
-from ..common.logs import add_level
+from ..common.log import add_level
 from .exceptions import MailsrvTestException
 from .protocols import SmtpTestProtocol
 
@@ -179,7 +179,7 @@ class ReceiveMailTestSuite(SmtpGenericTestSuite):
     Parameters
     ----------
     valid_recipients : list
-    invalid_recipient : list
+    invalid_recipients : list
     target_ip : str
     from_address : str
     relay_recipient : str
