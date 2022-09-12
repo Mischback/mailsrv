@@ -12,6 +12,7 @@ from typing import Union
 # local imports
 from ..common.log import add_level
 from .exceptions import MailsrvTestException
+from .fixture_mail import GENERIC_VALID_MAIL
 from .protocols import SmtpTestProtocol
 
 # get a module-level logger
@@ -206,3 +207,29 @@ class ReceiveMailTestSuite(SmtpGenericTestSuite):
         self._invalid_recipients = invalid_recipients
         self._from_address = from_address
         self._relay_recipient = relay_recipient
+
+    def sendmail(
+        self,
+        to_addrs: Union[str, list[str]],
+    ) -> bool:
+        """Send a mail.
+
+        This is a suite-specific wrapper for the more generic ``_sendmail()``
+        method, providing consistent default values for most parameters.
+
+        Parameters
+        ----------
+        to_addrs : str, list
+            The recipient or list of recipients for the mail.
+
+        Returns
+        -------
+        bool
+            Returns ``True`` if the mail is delivered to at least one of the
+            recipient, ``False`` otherwise.
+        """
+        return self._sendmail(
+            self._from_address,
+            to_addrs,
+            GENERIC_VALID_MAIL,
+        )
