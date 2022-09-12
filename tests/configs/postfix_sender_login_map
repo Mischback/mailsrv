@@ -1,5 +1,0 @@
-user_one@sut.test      user_one@sut.test
-user_two@sut.test      user_two@sut.test
-
-alias_one@sut.test     user_one@sut.test
-alias_extern@sut.test  user_one@sut.test user_two@sut.test
