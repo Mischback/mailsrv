@@ -37,6 +37,9 @@ if __name__ == "__main__":
     )
 
     # mandatory arguments (positional arguments)
+    arg_parser.add_argument(
+        "target_host", action="store", help="IP address of the system under test (SUT)"
+    )
 
     # optional arguments (keyword arguments)
     arg_parser.add_argument(
@@ -118,7 +121,7 @@ if __name__ == "__main__":
             logger.error("Could not read config files")
             raise e
 
-        suite = ReceiveMailTestSuite(postfix_addresses, [])
+        suite = ReceiveMailTestSuite(postfix_addresses, [], target_ip=args.target_host)
         suite.run()
 
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]

@@ -162,12 +162,13 @@ class SmtpGenericTestSuite:
                 logger.verbose("Connection to target (%s) terminated", self.target_ip)  # type: ignore [attr-defined]
         except smtplib.SMTPException as e:
             logger.critical("SMTP exception: '%s'", e)  # noqa: G200
-            logger.exception(e)  # noqa: G200
             raise self.SmtpOperationalError("SMTP exception")
-        except ConnectionRefusedError as e:
+        except ConnectionRefusedError:
             logger.critical("Target (%s) refused the connection", self.target_ip)
-            logger.exception(e)  # noqa: G200
             raise self.SmtpOperationalError("Connection refused")
+        except OSError:
+            logger.critical("Target (%s) is not reachable", self.target_ip)
+            raise self.SmtpOperationalError("Target not reachable")
 
         logger.summary("%s finished successfully", self.suite_name)  # type: ignore [attr-defined]
         return self._protocol
