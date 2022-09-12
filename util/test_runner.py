@@ -6,9 +6,11 @@
 import argparse
 import logging
 import logging.config
+import os
 import sys
 
 # app imports
+from mailsrv_aux.common import parser
 from mailsrv_aux.common.exceptions import MailsrvBaseException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
 
@@ -23,6 +25,10 @@ add_level("SUMMARY", logging.INFO + 1)
 if __name__ == "__main__":
     # setup the logging module
     logging.config.dictConfig(LOGGING_DEFAULT_CONFIG)
+
+    # find the script's path
+    my_dir = os.path.dirname(os.path.realpath(__file__))
+    test_config_dir = os.path.join(my_dir, "test_configs")
 
     # prepare the argument parser
     arg_parser = argparse.ArgumentParser(
@@ -53,25 +59,25 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--dovecot-userdb",
         action="store",
-        default="./test_configs/dovecot_vmail_users",
+        default=os.path.join(test_config_dir, "dovecot_vmail_users"),
         help="Specify a Dovecot user database file (passwd-like file)",
     )
     arg_parser.add_argument(
-        "--postfix_vmailboxes",
+        "--postfix-vmailboxes",
         action="store",
-        default="./test_configs/postfix_vmailboxes",
+        default=os.path.join(test_config_dir, "postfix_vmailboxes"),
         help="Specify a Postfix virtual mailbox file",
     )
     arg_parser.add_argument(
-        "--postfix_valiases",
+        "--postfix-valiases",
         action="store",
-        default="./test_configs/postfix_valiases",
+        default=os.path.join(test_config_dir, "postfix_valiases"),
         help="Specify a Postfix virtual alias file",
     )
     arg_parser.add_argument(
-        "--postfix_vdomains",
+        "--postfix-vdomains",
         action="store",
-        default="./test_configs/postfix_vdomains",
+        default=os.path.join(test_config_dir, "postfix_vdomains"),
         help="Specify a Postfix virtual domain file",
     )
 
@@ -88,7 +94,23 @@ if __name__ == "__main__":
 
     # Read and parse the configuration files
     try:
-        # logger.verbose("Reading configuration files")  # type: ignore [attr-defined]
+        logger.verbose("Reading configuration files")  # type: ignore [attr-defined]
+
+        dovecot_users = parser.PasswdFileParser(args.dovecot_userdb).get_usernames()
+        logger.debug("dovecot_users: %r", dovecot_users)
+
+        postfix_vmailboxes = parser.KeyParser(args.postfix_vmailboxes).get_values()
+        logger.debug("postfix_vmailboxes: %r", postfix_vmailboxes)
+
+        postfix_valiases = parser.KeyValueParser(args.postfix_valiases).get_values()
+        logger.debug("postfix_valiases: %r", postfix_valiases)
+
+        postfix_vdomains = parser.KeyParser(args.postfix_vdomains).get_values()
+        logger.debug("postfix_vdomains: %r", postfix_vdomains)
+
+        postfix_addresses = postfix_vmailboxes + list(postfix_valiases.keys())
+        logger.debug("postfix_addresses: %r", postfix_addresses)
+
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]
         sys.exit(0)
     except MailsrvBaseException as e:
