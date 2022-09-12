@@ -49,6 +49,32 @@ if __name__ == "__main__":
         help="Be more verbose; may be specified up to two times",
     )
 
+    # provide overrides for the test config files
+    arg_parser.add_argument(
+        "--dovecot-userdb",
+        action="store",
+        default="./test_configs/dovecot_vmail_users",
+        help="Specify a Dovecot user database file (passwd-like file)",
+    )
+    arg_parser.add_argument(
+        "--postfix_vmailboxes",
+        action="store",
+        default="./test_configs/postfix_vmailboxes",
+        help="Specify a Postfix virtual mailbox file",
+    )
+    arg_parser.add_argument(
+        "--postfix_valiases",
+        action="store",
+        default="./test_configs/postfix_valiases",
+        help="Specify a Postfix virtual alias file",
+    )
+    arg_parser.add_argument(
+        "--postfix_vdomains",
+        action="store",
+        default="./test_configs/postfix_vdomains",
+        help="Specify a Postfix virtual domain file",
+    )
+
     args = arg_parser.parse_args()
 
     if args.debug:
