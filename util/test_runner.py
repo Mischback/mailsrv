@@ -11,7 +11,7 @@ import sys
 
 # app imports
 from mailsrv_aux.common import parser
-from mailsrv_aux.common.exceptions import MailsrvBaseException
+from mailsrv_aux.common.exceptions import MailsrvBaseException, MailsrvIOException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
 
 # get a module-level logger
@@ -92,28 +92,34 @@ if __name__ == "__main__":
         logger.setLevel(logging.VERBOSE)  # type: ignore [attr-defined]
         logger.verbose("Verbose logging enabled")  # type: ignore [attr-defined]
 
-    # Read and parse the configuration files
     try:
-        logger.verbose("Reading configuration files")  # type: ignore [attr-defined]
+        try:
+            # Read and parse the configuration files
+            logger.verbose("Reading configuration files")  # type: ignore [attr-defined]
 
-        dovecot_users = parser.PasswdFileParser(args.dovecot_userdb).get_usernames()
-        logger.debug("dovecot_users: %r", dovecot_users)
+            dovecot_users = parser.PasswdFileParser(args.dovecot_userdb).get_usernames()
+            logger.debug("dovecot_users: %r", dovecot_users)
 
-        postfix_vmailboxes = parser.KeyParser(args.postfix_vmailboxes).get_values()
-        logger.debug("postfix_vmailboxes: %r", postfix_vmailboxes)
+            postfix_vmailboxes = parser.KeyParser(args.postfix_vmailboxes).get_values()
+            logger.debug("postfix_vmailboxes: %r", postfix_vmailboxes)
 
-        postfix_valiases = parser.KeyValueParser(args.postfix_valiases).get_values()
-        logger.debug("postfix_valiases: %r", postfix_valiases)
+            postfix_valiases = parser.KeyValueParser(args.postfix_valiases).get_values()
+            logger.debug("postfix_valiases: %r", postfix_valiases)
 
-        postfix_vdomains = parser.KeyParser(args.postfix_vdomains).get_values()
-        logger.debug("postfix_vdomains: %r", postfix_vdomains)
+            postfix_vdomains = parser.KeyParser(args.postfix_vdomains).get_values()
+            logger.debug("postfix_vdomains: %r", postfix_vdomains)
 
-        postfix_addresses = postfix_vmailboxes + list(postfix_valiases.keys())
-        logger.debug("postfix_addresses: %r", postfix_addresses)
+            # The addresses are the actual virtual mailboxes combined with the RHS
+            # of the virtual aliases.
+            postfix_addresses = postfix_vmailboxes + list(postfix_valiases.keys())
+            logger.debug("postfix_addresses: %r", postfix_addresses)
+        except MailsrvIOException as e:
+            logger.error("Could not read config files")
+            raise e
 
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]
         sys.exit(0)
     except MailsrvBaseException as e:
         logger.critical("Execution failed!")
-        logger.exception(e)  # noqa: G200
+        logger.debug(e, exc_info=True)  # noqa: G200
         sys.exit(1)
