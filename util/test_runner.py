@@ -117,16 +117,26 @@ if __name__ == "__main__":
             # of the virtual aliases.
             postfix_addresses = postfix_vmailboxes + list(postfix_valiases.keys())
             logger.debug("postfix_addresses: %r", postfix_addresses)
+
+            # Generate an invalid recipient (this means: a non-existing address
+            # on one of the SUT's (virtual) domains)
+            # This is not verified. Will clash during the test run. However, the
+            # generated address is highly unlikely to be included in the server's
+            # configuratio.
+            invalid_recipient = "{}@{}".format(
+                hash(postfix_addresses[0]), postfix_vdomains[0]
+            )
+            logger.debug("invalid_recipient: %s", invalid_recipient)
         except MailsrvIOException as e:
             logger.error("Could not read config files")
             raise e
 
         suite = OtherMtaTestSuite(
             valid_recipients=postfix_addresses,
-            invalid_recipients=[],
+            invalid_recipients=[invalid_recipient],
             target_ip=args.target_host,
         )
-        suite.run()
+        overall_result = suite.run()
 
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]
         sys.exit(0)
