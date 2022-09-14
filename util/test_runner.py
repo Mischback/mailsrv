@@ -13,7 +13,7 @@ import sys
 from mailsrv_aux.common import parser
 from mailsrv_aux.common.exceptions import MailsrvBaseException, MailsrvIOException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
-from mailsrv_aux.test_suite.smtp import ReceiveMailTestSuite
+from mailsrv_aux.test_suite.smtp import OtherMtaTestSuite
 
 # get a module-level logger
 logger = logging.getLogger()
@@ -121,7 +121,11 @@ if __name__ == "__main__":
             logger.error("Could not read config files")
             raise e
 
-        suite = ReceiveMailTestSuite(postfix_addresses, [], target_ip=args.target_host)
+        suite = OtherMtaTestSuite(
+            valid_recipients=postfix_addresses,
+            invalid_recipients=[],
+            target_ip=args.target_host,
+        )
         suite.run()
 
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]

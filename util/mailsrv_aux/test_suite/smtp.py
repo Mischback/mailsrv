@@ -7,7 +7,7 @@ These tests are meant to verify the SMTP-part of the mail setup.
 import logging
 import smtplib
 import time
-from typing import Union
+from typing import Any, Optional, Union
 
 # local imports
 from ..common.log import add_level
@@ -175,40 +175,68 @@ class SmtpGenericTestSuite:
         return self._protocol
 
 
-class ReceiveMailTestSuite(SmtpGenericTestSuite):
-    """Test the mail setup (receiving mails from another server).
+class OtherMtaTestSuite(SmtpGenericTestSuite):
+    """Simulate another MTA that submits mails.
+
+    The test suite acts like another Mail Transfer Agent (MTA), submitting
+    mails for various recipients.
+
+    While the actual test suite might seem to provide primarily tests for the
+    MTA part of the setup, it might be used to prepare the testing of the
+    Mail Delivery Agent (MDA) aswell. The class's ``run()`` method will return
+    an instance of ``SmtpTestProtocol`` which might be used as input to tests
+    of the MDA.
 
     Parameters
     ----------
     valid_recipients : list
+        A ``list`` of ``str`` containing **valid** mail addresses. Mails to
+        these addresses are expected to be accepted/queued.
     invalid_recipients : list
-    target_ip : str
+        A ``list`` of ``str`` containing **invalid** mail addresses. Mails to
+        these addresses are expected to be rejected.
     from_address : str
+        The address to be used as value to ``MAIL FROM:`` (default:
+        sender@another-host.test).
     relay_recipient : str
-    mail_count_offset : int
+        An address of another host, that the setup is not responsible for. This
+        will be used to verify, that the SUT correctly rejects mails, if it is
+        not responsible for a domain. There is no validation of the value
+        (default: relay@another-host.test).
     """
 
     def __init__(
         self,
-        valid_recipients: list[str],
-        invalid_recipients: list[str],
-        target_ip: str = "127.0.0.1",
+        *args: Any,
+        valid_recipients: Optional[list[str]] = None,
+        invalid_recipients: Optional[list[str]] = None,
         from_address: str = "sender@another-host.test",
         relay_recipient: str = "relay@another-host.test",
-        mail_count_offset: int = 0,
+        suite_name: str = "Other MTA Test Suite",
+        **kwargs: Optional[Any]
     ) -> None:
-        super().__init__(
-            target_ip=target_ip,
-            suite_name="Receive Mail Suite",
-            mail_count_offset=mail_count_offset,
+        super().__init__(  # type: ignore
+            *args,
+            suite_name=suite_name,
+            **kwargs,  # type: ignore
         )
 
-        self._valid_recipients = valid_recipients
-        self._invalid_recipients = invalid_recipients
+        if valid_recipients is None:
+            # FIXME: Does this make sense? Is this an operational error?
+            self._valid_recipients = list()
+        else:
+            self._valid_recipients = valid_recipients
+
+        if invalid_recipients is None:
+            # FIXME: Does this make sense? Is this an operational error?
+            self._invalid_recipients = list()
+        else:
+            self._invalid_recipients = invalid_recipients
+
         self._from_address = from_address
         self._relay_recipient = relay_recipient
 
-    def sendmail(
+    def _sendmail(  # type: ignore [override]
         self,
         to_addrs: Union[str, list[str]],
     ) -> bool:
@@ -228,8 +256,72 @@ class ReceiveMailTestSuite(SmtpGenericTestSuite):
             Returns ``True`` if the mail is delivered to at least one of the
             recipient, ``False`` otherwise.
         """
-        return self._sendmail(
+        return super()._sendmail(
             self._from_address,
             to_addrs,
             GENERIC_VALID_MAIL,
         )
+
+    def _sendmail_expect_queue(
+        self,
+        to_addrs: Union[str, list[str]],
+    ) -> None:
+        """Send a mail and expect it to be queued.
+
+        Parameters
+        ----------
+        to_addrs : str, list
+            The recipient or list of recipients for the mail.
+
+        Raises
+        ------
+        SmtpTestSuiteError
+            Raised if the mail is rejected.
+        """
+        logger.debug("Sending mail to %r, expecting the mail to be queued", to_addrs)
+
+        if not self._sendmail(to_addrs):
+            raise self.SmtpTestSuiteError("Expected mail to be queued, got rejected")
+
+    def _sendmail_expect_reject(
+        self,
+        to_addrs: Union[str, list[str]],
+    ) -> None:
+        """Send a mail and expect it to be rejected.
+
+        Parameters
+        ----------
+        to_addrs : str, list
+            The recipient or list of recipients for the mail.
+
+        Raises
+        ------
+        SmtpTestSuiteError
+            Raised if the mail is accepted/queued.
+        """
+        logger.debug("Sending mail to %r, expecting the mail to be rejected", to_addrs)
+
+        if self._sendmail(to_addrs):
+            raise self.SmtpTestSuiteError("Expected mail to be queued, got rejected")
+
+    def _run_tests(self) -> None:
+        logger.info("Start sending of mails")
+
+        # Send mails to all valid recipients
+        for to_addr in self._valid_recipients:
+            self._sendmail_expect_queue(to_addr)
+
+        # Manually send a mail to multiple recipients:
+        # Use the first to addresses in ``_valid_recipients``.
+        self._sendmail_expect_queue(self._valid_recipients[:2])
+
+        # Send mails to invalid recipients (expect REJECT)
+        for to_addr in self._invalid_recipients:
+            self._sendmail_expect_reject(to_addr)
+
+        # Send mail to an external address (relaying; expect REJECT)
+        self._sendmail_expect_reject(self._relay_recipient)
+
+        logger.info("All mails sent; server reactions as expected")
+        logger.verbose("Protocol: %s", self._protocol)  # type: ignore [attr-defined]
+        logger.debug("Protocol: %r", self._protocol)
