@@ -213,7 +213,7 @@ class OtherMtaTestSuite(SmtpGenericTestSuite):
         from_address: str = "sender@another-host.test",
         relay_recipient: str = "relay@another-host.test",
         suite_name: str = "Other MTA Test Suite",
-        **kwargs: Optional[Any]
+        **kwargs: Optional[Any],
     ) -> None:
         super().__init__(  # type: ignore
             *args,
@@ -325,3 +325,34 @@ class OtherMtaTestSuite(SmtpGenericTestSuite):
         logger.info("All mails sent; server reactions as expected")
         logger.verbose("Protocol: %s", self._protocol)  # type: ignore [attr-defined]
         logger.debug("Protocol: %r", self._protocol)
+
+
+class OtherMtaTlsTestSuite(OtherMtaTestSuite):
+    """Simulate another MTA that submits mails, using TLS.
+
+    The only difference to ``OtherMtaTestSuite`` is the usage of the
+    ``starttls()`` command before sending mails.
+    """
+
+    def __init__(
+        self,
+        *args: Any,
+        suite_name: str = "Other MTA (TLS) Test Suite",
+        **kwargs: Optional[Any],
+    ) -> None:
+        super().__init__(*args, suite_name=suite_name, **kwargs)  # type: ignore [arg-type]
+
+    def _pre_run(self) -> None:
+        logger.verbose("Sending command STARTTLS...")  # type: ignore [attr-defined]
+
+        try:
+            self.smtp.starttls()
+        except (
+            smtplib.SMTPNotSupportedError,
+            RuntimeError,
+            ValueError,
+            smtplib.SMTPResponseException,
+        ):
+            logger.critical("Could not establish TLS connection using STARTTLS")
+            raise self.SmtpOperationalError("TLS failure")
+        logger.verbose("TLS encryption established")  # type: ignore [attr-defined]
