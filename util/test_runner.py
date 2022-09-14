@@ -13,7 +13,7 @@ import sys
 from mailsrv_aux.common import parser
 from mailsrv_aux.common.exceptions import MailsrvBaseException, MailsrvIOException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
-from mailsrv_aux.test_suite.smtp import OtherMtaTestSuite
+from mailsrv_aux.test_suite.smtp import OtherMtaTestSuite, OtherMtaTlsTestSuite
 
 # get a module-level logger
 logger = logging.getLogger()
@@ -137,6 +137,13 @@ if __name__ == "__main__":
             target_ip=args.target_host,
         )
         overall_result = suite.run()
+
+        suite = OtherMtaTlsTestSuite(
+            valid_recipients=postfix_addresses,
+            invalid_recipients=[invalid_recipient],
+            target_ip=args.target_host,
+        )
+        overall_result += suite.run()
 
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]
         sys.exit(0)
