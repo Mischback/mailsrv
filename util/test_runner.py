@@ -4,6 +4,7 @@
 
 # Python imports
 import argparse
+import collections
 import logging
 import logging.config
 import os
@@ -30,14 +31,32 @@ def map_mails_to_mailboxes(
     postfix_vmailboxes: list[str],
     postfix_valiases: dict[str, list[str]],
     postfix_vdomains: list[str],
-) -> None:
+) -> dict[str, list[str]]:
     """Map the mails to actual mailboxes."""
     resolved_aliases, _, _ = PostfixAliasResolver(
         postfix_vmailboxes, postfix_valiases, postfix_vdomains
     ).resolve()
 
-    logger.info("smtp protocol: %r", smtp_protocol)
-    logger.info("resolved aliases: %r", resolved_aliases)
+    logger.debug("smtp protocol: %r", smtp_protocol)
+    logger.debug("resolved aliases: %r", resolved_aliases)
+
+    result: dict[str, list[str]] = collections.defaultdict(list)
+
+    aliases = resolved_aliases.keys()
+    for rcpt in smtp_protocol._accepted.keys():
+        if rcpt in postfix_vmailboxes:
+            logger.debug("Found RCPT with mailbox: %s", rcpt)
+            result[rcpt] += smtp_protocol._accepted[rcpt]
+
+        if rcpt in aliases:
+            logger.debug("Fount RCPT as alias: %s", rcpt)
+
+            for alias_target in resolved_aliases[rcpt]:
+                result[alias_target] += smtp_protocol._accepted[rcpt]
+
+    logger.debug("Result: %r", dict(result))
+
+    return dict(result)
 
 
 if __name__ == "__main__":
@@ -166,9 +185,11 @@ if __name__ == "__main__":
         logger.info("Result: %s", overall_result)
         logger.debug("Result (detail): %r", overall_result)
 
-        map_mails_to_mailboxes(
+        mapped_mails = map_mails_to_mailboxes(
             overall_result, postfix_vmailboxes, postfix_valiases, postfix_vdomains
         )
+
+        logger.debug("Mapped Mails: %r", mapped_mails)
 
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]
         sys.exit(0)
