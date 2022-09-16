@@ -19,7 +19,7 @@ import sys
 if __name__ == "__main__":
     files_args = sys.argv[1:]
 
-    files = 'mypy_files="{}"'.format(" ".join(files_args))
+    files = "mypy_files={}".format(" ".join(files_args))
 
     tmp = subprocess.run(
         ["make", "local/mypy", files],
