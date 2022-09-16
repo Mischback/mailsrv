@@ -13,6 +13,8 @@ import sys
 from mailsrv_aux.common import parser
 from mailsrv_aux.common.exceptions import MailsrvBaseException, MailsrvIOException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
+from mailsrv_aux.common.parser import PostfixAliasResolver
+from mailsrv_aux.test_suite.protocols import SmtpTestProtocol
 from mailsrv_aux.test_suite.smtp import OtherMtaTestSuite, OtherMtaTlsTestSuite
 
 # get a module-level logger
@@ -21,6 +23,21 @@ logger = logging.getLogger()
 # add the VERBOSE / SUMMARY log levels
 add_level("VERBOSE", logging.INFO - 1)
 add_level("SUMMARY", logging.INFO + 1)
+
+
+def map_mails_to_mailboxes(
+    smtp_protocol: SmtpTestProtocol,
+    postfix_vmailboxes: list[str],
+    postfix_valiases: dict[str, list[str]],
+    postfix_vdomains: list[str],
+) -> None:
+    """Map the mails to actual mailboxes."""
+    resolved_aliases, _, _ = PostfixAliasResolver(
+        postfix_vmailboxes, postfix_valiases, postfix_vdomains
+    ).resolve()
+
+    logger.info("smtp protocol: %r", smtp_protocol)
+    logger.info("resolved aliases: %r", resolved_aliases)
 
 
 if __name__ == "__main__":
@@ -148,6 +165,10 @@ if __name__ == "__main__":
 
         logger.info("Result: %s", overall_result)
         logger.debug("Result (detail): %r", overall_result)
+
+        map_mails_to_mailboxes(
+            overall_result, postfix_vmailboxes, postfix_valiases, postfix_vdomains
+        )
 
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]
         sys.exit(0)
