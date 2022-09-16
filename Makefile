@@ -28,6 +28,10 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 
+local/mypy :
+	echo "foobar"
+.PHONY : local/mypy
+
 tests/venv : $(TEST_VENV_INSTALLED)
 .PHONY : tests/venv
 
