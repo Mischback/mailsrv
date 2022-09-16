@@ -7,6 +7,10 @@ UTIL_VENV_DIR := .util-venv
 UTIL_VENV_CREATED := $(UTIL_VENV_DIR)/pyvenv.cfg
 UTIL_VENV_INSTALLED := $(UTIL_VENV_DIR)/packages.txt
 
+TEST_VENV_DIR := .test-venv
+TEST_VENV_CREATED := $(TEST_VENV_DIR)/pyvenv.cfg
+TEST_VENV_INSTALLED := $(TEST_VENV_DIR)/packages.txt
+
 PRE_COMMIT_READY := .git/hooks/pre-commit
 
 
@@ -17,6 +21,10 @@ PRE_COMMIT_READY := .git/hooks/pre-commit
 MAKEFLAGS += --no-print-directory
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
+
+
+tests/venv : $(TEST_VENV_INSTALLED)
+.PHONY : tests/venv
 
 
 util/black :
@@ -53,7 +61,16 @@ $(PRE_COMMIT_READY) : $(UTIL_VENV_INSTALLED)
 $(UTIL_VENV_CREATED) :
 	/usr/bin/env python3 -m venv $(UTIL_VENV_DIR)
 
-# Install the required packages in the utility virtual environments
+# Install the required packages in the utility virtual environment
 $(UTIL_VENV_INSTALLED) : $(UTIL_VENV_CREATED) requirements/util.txt
 	$(UTIL_VENV_DIR)/bin/pip install -r requirements/util.txt
 	$(UTIL_VENV_DIR)/bin/pip freeze > $(UTIL_VENV_INSTALLED)
+
+# Create the virtual environment for the test suite
+$(TEST_VENV_CREATED) :
+	/usr/bin/env python3 -m venv $(TEST_VENV_DIR)
+
+# Install the required packages in the test suite virtual environment
+$(TEST_VENV_INSTALLED) : $(TEST_VENV_CREATED) requirements/test_suite.txt
+	$(TEST_VENV_DIR)/bin/pip install -r requirements/test_suite.txt
+	$(TEST_VENV_DIR)/bin/pip freeze > $(TEST_VENV_INSTALLED)
