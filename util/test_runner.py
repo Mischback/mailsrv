@@ -142,8 +142,12 @@ if __name__ == "__main__":
             valid_recipients=postfix_addresses,
             invalid_recipients=[invalid_recipient],
             target_ip=args.target_host,
+            mail_count_offset=overall_result.get_mail_count(),
         )
         overall_result += suite.run()
+
+        logger.info("Result: %s", overall_result)
+        logger.debug("Result (detail): %r", overall_result)
 
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]
         sys.exit(0)
