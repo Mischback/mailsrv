@@ -30,3 +30,34 @@ show_error_codes        = true
 warn_unused_ignores     = true
 warn_unused_configs     = true
 ignore_missing_imports  = false
+
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+minversion = 3.26.0
+
+[testenv:util]
+basepython = python3
+deps =
+  -r {toxinidir}/requirements/util.txt
+envdir = {toxworkdir}/util
+setenv =
+  PYTHONDONTWRITEBYTECODE=1
+passenv = SSH_AUTH_SOCK
+skip_install = true
+commands =
+  {posargs:pre-commit run}
+
+[testenv:typechecking]
+basepython = {[testenv:util]basepython}
+deps =
+  -r {toxinidir}/requirements/mypy.txt
+  -r {toxinidir}/requirements/test_suite.txt
+envdir = {toxworkdir}/typechecking
+setenv =
+  PYTHONDONTWRITEBYTECODE=1
+skip_install = true
+commands =
+  {posargs:mypy}
+"""
