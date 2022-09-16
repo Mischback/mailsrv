@@ -44,6 +44,7 @@ deps =
 envdir = {toxworkdir}/util
 setenv =
   PYTHONDONTWRITEBYTECODE=1
+passenv = SSH_AUTH_SOCK
 skip_install = true
 commands =
   {posargs:pre-commit run}

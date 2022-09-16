@@ -22,9 +22,9 @@ repos:
       - id: mypy
         name: mypy
         description: "Run mypy locally, with dependencies, via tox"
-        language: system
+        language: script
         "types_or": [python, pyi]
-        entry: make local/mypy
+        entry: util/typechecking_runner.py
   # flake8 (linting)
   - repo: https://github.com/PyCQA/flake8
     rev: 4.0.1

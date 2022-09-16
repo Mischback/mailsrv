@@ -28,8 +28,9 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 
+mypy_files ?= ""
 local/mypy :
-	echo "foobar"
+	$(TOX_CMD) -e typechecking -- mypy $(mypy_files)
 .PHONY : local/mypy
 
 tests/venv : $(TEST_VENV_INSTALLED)
