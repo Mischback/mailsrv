@@ -77,3 +77,21 @@ class PopGenericTestSuite:
 
     def _post_run(self) -> None:
         pass
+
+    def _disconnect(self) -> None:
+        # Fetching the mails should have no side effects. In particular, no
+        # mails should be deleted. So, ``rset()`` is called before quitting.
+        self.pop.rset()
+        self.pop.quit()
+
+    def _run_tests(self) -> None:
+        raise NotImplementedError("Has to be implemented in real test suite")
+
+    def run(self) -> None:
+        """Run the test suite."""
+        self._pre_connect()
+        self._connect()
+        self._pre_run()
+        self._run_tests()
+        self._post_run()
+        self._disconnect()
