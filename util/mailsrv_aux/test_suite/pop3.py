@@ -7,7 +7,7 @@ server **and** verify, that all mails got delivered as expected.
 # Python imports
 import logging
 import poplib
-from typing import Optional
+from typing import Any, Optional
 
 # local imports
 from .exceptions import MailsrvTestException
@@ -79,9 +79,12 @@ class PopGenericTestSuite:
         pass
 
     def _disconnect(self) -> None:
-        # Fetching the mails should have no side effects. In particular, no
-        # mails should be deleted. So, ``rset()`` is called before quitting.
-        self.pop.rset()
+        try:
+            # Fetching the mails should have no side effects. In particular, no
+            # mails should be deleted. So, ``rset()`` is called before quitting.
+            self.pop.rset()
+        except poplib.error_proto:
+            pass
         self.pop.quit()
 
     def _run_tests(self) -> None:
@@ -95,3 +98,25 @@ class PopGenericTestSuite:
         self._run_tests()
         self._post_run()
         self._disconnect()
+
+
+class NoNonSecureAuth(PopGenericTestSuite):
+    """Verify that no unsecure login is possible."""
+
+    def __init__(
+        self,
+        *args: Any,
+        username: str = "foo",
+        password: str = "bar",
+        **kwargs: Optional[Any],
+    ) -> None:
+        super().__init__(*args, username=username, password=password, **kwargs)  # type: ignore
+
+    def _run_tests(self) -> None:
+        try:
+            self.pop.user(self.username)
+        except poplib.error_proto:
+            logger.info("Server rejected login as expected")
+            return
+
+        raise self.Pop3TestSuiteError("Server accepted login without secure connection")

@@ -9,12 +9,14 @@ import logging
 import logging.config
 import os
 import sys
+from typing import Any
 
 # app imports
 from mailsrv_aux.common import parser
 from mailsrv_aux.common.exceptions import MailsrvBaseException, MailsrvIOException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
 from mailsrv_aux.common.parser import PostfixAliasResolver
+from mailsrv_aux.test_suite.pop3 import NoNonSecureAuth
 from mailsrv_aux.test_suite.protocols import SmtpTestProtocol
 from mailsrv_aux.test_suite.smtp import OtherMtaTestSuite, OtherMtaTlsTestSuite
 
@@ -167,7 +169,7 @@ if __name__ == "__main__":
             logger.error("Could not read config files")
             raise e
 
-        suite = OtherMtaTestSuite(
+        suite: Any = OtherMtaTestSuite(
             valid_recipients=postfix_addresses,
             invalid_recipients=[invalid_recipient],
             target_ip=args.target_host,
@@ -190,6 +192,11 @@ if __name__ == "__main__":
         )
 
         logger.debug("Mapped Mails: %r", mapped_mails)
+
+        suite = NoNonSecureAuth(
+            target_ip=args.target_host,
+        )
+        suite.run()
 
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]
         sys.exit(0)
