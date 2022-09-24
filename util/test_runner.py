@@ -204,7 +204,7 @@ if __name__ == "__main__":
             target_ip=args.target_host,
             username="user_one@sut-one.test",
             password="foobar",
-            expected_mails=["foo"],
+            expected_messages=mapped_mails["user_one@sut-one.test"],
         )
         suite.run()
 

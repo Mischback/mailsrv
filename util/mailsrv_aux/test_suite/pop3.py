@@ -128,18 +128,54 @@ class VerifyMailGotDelivered(PopGenericTestSuite):
     def __init__(
         self,
         *args: Any,
-        expected_mails: Optional[list[str]] = None,
+        expected_messages: Optional[list[str]] = None,
         **kwargs: Optional[Any],
     ) -> None:
         super().__init__(*args, **kwargs)  # type: ignore [arg-type]
 
-        if expected_mails is None:
+        if expected_messages is None:
             raise self.Pop3OperationalError("Missing parameter: 'expected_mails'")
-        self.expected_mails = expected_mails
+        self.expected_messages = expected_messages
 
     def _pre_run(self) -> None:
         self.pop.stls()
         self._auth()
 
+    def _get_message_subject(self, message: list[bytes]) -> str:
+        # This is crazy kluged together...
+        # It retrieves the actual subject by looking for the substring
+        # ``"Subject: "`` in all *lines* of the message, then decodes the line
+        # to UTF-8 / ASCII and removes the prefix.
+        return [
+            i.decode().removeprefix("Subject: ")
+            for i in message
+            if "Subject: " in i.decode()
+        ][0]
+
     def _run_tests(self) -> None:
         logger.info("starting tests...")
+
+        msg_list = self.pop.list()[1]
+        logger.debug(msg_list)  # FIXME: May be deleted!
+
+        for item in msg_list:
+            msg_id = item.decode().split(" ")[0]
+            logger.debug("Processing message: %s", msg_id)
+
+            msg = self.pop.retr(msg_id)[1]
+            logger.debug(msg)  # FIXME: May be deleted!
+
+            subject = self._get_message_subject(msg)
+            logger.debug("Subject of %s: %s", msg_id, subject)
+
+            if subject in self.expected_messages:
+                logger.debug("Found '%s'", subject)
+                self.expected_messages.pop(self.expected_messages.index(subject))
+
+        if self.expected_messages:
+            logger.error(
+                "Could not find expected message(s): %s", self.expected_messages
+            )
+            raise self.Pop3TestSuiteError(
+                "At least one expected message could not be found"
+            )
