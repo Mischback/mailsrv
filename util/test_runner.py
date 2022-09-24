@@ -169,6 +169,7 @@ if __name__ == "__main__":
             logger.error("Could not read config files")
             raise e
 
+        # Queue some mails to the mailserver (non-secure)
         suite: Any = OtherMtaTestSuite(
             valid_recipients=postfix_addresses,
             invalid_recipients=[invalid_recipient],
@@ -176,6 +177,7 @@ if __name__ == "__main__":
         )
         overall_result = suite.run()
 
+        # Queue some more mails to the mailserver (using STARTTLS)
         suite = OtherMtaTlsTestSuite(
             valid_recipients=postfix_addresses,
             invalid_recipients=[invalid_recipient],
@@ -187,19 +189,23 @@ if __name__ == "__main__":
         logger.info("Result: %s", overall_result)
         logger.debug("Result (detail): %r", overall_result)
 
-        mapped_mails = map_mails_to_mailboxes(
-            overall_result, postfix_vmailboxes, postfix_valiases, postfix_vdomains
-        )
-
-        logger.debug("Mapped Mails: %r", mapped_mails)
-
+        # Minimal test suite to verify, that logins to POP3 have to be
+        # performed over a secure connection (using STARTTLS)
         suite = NoNonSecureAuth(
             target_ip=args.target_host,
         )
         suite.run()
 
+        # Map the mails to mailboxes
+        # This result is then used to verify the actual delivery of the
+        # messages as required, using the POP3 protocol, see
+        # ``VerifyMailGotDelivered``
+        mapped_mails = map_mails_to_mailboxes(
+            overall_result, postfix_vmailboxes, postfix_valiases, postfix_vdomains
+        )
+        logger.debug("Mapped Mails: %r", mapped_mails)
+
         # FIXME: Fetch username/password from dovecot's userdb
-        # FIXME: Apply ``expected_mails`` from ``mapped_mails``
         suite = VerifyMailGotDelivered(
             target_ip=args.target_host,
             username="user_one@sut-one.test",
