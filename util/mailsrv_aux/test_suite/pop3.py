@@ -10,13 +10,18 @@ import poplib
 from typing import Any, Optional
 
 # local imports
+from ..common.log import add_level
 from .exceptions import MailsrvTestException
 
 # get a module-level logger
 logger = logging.getLogger(__name__)
 
+# add VERBOSE / SUMMARY log levels
+add_level("VERBOSE", logging.INFO - 1)
+add_level("SUMMARY", logging.INFO + 1)
 
-class PopGenericTestSuite:
+
+class Pop3GenericTestSuite:
     """Provide the POP3 protocol abstraction for actual test suites.
 
     Parameters
@@ -25,6 +30,17 @@ class PopGenericTestSuite:
         The IP to connect to (default: 127.0.0.1).
     target_port : int, optional
         The port to use for the connection (default: 110, from ``poplib.POP3_PORT``).
+    suite_name : str, optional
+        The name of the test suite. Should be set to distinguish several suites
+        (default: Generic POP3 Suite).
+    username : str
+        The username to use during POP3's login. This is marked as *optional*
+        for Python's typing, but a default value of ``None`` is provided which
+        results in a ``Pop3OperationalError`` if not overwritten.
+    password : str
+        The password to use during POP3's login. This is marked as *optional*
+        for Python's typing, but a default value of ``None`` is provided which
+        results in a ``Pop3OperationalError`` if not overwritten.
     """
 
     class Pop3GenericException(MailsrvTestException):
@@ -40,17 +56,21 @@ class PopGenericTestSuite:
         self,
         target_ip: str = "127.0.0.1",
         target_port: int = poplib.POP3_PORT,
+        suite_name: str = "Generic POP3 Suite",
         username: Optional[str] = None,
         password: Optional[str] = None,
     ) -> None:
         self.target_ip = target_ip
         self.target_port = target_port
+        self.suite_name = suite_name
 
         if username is None:
+            logger.critical("Missing parameter: 'username'")
             raise self.Pop3OperationalError("Missing parameter: 'username'")
         self.username = username
 
         if password is None:
+            logger.critical("Missing parameter: 'password'")
             raise self.Pop3OperationalError("Missing parameter: 'password'")
         self.password = password
 
@@ -61,12 +81,14 @@ class PopGenericTestSuite:
             logger.critical("Target (%s) refused the connection", self.target_ip)
             raise self.Pop3OperationalError("Connection refused")
 
+        logger.info("Connection to target (%s) established", self.target_ip)
+
     def _auth(self) -> None:
         try:
             self.pop.user(self.username)
             self.pop.pass_(self.password)
         except poplib.error_proto as e:
-            logger.error("Authentication failed: %s", e)  # noqa: G200
+            logger.critical("Authentication failed: %s", e)  # noqa: G200
             raise self.Pop3OperationalError("Authentication failed")
 
     def _pre_connect(self) -> None:
@@ -84,33 +106,47 @@ class PopGenericTestSuite:
             # mails should be deleted. So, ``rset()`` is called before quitting.
             self.pop.rset()
         except poplib.error_proto:
+            # rset() will fail without successful login
             pass
         self.pop.quit()
+        logger.verbose("Connection to target (%s) terminated", self.target_ip)  # type: ignore [attr-defined]
 
     def _run_tests(self) -> None:
         raise NotImplementedError("Has to be implemented in real test suite")
 
     def run(self) -> None:
         """Run the test suite."""
+        logger.summary("Running %s", self.suite_name)  # type: ignore [attr-defined]
         self._pre_connect()
         self._connect()
         self._pre_run()
-        self._run_tests()
-        self._post_run()
-        self._disconnect()
+        try:
+            self._run_tests()
+            self._post_run()
+        finally:
+            self._disconnect()
+
+        logger.summary("%s finished successfully", self.suite_name)  # type: ignore [attr-defined]
 
 
-class NoNonSecureAuth(PopGenericTestSuite):
+class NoNonSecureAuth(Pop3GenericTestSuite):
     """Verify that no unsecure login is possible."""
 
     def __init__(
         self,
         *args: Any,
+        suite_name: str = "No non-secure auth Test Suite",
         username: str = "foo",
         password: str = "bar",
         **kwargs: Optional[Any],
     ) -> None:
-        super().__init__(*args, username=username, password=password, **kwargs)  # type: ignore
+        super().__init__(  # type: ignore
+            *args,
+            suite_name=suite_name,
+            username=username,
+            password=password,
+            **kwargs,  # type: ignore [arg-type]
+        )
 
     def _run_tests(self) -> None:
         try:
@@ -122,16 +158,32 @@ class NoNonSecureAuth(PopGenericTestSuite):
         raise self.Pop3TestSuiteError("Server accepted login without secure connection")
 
 
-class VerifyMailGotDelivered(PopGenericTestSuite):
-    """Check the mailbox of a given user for expected mails."""
+class VerifyMailGotDelivered(Pop3GenericTestSuite):
+    """Check the mailbox of a given user for expected mails.
+
+    Parameters
+    ----------
+    expected_messages : list
+        A ``list`` of ``str``, representing the subjects of the messages,
+        expected to be present in the mailbox.
+
+    Notes
+    -----
+    For a full list of parameters refer to ``Pop3GenericTestSuite``.
+    """
 
     def __init__(
         self,
         *args: Any,
+        suite_name: str = "Verify messages in Mailbox Test Suite",
         expected_messages: Optional[list[str]] = None,
         **kwargs: Optional[Any],
     ) -> None:
-        super().__init__(*args, **kwargs)  # type: ignore [arg-type]
+        super().__init__(  # type: ignore
+            *args,
+            suite_name=suite_name,
+            **kwargs,  # type: ignore [arg-type]
+        )
 
         if expected_messages is None:
             raise self.Pop3OperationalError("Missing parameter: 'expected_mails'")
@@ -142,7 +194,7 @@ class VerifyMailGotDelivered(PopGenericTestSuite):
         self._auth()
 
     def _get_message_subject(self, message: list[bytes]) -> str:
-        # This is crazy kluged together...
+        # This is crazily kluged together...
         # It retrieves the actual subject by looking for the substring
         # ``"Subject: "`` in all *lines* of the message, then decodes the line
         # to UTF-8 / ASCII and removes the prefix.
@@ -153,23 +205,23 @@ class VerifyMailGotDelivered(PopGenericTestSuite):
         ][0]
 
     def _run_tests(self) -> None:
-        logger.info("starting tests...")
-
+        # Get a list of all messages in the mailbox
         msg_list = self.pop.list()[1]
-        logger.debug(msg_list)  # FIXME: May be deleted!
 
+        # Loop all messages, find their *Subject* line and compare to the
+        # provided list of expected messages (which is in fact a list of
+        # subjects). The message is removed from the list of expected messages.
         for item in msg_list:
             msg_id = item.decode().split(" ")[0]
-            logger.debug("Processing message: %s", msg_id)
+            # logger.debug("Processing message: %s", msg_id)
 
             msg = self.pop.retr(msg_id)[1]
-            logger.debug(msg)  # FIXME: May be deleted!
 
             subject = self._get_message_subject(msg)
-            logger.debug("Subject of %s: %s", msg_id, subject)
+            # logger.debug("Subject of %s: %s", msg_id, subject)
 
             if subject in self.expected_messages:
-                logger.debug("Found '%s'", subject)
+                logger.debug("Found '%s' (message ID %s)", subject, msg_id)
                 self.expected_messages.pop(self.expected_messages.index(subject))
 
         if self.expected_messages:
@@ -179,3 +231,5 @@ class VerifyMailGotDelivered(PopGenericTestSuite):
             raise self.Pop3TestSuiteError(
                 "At least one expected message could not be found"
             )
+
+        logger.info("All expected messages found")

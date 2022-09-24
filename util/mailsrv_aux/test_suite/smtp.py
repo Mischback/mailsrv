@@ -34,7 +34,7 @@ class SmtpGenericTestSuite:
         The port to use for the connection (default: 25, from ``smtplib.SMTP_PORT``).
     suite_name : str, optional
         The name of the test suite. Should be set to distinguish several suites
-        (default: Generic Suite).
+        (default: Generic SMTP Suite).
     local_hostname : str, optional
         The hostname to use in SMTP HELO/EHLO (default: mail.another-host.test).
     mail_count_offset : int, optional
@@ -54,7 +54,7 @@ class SmtpGenericTestSuite:
         self,
         target_ip: str = "127.0.0.1",
         target_port: int = smtplib.SMTP_PORT,
-        suite_name: str = "Generic Suite",
+        suite_name: str = "Generic SMTP Suite",
         local_hostname: str = "mail.another-host.test",
         mail_count_offset: int = 0,
     ) -> None:
