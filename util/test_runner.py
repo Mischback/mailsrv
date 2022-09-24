@@ -16,7 +16,7 @@ from mailsrv_aux.common import parser
 from mailsrv_aux.common.exceptions import MailsrvBaseException, MailsrvIOException
 from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
 from mailsrv_aux.common.parser import PostfixAliasResolver
-from mailsrv_aux.test_suite.pop3 import NoNonSecureAuth
+from mailsrv_aux.test_suite.pop3 import NoNonSecureAuth, VerifyMailGotDelivered
 from mailsrv_aux.test_suite.protocols import SmtpTestProtocol
 from mailsrv_aux.test_suite.smtp import OtherMtaTestSuite, OtherMtaTlsTestSuite
 
@@ -195,6 +195,16 @@ if __name__ == "__main__":
 
         suite = NoNonSecureAuth(
             target_ip=args.target_host,
+        )
+        suite.run()
+
+        # FIXME: Fetch username/password from dovecot's userdb
+        # FIXME: Apply ``expected_mails`` from ``mapped_mails``
+        suite = VerifyMailGotDelivered(
+            target_ip=args.target_host,
+            username="user_one@sut-one.test",
+            password="foobar",
+            expected_mails=["foo"],
         )
         suite.run()
 

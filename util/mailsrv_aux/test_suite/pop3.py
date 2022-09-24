@@ -120,3 +120,26 @@ class NoNonSecureAuth(PopGenericTestSuite):
             return
 
         raise self.Pop3TestSuiteError("Server accepted login without secure connection")
+
+
+class VerifyMailGotDelivered(PopGenericTestSuite):
+    """Check the mailbox of a given user for expected mails."""
+
+    def __init__(
+        self,
+        *args: Any,
+        expected_mails: Optional[list[str]] = None,
+        **kwargs: Optional[Any],
+    ) -> None:
+        super().__init__(*args, **kwargs)  # type: ignore [arg-type]
+
+        if expected_mails is None:
+            raise self.Pop3OperationalError("Missing parameter: 'expected_mails'")
+        self.expected_mails = expected_mails
+
+    def _pre_run(self) -> None:
+        self.pop.stls()
+        self._auth()
+
+    def _run_tests(self) -> None:
+        logger.info("starting tests...")
