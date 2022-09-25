@@ -139,7 +139,8 @@ if __name__ == "__main__":
             # Read and parse the configuration files
             logger.verbose("Reading configuration files")  # type: ignore [attr-defined]
 
-            dovecot_users = parser.PasswdFileParser(args.dovecot_userdb).get_usernames()
+            dovecot_passwd = parser.PasswdFileParser(args.dovecot_userdb)
+            dovecot_users = dovecot_passwd.get_usernames()
             logger.debug("dovecot_users: %r", dovecot_users)
 
             postfix_vmailboxes = parser.KeyParser(args.postfix_vmailboxes).get_values()
