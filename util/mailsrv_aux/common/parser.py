@@ -3,7 +3,7 @@
 # Python imports
 import collections
 import logging
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 # local imports
 from .exceptions import MailsrvResolverException
@@ -15,6 +15,25 @@ logger = logging.getLogger(__name__)
 
 class PasswdFileParser(GenericFileReader):
     """Parse ``passwd``-file-like configuration files."""
+
+    def __init__(
+        self,
+        *args: Any,
+        **kwargs: Optional[Any],
+    ) -> None:
+        super().__init__(*args, **kwargs)  # type: ignore [arg-type]
+
+        self._user_db = dict()
+        for line in self._raw_lines:
+            elems = line.split(":")
+
+            self._user_db[elems[0]] = {
+                "password": elems[1],
+                "uid": elems[2],
+                "gid": elems[3],
+                "home": elems[5],
+                "extra": elems[7],
+            }
 
     def get_usernames(self) -> list[str]:
         """Return the usernames.
