@@ -51,10 +51,7 @@ class PasswdFileParser(GenericFileReader):
         -----
         The usernames are in fact the very first column in the file.
         """
-        # The Pythonic-condensed version of "the very first occurence of ":"
-        # in a line and get everything until that occurrence; repeat for
-        # every line"
-        return [line[: line.index(":")] for line in self._raw_lines]
+        return list(self._user_db.keys())
 
 
 class KeyParser(GenericFileReader):
