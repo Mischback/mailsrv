@@ -23,7 +23,7 @@ class PasswdFileParser(GenericFileReader):
     ) -> None:
         super().__init__(*args, **kwargs)  # type: ignore [arg-type]
 
-        self._user_db = dict()
+        self._user_db = {}
         for line in self._raw_lines:
             elems = line.split(":")
 
@@ -117,7 +117,7 @@ class KeyValueParser(GenericFileReader):
             A ``dict``, using the *left-hand-side* as ``key`` and provide the
             *right-hand-side* as ``list`` of ``str``.
         """
-        result = dict()
+        result = {}
         for line in self._raw_lines:
             key = line[: line.index(" ")]
             value = line[line.index(" ") :].strip().split(" ")
@@ -158,7 +158,7 @@ class PostfixAliasResolver:
 
         self._work_aliases = postfix_aliases
 
-        self.resolved: dict[str, list[str]] = dict()
+        self.resolved: dict[str, list[str]] = {}
         self.external: dict[str, set[str]] = collections.defaultdict(set)
         self.unresolved: dict[str, set[str]] = collections.defaultdict(set)
 
@@ -254,7 +254,7 @@ class PostfixAliasResolver:
         to ``self.external`` and *unresolvable aliases* to ``self.unresolved``.
         These are returned by ``resolve()``, if not empty.
         """
-        result: list[str] = list()
+        result: list[str] = []
 
         for target in targets:
             logger.debug("[checking] %s", target)

@@ -37,7 +37,7 @@ def check_mailbox_has_account(
     logger.debug("check_mailbox_has_account()")
     logger.verbose("Check: Postfix's virtual mailboxes must have a Dovecot account")  # type: ignore [attr-defined]
 
-    findings: list[ValidationMessage] = list()
+    findings: list[ValidationMessage] = []
 
     for box in postfix_mailboxes:
         if box not in dovecot_accounts:
@@ -74,7 +74,7 @@ def check_addresses_match_domains(
     logger.debug("check_addresses_match_domains()")
     logger.verbose("Check: Postfix's addresses must have a matchin virtual domain")  # type: ignore [attr-defined]
 
-    findings: list[ValidationMessage] = list()
+    findings: list[ValidationMessage] = []
 
     for address in postfix_addresses:
         if address[address.index("@") + 1 :] not in postfix_domains:
@@ -111,7 +111,7 @@ def check_address_can_send(
     logger.debug("check_address_can_send()")
     logger.verbose("Check: Can the addresses send?")  # type: ignore [attr-defined]
 
-    findings: list[ValidationMessage] = list()
+    findings: list[ValidationMessage] = []
 
     senders_lhs = list(postfix_senders.keys())
 
@@ -150,14 +150,11 @@ def check_sender_has_login(
     logger.debug("check_sender_has_login()")
     logger.verbose("Check: Can the sender login?")  # type: ignore [attr-defined]
 
-    findings: list[ValidationMessage] = list()
+    findings: list[ValidationMessage] = []
 
-    # Crazy Python list comprehension: All values in ``postfix_senders`` (which
-    # are ``lists``) combined into one ``list``; then apply a ``set`` to purge
-    # duplicates.
-    senders_rhs = set(
-        [item for sublist in postfix_senders.values() for item in sublist]
-    )
+    # Crazy kluge: All values in ``postfix_senders`` (which are ``lists``)
+    # combined into one ``set``
+    senders_rhs = {item for sublist in postfix_senders.values() for item in sublist}
 
     for sender in senders_rhs:
         if sender not in dovecot_accounts:
@@ -201,14 +198,11 @@ def check_account_has_function(
     logger.debug("check_account_has_function()")
     logger.verbose("Check: Dovecot's accounts should have a function")  # type: ignore [attr-defined]
 
-    findings: list[ValidationMessage] = list()
+    findings: list[ValidationMessage] = []
 
-    # Crazy Python list comprehension: All values in ``postfix_senders`` (which
-    # are ``lists``) combined into one ``list``; then apply a ``set`` to purge
-    # duplicates.
-    senders_rhs = set(
-        [item for sublist in postfix_senders.values() for item in sublist]
-    )
+    # Crazy kluge: All values in ``postfix_senders`` (which are ``lists``)
+    # combined into one ``set``
+    senders_rhs = {item for sublist in postfix_senders.values() for item in sublist}
 
     for account in dovecot_accounts:
         if account in postfix_mailboxes:
@@ -248,7 +242,7 @@ def check_domain_has_admin_addresses(
     logger.debug("check_domain_has_admin_addresses()")
     logger.verbose("Check: All domains should have postmaster and abuse addresses")  # type: ignore [attr-defined]
 
-    findings: list[ValidationMessage] = list()
+    findings: list[ValidationMessage] = []
 
     for domain in postfix_domains:
         if "postmaster@{}".format(domain) in postfix_addresses:
@@ -300,7 +294,7 @@ def check_resolve_alias_configuration(
     logger.debug("check_resolve_alias_configuration()")
     logger.verbose("Check: Resolve the alias configuration")  # type: ignore [attr-defined]
 
-    findings: list[ValidationMessage] = list()
+    findings: list[ValidationMessage] = []
 
     resolver = PostfixAliasResolver(postfix_mailboxes, postfix_aliases, postfix_domains)
 

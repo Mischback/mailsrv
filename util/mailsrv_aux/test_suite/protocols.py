@@ -19,12 +19,12 @@ class SmtpTestProtocol:
         accepted: Optional[dict[str, list[str]]] = None,
     ) -> None:
         if sent is None:
-            self._sent: list[str] = list()
+            self._sent: list[str] = []
         else:
             self._sent = sent
 
         if rejected is None:
-            self._rejected: list[str] = list()
+            self._rejected: list[str] = []
         else:
             self._rejected = rejected
 

@@ -223,13 +223,13 @@ class OtherMtaTestSuite(SmtpGenericTestSuite):
 
         if valid_recipients is None:
             # FIXME: Does this make sense? Is this an operational error?
-            self._valid_recipients = list()
+            self._valid_recipients = []
         else:
             self._valid_recipients = valid_recipients
 
         if invalid_recipients is None:
             # FIXME: Does this make sense? Is this an operational error?
-            self._invalid_recipients = list()
+            self._invalid_recipients = []
         else:
             self._invalid_recipients = invalid_recipients
 

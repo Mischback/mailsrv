@@ -3,6 +3,8 @@
 extend-select =
     # flake8-bugbear
     B, B902, B903,
+    # flake8-comprehensions
+    C4,
     # pydocstyle (by flake8-docstrings)
     D,
     # logging-format (by flake8-logging-format)

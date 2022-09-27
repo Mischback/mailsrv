@@ -72,7 +72,7 @@ def check_wrapper(
     check_func: TCheckFunc,
     *args: Any,
     fail_fast: bool = False,
-    skip: tuple = tuple(),
+    skip: tuple = (),
     **kwargs: Optional[Any],
 ) -> bool:
     """Wrap a check function and handle its return value.
@@ -135,7 +135,7 @@ def run_checks(
     postfix_sender_map: dict[str, list[str]],
     dovecot_users: list[str],
     fail_fast: bool = False,
-    skip: tuple = tuple(),
+    skip: tuple = (),
 ) -> None:
     """Run the actual check functions.
 
@@ -305,7 +305,7 @@ if __name__ == "__main__":
     try:
         skip = tuple(args.skip)
     except TypeError:
-        skip = tuple()
+        skip = ()
 
     # Read and parse the configuration files
     try:
