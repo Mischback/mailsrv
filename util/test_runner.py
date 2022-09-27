@@ -28,6 +28,20 @@ add_level("VERBOSE", logging.INFO - 1)
 add_level("SUMMARY", logging.INFO + 1)
 
 
+def get_password_plain(
+    username: str,
+    userdb: parser.PasswdFileParser,
+) -> str:
+    """Return plain text passwords from userdb."""
+    ret = userdb.get_password(username)
+
+    if "{plain}" not in ret:
+        logger.error("Did not find plain text password")
+        return ""
+
+    return ret.removeprefix("{plain}")
+
+
 def map_mails_to_mailboxes(
     smtp_protocol: SmtpTestProtocol,
     postfix_vmailboxes: list[str],
@@ -206,14 +220,19 @@ if __name__ == "__main__":
         )
         logger.debug("Mapped Mails: %r", mapped_mails)
 
-        # FIXME: Fetch username/password from dovecot's userdb
-        suite = VerifyMailGotDelivered(
-            target_ip=args.target_host,
-            username="user_one@sut-one.test",
-            password="foobar",
-            expected_messages=mapped_mails["user_one@sut-one.test"],
-        )
-        suite.run()
+        for rcpt in mapped_mails:
+            if rcpt not in dovecot_users:
+                logger.debug("Skipping mailbox check for '%s'", rcpt)
+                continue
+
+            logger.verbose("Checking mailbox of '%s'", rcpt)  # type: ignore [attr-defined]
+            suite = VerifyMailGotDelivered(
+                target_ip=args.target_host,
+                username=rcpt,
+                password=get_password_plain(rcpt, dovecot_passwd),
+                expected_messages=mapped_mails[rcpt],
+            )
+            suite.run()
 
         logger.summary("Test suite completed successfully!")  # type: ignore [attr-defined]
         sys.exit(0)
