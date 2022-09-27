@@ -6,7 +6,7 @@ import logging
 from typing import Any, Optional, Tuple
 
 # local imports
-from .exceptions import MailsrvResolverException
+from .exceptions import MailsrvParserException, MailsrvResolverException
 from .fs import GenericFileReader
 
 # get a module-level logger
@@ -52,6 +52,25 @@ class PasswdFileParser(GenericFileReader):
         The usernames are in fact the very first column in the file.
         """
         return list(self._user_db.keys())
+
+    def get_password(self, username: str) -> str:
+        """Return the password for a given user.
+
+        Parameters
+        ----------
+        username : str
+            Specify the user to get the password for.
+
+        Returns
+        -------
+        str
+            The password, provided as ``str``.
+        """
+        try:
+            return self._user_db[username]["password"]
+        except KeyError:
+            logger.error("No entry for '%s' in userdb", username)
+            raise MailsrvParserException("Missing entry in userdb")
 
 
 class KeyParser(GenericFileReader):

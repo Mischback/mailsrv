@@ -13,5 +13,9 @@ class MailsrvIOException(MailsrvBaseException):
     """Indicate I/O-related errors."""
 
 
+class MailsrvParserException(MailsrvBaseException):
+    """Indicate an error during parsing."""
+
+
 class MailsrvResolverException(MailsrvBaseException):
     """Base class for exceptions in ``PostfixAliasResolver``."""
