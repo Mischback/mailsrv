@@ -72,7 +72,7 @@ def check_addresses_match_domains(
         A list of ``ValidationError`` instances.
     """
     logger.debug("check_addresses_match_domains()")
-    logger.verbose("Check: Postfix's addresses must have a matchin virtual domain")  # type: ignore [attr-defined]
+    logger.verbose("Check: Postfix's addresses must have a matching virtual domain")  # type: ignore [attr-defined]
 
     findings: list[ValidationMessage] = []
 
