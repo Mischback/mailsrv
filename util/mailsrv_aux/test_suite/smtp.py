@@ -141,6 +141,52 @@ class SmtpGenericTestSuite:
 
         return True
 
+    def _sendmail_expect_queue(
+        self,
+        from_addr: str,
+        to_addrs: Union[str, list[str]],
+    ) -> None:
+        """Send a mail and expect it to be queued.
+
+        Parameters
+        ----------
+        from_addr: str
+
+        to_addrs : str, list
+            The recipient or list of recipients for the mail.
+
+        Raises
+        ------
+        SmtpTestSuiteError
+            Raised if the mail is rejected.
+        """
+        logger.debug("Sending mail to %r, expecting the mail to be queued", to_addrs)
+
+        if not self._sendmail(from_addr, to_addrs, GENERIC_VALID_MAIL):
+            raise self.SmtpTestSuiteError("Expected mail to be queued, got rejected")
+
+    def _sendmail_expect_reject(
+        self,
+        from_addr: str,
+        to_addrs: Union[str, list[str]],
+    ) -> None:
+        """Send a mail and expect it to be rejected.
+
+        Parameters
+        ----------
+        to_addrs : str, list
+            The recipient or list of recipients for the mail.
+
+        Raises
+        ------
+        SmtpTestSuiteError
+            Raised if the mail is accepted/queued.
+        """
+        logger.debug("Sending mail to %r, expecting the mail to be rejected", to_addrs)
+
+        if self._sendmail(from_addr, to_addrs, GENERIC_VALID_MAIL):
+            raise self.SmtpTestSuiteError("Expected mail to be queued, got rejected")
+
     def run(self) -> SmtpTestProtocol:
         """Run the test suite."""
         logger.summary("Running %s", self.suite_name)  # type: ignore [attr-defined]
@@ -236,91 +282,23 @@ class OtherMtaTestSuite(SmtpGenericTestSuite):
         self._from_address = from_address
         self._relay_recipient = relay_recipient
 
-    def _sendmail(  # type: ignore [override]
-        self,
-        to_addrs: Union[str, list[str]],
-    ) -> bool:
-        """Send a mail.
-
-        This is a suite-specific wrapper for the more generic ``_sendmail()``
-        method, providing consistent default values for most parameters.
-
-        Parameters
-        ----------
-        to_addrs : str, list
-            The recipient or list of recipients for the mail.
-
-        Returns
-        -------
-        bool
-            Returns ``True`` if the mail is delivered to at least one of the
-            recipient, ``False`` otherwise.
-        """
-        return super()._sendmail(
-            self._from_address,
-            to_addrs,
-            GENERIC_VALID_MAIL,
-        )
-
-    def _sendmail_expect_queue(
-        self,
-        to_addrs: Union[str, list[str]],
-    ) -> None:
-        """Send a mail and expect it to be queued.
-
-        Parameters
-        ----------
-        to_addrs : str, list
-            The recipient or list of recipients for the mail.
-
-        Raises
-        ------
-        SmtpTestSuiteError
-            Raised if the mail is rejected.
-        """
-        logger.debug("Sending mail to %r, expecting the mail to be queued", to_addrs)
-
-        if not self._sendmail(to_addrs):
-            raise self.SmtpTestSuiteError("Expected mail to be queued, got rejected")
-
-    def _sendmail_expect_reject(
-        self,
-        to_addrs: Union[str, list[str]],
-    ) -> None:
-        """Send a mail and expect it to be rejected.
-
-        Parameters
-        ----------
-        to_addrs : str, list
-            The recipient or list of recipients for the mail.
-
-        Raises
-        ------
-        SmtpTestSuiteError
-            Raised if the mail is accepted/queued.
-        """
-        logger.debug("Sending mail to %r, expecting the mail to be rejected", to_addrs)
-
-        if self._sendmail(to_addrs):
-            raise self.SmtpTestSuiteError("Expected mail to be queued, got rejected")
-
     def _run_tests(self) -> None:
         logger.info("Start sending of mails")
 
         # Send mails to all valid recipients
         for to_addr in self._valid_recipients:
-            self._sendmail_expect_queue(to_addr)
+            self._sendmail_expect_queue(self._from_address, to_addr)
 
         # Manually send a mail to multiple recipients:
         # Use the first to addresses in ``_valid_recipients``.
-        self._sendmail_expect_queue(self._valid_recipients[:2])
+        self._sendmail_expect_queue(self._from_address, self._valid_recipients[:2])
 
         # Send mails to invalid recipients (expect REJECT)
         for to_addr in self._invalid_recipients:
-            self._sendmail_expect_reject(to_addr)
+            self._sendmail_expect_reject(self._from_address, to_addr)
 
         # Send mail to an external address (relaying; expect REJECT)
-        self._sendmail_expect_reject(self._relay_recipient)
+        self._sendmail_expect_reject(self._from_address, self._relay_recipient)
 
         logger.info("All mails sent; server reactions as expected")
         logger.verbose("Protocol: %s", self._protocol)  # type: ignore [attr-defined]
