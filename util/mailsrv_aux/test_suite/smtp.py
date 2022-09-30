@@ -334,3 +334,104 @@ class OtherMtaTlsTestSuite(OtherMtaTestSuite):
             logger.critical("Could not establish TLS connection using STARTTLS")
             raise self.SmtpOperationalError("TLS failure")
         logger.verbose("TLS encryption established")  # type: ignore [attr-defined]
+
+
+class SubmissionTestSuite(SmtpGenericTestSuite):
+    """Verify submission of mails from known users of the SUT.
+
+    This test suite acts like a Mail User Agent (MUA), submitting mails for
+    local and external recipients *coming from a local user*.
+
+    The suite requires user credentials and a list of addresses to be used in
+    the ``MAIL FROM`` command.
+
+    The class's ``run()`` method will return an instance of
+    ``SmtpTestProtocol`` which might e used as input to tests of the MDA.
+
+    Parameters
+    ----------
+    username : str
+        The username to be used for login.
+    password : str
+        The password, completing the login credentials.
+    valid_from : list
+        A ``list`` of ``str`` containing **valid** addresses to be used in the
+        ``MAIL FROM`` command.
+    invalid_from : str, optional
+        An **invalid** address, meaning an address that can not be used in the
+        ``MAIL FROM`` command (default: no_sending@sut-one.test).
+    local_rcpt : str, optional
+        A local address, meaning an address that is handled by the SUT
+        (default: submission@sut-one.test).
+    external_rcpt : str, optional
+        An address on another MTA (default: submission@another-host.test).
+    suite_name : str, optional
+        The suites verbose name (default: Submission Test Suite).
+    """
+
+    def __init__(
+        self,
+        *args: Any,
+        username: str,
+        password: str,
+        valid_from: Optional[list[str]] = None,
+        invalid_from: str = "no_sending@sut-one.test",
+        local_rcpt: str = "submission@sut-one.test",
+        external_rcpt: str = "submission@another-host.test",
+        suite_name: str = "Submission Test Suite",
+        **kwargs: Optional[Any],
+    ) -> None:
+        super().__init__(  # type: ignore
+            *args,
+            target_port=587,
+            suite_name=suite_name,
+            **kwargs,  # type: ignore
+        )
+
+        self.username = username
+        self.password = password
+        self.invalid_from = invalid_from
+        self.local_rcpt = local_rcpt
+        self.external_rcpt = external_rcpt
+
+        if valid_from is None:
+            self.valid_from = []
+        else:
+            self.valid_from = valid_from
+
+    def _pre_run(self) -> None:
+        logger.verbose("Sending command STARTTLS...")  # type: ignore [attr-defined]
+
+        try:
+            self.smtp.starttls()
+        except (
+            smtplib.SMTPNotSupportedError,
+            RuntimeError,
+            ValueError,
+            smtplib.SMTPResponseException,
+        ):
+            logger.critical("Could not establish TLS connection using STARTTLS")
+            raise self.SmtpOperationalError("TLS failure")
+        logger.verbose("TLS encryption established")  # type: ignore [attr-defined]
+
+        try:
+            self.smtp.login(self.username, self.password)
+        except (
+            smtplib.SMTPHeloError,
+            smtplib.SMTPAuthenticationError,
+            smtplib.SMTPNotSupportedError,
+            smtplib.SMTPException,
+        ):
+            logger.critical("Could not login")
+            raise self.SmtpOperationalError("Login error")
+        logger.verbose("Login successful")  # type: ignore [attr-defined]
+
+    def _run_tests(self) -> None:
+        logger.verbose("Sending mails for account '%s'", self.username)  # type: ignore [attr-defined]
+        for addr in self.valid_from:
+            self._sendmail_expect_queue(from_addr=addr, to_addrs=self.local_rcpt)
+            self._sendmail_expect_queue(from_addr=addr, to_addrs=self.external_rcpt)
+
+        self._sendmail_expect_reject(
+            from_addr=self.invalid_from, to_addrs=self.local_rcpt
+        )

@@ -18,7 +18,11 @@ from mailsrv_aux.common.log import LOGGING_DEFAULT_CONFIG, add_level
 from mailsrv_aux.common.parser import PostfixAliasResolver
 from mailsrv_aux.test_suite.pop3 import NoNonSecureAuth, VerifyMailGotDelivered
 from mailsrv_aux.test_suite.protocols import SmtpTestProtocol
-from mailsrv_aux.test_suite.smtp import OtherMtaTestSuite, OtherMtaTlsTestSuite
+from mailsrv_aux.test_suite.smtp import (
+    OtherMtaTestSuite,
+    OtherMtaTlsTestSuite,
+    SubmissionTestSuite,
+)
 
 # get a module-level logger
 logger = logging.getLogger()
@@ -196,6 +200,16 @@ if __name__ == "__main__":
         suite = OtherMtaTlsTestSuite(
             valid_recipients=postfix_addresses,
             invalid_recipients=[invalid_recipient],
+            target_ip=args.target_host,
+            mail_count_offset=overall_result.get_mail_count(),
+        )
+        overall_result += suite.run()
+
+        # TODO: Wrap this into a loop
+        suite = SubmissionTestSuite(
+            username="user_one@sut-one.test",
+            password="foobar",
+            valid_from=["user_one@sut-one.test", "alias_one@sut-one.test"],
             target_ip=args.target_host,
             mail_count_offset=overall_result.get_mail_count(),
         )
