@@ -140,6 +140,12 @@ if __name__ == "__main__":
         default=os.path.join(test_config_dir, "postfix_vdomains"),
         help="Specify a Postfix virtual domain file",
     )
+    arg_parser.add_argument(
+        "--postfix-sendermap",
+        action="store",
+        default=os.path.join(test_config_dir, "postfix_sender-login-map"),
+        help="Specify the Postfix sender to login map file",
+    )
 
     args = arg_parser.parse_args()
 
@@ -170,6 +176,11 @@ if __name__ == "__main__":
             postfix_vdomains = parser.KeyParser(args.postfix_vdomains).get_values()
             logger.debug("postfix_vdomains: %r", postfix_vdomains)
 
+            postfix_sendermap = parser.KeyValueParser(
+                args.postfix_sendermap
+            ).get_values()
+            logger.debug("postfix_sendermap: %r", postfix_sendermap)
+
             # The addresses are the actual virtual mailboxes combined with the RHS
             # of the virtual aliases.
             postfix_addresses = postfix_vmailboxes + list(postfix_valiases.keys())
@@ -179,7 +190,10 @@ if __name__ == "__main__":
             # on one of the SUT's (virtual) domains)
             # This is not verified. Will clash during the test run. However, the
             # generated address is highly unlikely to be included in the server's
-            # configuratio.
+            # configuration.
+            # Yeah, this is crazy. Basically: hash the first address, omit the
+            # first character and append the first virtual domain for the
+            # domain part.
             invalid_recipient = "{}@{}".format(
                 str(hash(postfix_addresses[0]))[1:], postfix_vdomains[0]
             )
