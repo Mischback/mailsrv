@@ -2,7 +2,10 @@
 # These will be applied in Postfix's ``smtpd_sender_login_maps`` setting.
 #
 # FORMAT: [key][BLANK][list of logins]
-user_one@sut-one.test user_one@sut-one.test
-user_two@sut-one.test user_two@sut-one.test
+user_one@sut-one.test    user_one@sut-one.test
+user_two@sut-one.test    user_two@sut-one.test
 
-user@sut-two.test     user@sut-two.test
+user@sut-two.test        user@sut-two.test
+
+alias_one@sut-one.test   user_one@sut-one.test
+alias_list@sut-one.test  user_one@sut-one.test
