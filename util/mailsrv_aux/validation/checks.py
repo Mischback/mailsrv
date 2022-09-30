@@ -5,7 +5,7 @@ import logging
 
 # local imports
 from ..common.log import add_level
-from ..common.parser import PostfixAliasResolver
+from ..common.parser import PasswdFileParser, PostfixAliasResolver
 from .messages import ValidationError, ValidationMessage, ValidationWarning
 
 # get a module-level logger
@@ -326,6 +326,40 @@ def check_resolve_alias_configuration(
                     " This poses a severe risk to the mail setup, as spam might"
                     " be forwarded and this server will be considered a spam"
                     " relay. Other problems regarding SPF and DMARC may arise.",
+                )
+            )
+
+    return findings
+
+
+def check_no_plaintext_passwords(
+    userdb: PasswdFileParser,
+) -> list[ValidationMessage]:
+    """Dovecot's userdatabase **must not** contain plain test passwords.
+
+    Parameters
+    ----------
+    userdb : ``PasswdFileParser``
+        The internal representation of Dovecot's userdb.
+
+    Returns
+    -------
+    list
+        A list of ``ValidationError`` instances.
+    """
+    logger.debug("check_no_plaintext_passwords()")
+    logger.verbose("Check: Dovecot's userdb must not contain plain text passwords")  # type: ignore [attr-defined]
+
+    findings: list[ValidationMessage] = []
+
+    for entry in userdb.get_usernames():
+        if userdb.get_password(entry).startswith("{plain}"):
+            logger.debug("Entry '%s' has a plain text password", entry)
+            findings.append(
+                ValidationError(
+                    "Account '{}' has a plain text password".format(entry),
+                    id="e009",
+                    hint="Provide a hashed password",
                 )
             )
 

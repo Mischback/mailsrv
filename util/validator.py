@@ -234,6 +234,16 @@ def run_checks(
         or got_errors
     )
 
+    got_errors = (
+        check_wrapper(
+            checks.check_no_plaintext_passwords,
+            dovecot_passwd,
+            fail_fast=fail_fast,
+            skip=skip,
+        )
+        or got_errors
+    )
+
     if got_errors:
         raise MailsrvValidationFailedException("There were errors during validation")
 
