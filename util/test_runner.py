@@ -79,6 +79,23 @@ def map_mails_to_mailboxes(
     return dict(result)
 
 
+def map_logins_to_aliases(
+    postfix_sendermap: dict[str, list[str]],
+) -> dict[str, list[str]]:
+    """Map allowed sender aliases to logins."""
+    logger.debug("postfix_sendermap: %r", postfix_sendermap)
+
+    result: dict[str, list[str]] = collections.defaultdict(list)
+
+    for sender in postfix_sendermap:
+        for account in postfix_sendermap[sender]:
+            result[account].append(sender)
+
+    logger.debug("Result: %r", dict(result))
+
+    return dict(result)
+
+
 if __name__ == "__main__":
     # setup the logging module
     logging.config.dictConfig(LOGGING_DEFAULT_CONFIG)
@@ -219,15 +236,17 @@ if __name__ == "__main__":
         )
         overall_result += suite.run()
 
-        # TODO: Wrap this into a loop
-        suite = SubmissionTestSuite(
-            username="user_one@sut-one.test",
-            password="foobar",
-            valid_from=["user_one@sut-one.test", "alias_one@sut-one.test"],
-            target_ip=args.target_host,
-            mail_count_offset=overall_result.get_mail_count(),
-        )
-        overall_result += suite.run()
+        mapped_aliases = map_logins_to_aliases(postfix_sendermap)
+
+        for account in mapped_aliases:
+            suite = SubmissionTestSuite(
+                username=account,
+                password=get_password_plain(account, dovecot_passwd),
+                valid_from=mapped_aliases[account],
+                target_ip=args.target_host,
+                mail_count_offset=overall_result.get_mail_count(),
+            )
+            overall_result += suite.run()
 
         logger.info("Result: %s", overall_result)
         logger.debug("Result (detail): %r", overall_result)
