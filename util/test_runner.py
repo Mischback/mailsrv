@@ -177,7 +177,7 @@ if __name__ == "__main__":
             # generated address is highly unlikely to be included in the server's
             # configuratio.
             invalid_recipient = "{}@{}".format(
-                hash(postfix_addresses[0]), postfix_vdomains[0]
+                str(hash(postfix_addresses[0]))[1:], postfix_vdomains[0]
             )
             logger.debug("invalid_recipient: %s", invalid_recipient)
         except MailsrvIOException as e:
