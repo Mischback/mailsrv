@@ -133,7 +133,7 @@ def run_checks(
     postfix_valiases: dict[str, list[str]],
     postfix_vdomains: list[str],
     postfix_sender_map: dict[str, list[str]],
-    dovecot_users: list[str],
+    dovecot_passwd: parser.PasswdFileParser,
     fail_fast: bool = False,
     skip: tuple = (),
 ) -> None:
@@ -148,6 +148,7 @@ def run_checks(
     logger.verbose("Skipping: %r", skip)  # type: ignore [attr-defined]
 
     # Build temporary lists
+    dovecot_users = dovecot_passwd.get_usernames()
     postfix_addresses = postfix_vmailboxes + list(postfix_valiases.keys())
     logger.debug("postfix_adresses: %r", postfix_addresses)
 
@@ -312,10 +313,8 @@ if __name__ == "__main__":
         logger.verbose("Reading configuration files")  # type: ignore [attr-defined]
 
         logger.debug("dovecot_userdb_file=%s", args.dovecot_userdb_file)
-        dovecot_users = parser.PasswdFileParser(
-            args.dovecot_userdb_file
-        ).get_usernames()
-        logger.debug("dovecot_users: %r", dovecot_users)
+        dovecot_passwd = parser.PasswdFileParser(args.dovecot_userdb_file)
+        # logger.debug("dovecot_users: %r", dovecot_users)
 
         logger.debug("postfix_vmailbox_file=%s", args.postfix_vmailbox_file)
         postfix_vmailboxes = parser.KeyParser(args.postfix_vmailbox_file).get_values()
@@ -341,7 +340,7 @@ if __name__ == "__main__":
                 postfix_valiases,
                 postfix_vdomains,
                 postfix_sender_map,
-                dovecot_users,
+                dovecot_passwd,
                 fail_fast=args.fail_fast,
                 skip=skip,
             )
