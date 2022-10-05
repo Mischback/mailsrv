@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2022 Mischback
+# SPDX-License-Identifier: MIT
+# SPDX-FileType: SOURCE
+
 """Provide a wrapper around the (local) make recipe ``local/mypy``.
 
 ``mypy`` should be run through pre-commit, however, as the actual dependencies

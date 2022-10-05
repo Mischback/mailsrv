@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Mischback
+# SPDX-License-Identifier: MIT
+# SPDX-FileType: SOURCE
+
 """Provide the actual check functions to validate the configuration."""
 
 # Python imports

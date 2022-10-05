@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Mischback
+# SPDX-License-Identifier: MIT
+# SPDX-FileType: SOURCE
+
 """Provide mails for the test cases."""
 
 GENERIC_VALID_MAIL = (

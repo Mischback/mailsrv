@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2022 Mischback
+# SPDX-License-Identifier: MIT
+# SPDX-FileType: SOURCE
+
 """Run the validation suite."""
 
 

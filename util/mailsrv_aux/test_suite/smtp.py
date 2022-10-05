@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Mischback
+# SPDX-License-Identifier: MIT
+# SPDX-FileType: SOURCE
+
 """SMTP-related parts of the test suite.
 
 These tests are meant to verify the SMTP-part of the mail setup.

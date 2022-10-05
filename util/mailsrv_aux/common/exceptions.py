@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Mischback
+# SPDX-License-Identifier: MIT
+# SPDX-FileType: SOURCE
+
 """Provide exceptions.
 
 This module includes the specific exceptions for the ``common`` sub- package

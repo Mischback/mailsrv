@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Mischback
+# SPDX-License-Identifier: MIT
+# SPDX-FileType: SOURCE
+
 """Provide a package-specific extension of Python's ``logging`` module."""
 
 # Python imports
@@ -38,7 +42,12 @@ LOGGING_DEFAULT_CONFIG = {
 
 
 def add_level(level_name: str, level_number: int) -> None:
-    """Add a new logging level to Python's ``logging`` module."""
+    """Add a new logging level to Python's ``logging`` module.
+
+    This is based on https://stackoverflow.com/a/35804945 . A more complete
+    implementation may be found here:
+    https://github.com/madphysicist/haggis/blob/master/src/haggis/logs.py .
+    """
     # Make the additions as compatible as possible with the original module
     # code.
     # Actual "level names" are upper-case, "method names" are lower-case.
