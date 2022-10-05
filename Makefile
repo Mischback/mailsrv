@@ -7,10 +7,6 @@ UTIL_VENV_DIR := .util-venv
 UTIL_VENV_CREATED := $(UTIL_VENV_DIR)/pyvenv.cfg
 UTIL_VENV_INSTALLED := $(UTIL_VENV_DIR)/packages.txt
 
-TEST_VENV_DIR := .test-venv
-TEST_VENV_CREATED := $(TEST_VENV_DIR)/pyvenv.cfg
-TEST_VENV_INSTALLED := $(TEST_VENV_DIR)/packages.txt
-
 TOX_VENV_DIR := .tox-venv
 TOX_VENV_CREATED := $(TOX_VENV_DIR)/pyvenv.cfg
 TOX_VENV_INSTALLED := $(TOX_VENV_DIR)/packages.txt
@@ -32,9 +28,6 @@ mypy_files ?= ""
 local/mypy :
 	$(TOX_CMD) -e typechecking -- mypy $(mypy_files)
 .PHONY : local/mypy
-
-tests/venv : $(TEST_VENV_INSTALLED)
-.PHONY : tests/venv
 
 util/black :
 	$(MAKE) util/pre-commit pre-commit_id="black" pre-commit_files="--all-files"
@@ -65,15 +58,6 @@ util/pre-commit : $(PRE_COMMIT_READY)
 # Install the pre-commit hooks
 $(PRE_COMMIT_READY) : | $(TOX_VENV_INSTALLED)
 	$(TOX_CMD) -e util -- pre-commit install
-
-# Create the virtual environment for the test suite
-$(TEST_VENV_CREATED) :
-	/usr/bin/env python3 -m venv $(TEST_VENV_DIR)
-
-# Install the required packages in the test suite virtual environment
-$(TEST_VENV_INSTALLED) : $(TEST_VENV_CREATED) requirements/test_suite.txt
-	$(TEST_VENV_DIR)/bin/pip install -r requirements/test_suite.txt
-	$(TEST_VENV_DIR)/bin/pip freeze > $(TEST_VENV_INSTALLED)
 
 # Create the virtual environment for the test suite
 $(TOX_VENV_CREATED) :

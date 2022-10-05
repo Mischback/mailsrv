@@ -53,7 +53,9 @@ commands =
 basepython = {[testenv:util]basepython}
 deps =
   -r {toxinidir}/requirements/mypy.txt
-  -r {toxinidir}/requirements/test_suite.txt
+  # This environment must install the actual dependencies of the Python-parts
+  # of the repository to enable typechecking.
+  # -r {toxinidir}/requirements/test_suite.txt
 envdir = {toxworkdir}/typechecking
 setenv =
   PYTHONDONTWRITEBYTECODE=1
