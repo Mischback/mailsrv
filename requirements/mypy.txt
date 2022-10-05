@@ -1,0 +1,2 @@
+# The Python codebase is type checked using ``mypy``.
+mypy>=0.971

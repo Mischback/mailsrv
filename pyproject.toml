@@ -1,0 +1,65 @@
+# Project's general Python settings
+
+# ### ISORT config
+[tool.isort]
+profile            = "black"
+combine_as_imports = true
+default_section    = "THIRDPARTY"
+sections           = [
+  "FUTURE",
+  "STDLIB",
+  "THIRDPARTY",
+  "FIRSTPARTY",
+  "LOCALFOLDER"
+]
+import_heading_stdlib      = "Python imports"
+import_heading_thirdparty  = "external imports"
+import_heading_firstparty  = "app imports"
+import_heading_localfolder = "local imports"
+known_first_party          = "mailsrv_aux"
+
+
+[tool.mypy]
+python_version = "3.9"
+disallow_untyped_defs   = true
+disallow_any_unimported = true
+no_implicit_optional    = true
+check_untyped_defs      = true
+warn_return_any         = true
+show_error_codes        = true
+warn_unused_ignores     = true
+warn_unused_configs     = true
+ignore_missing_imports  = false
+
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+minversion = 3.26.0
+
+[testenv:util]
+basepython = python3
+deps =
+  -r {toxinidir}/requirements/util.txt
+envdir = {toxworkdir}/util
+setenv =
+  PYTHONDONTWRITEBYTECODE=1
+passenv = SSH_AUTH_SOCK
+skip_install = true
+commands =
+  {posargs:pre-commit run}
+
+[testenv:typechecking]
+basepython = {[testenv:util]basepython}
+deps =
+  -r {toxinidir}/requirements/mypy.txt
+  # This environment must install the actual dependencies of the Python-parts
+  # of the repository to enable typechecking.
+  # -r {toxinidir}/requirements/test_suite.txt
+envdir = {toxworkdir}/typechecking
+setenv =
+  PYTHONDONTWRITEBYTECODE=1
+skip_install = true
+commands =
+  {posargs:mypy}
+"""

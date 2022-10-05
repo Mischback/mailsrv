@@ -1,2 +1,5 @@
-pre-commit
-
+# ``pre-commit`` is used to run several code-quality tools (e.g. linters)
+# automatically during development.
+# ``pre-commit`` is actually run from within a ``tox`` environment. The actual
+# version does not really matter. ``1.14.0`` is just a minimal requirement.
+pre-commit>1.14.0

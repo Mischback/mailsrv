@@ -1,0 +1,7 @@
+# Provide the userdb for Dovecot
+#
+# This file is in passwd-like format
+user_one@sut-one.test:{plain}foobar::::::
+user_two@sut-one.test:{plain}foobar::::::
+submission@sut-one.test:{plain}foobar::::::
+user@sut-two.test:{plain}foobar::::::

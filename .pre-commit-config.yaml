@@ -16,12 +16,21 @@ repos:
     rev: 5.10.1
     hooks:
       - id: isort
+  # mypy (type checking)
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        description: "Run mypy locally, with dependencies, via tox"
+        language: script
+        "types_or": [python, pyi]
+        entry: util/typechecking_runner.py
   # flake8 (linting)
   - repo: https://github.com/PyCQA/flake8
     rev: 4.0.1
     hooks:
       - id: flake8
-        additional_dependencies: [flake8-bugbear, flake8-docstrings]
+        additional_dependencies: [flake8-bugbear, flake8-comprehensions, flake8-docstrings, flake8-logging-format]
   # easy regex checks
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.9.0
