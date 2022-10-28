@@ -16,5 +16,6 @@ server setup.
 
 - ``# DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends postfix/stable``
 - Get configuration files for ``Postfix``:
-  - ``master.cf``
-  - ``main.cf``
+  - ``/etc/postfix/master.cf``
+  - ``/etc/postfix/main.cf``
+  - ``/etc/postfix/local_aliases``
