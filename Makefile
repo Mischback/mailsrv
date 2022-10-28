@@ -2,7 +2,17 @@
 
 # ### INTERNAL SETTINGS / CONSTANTS
 
+# The name of the actual setup script
+SCRIPT_OS_PACKAGES := util/scripts/install-packages.sh
+
+# make's internal stamps
+# These are artificial files to track the status of commands / operations /
+# recipes, that do not directly result in output files.
+MAKE_STAMP_DIR := .make-stamps
+STAMP_OS_PACKAGES := $(MAKE_STAMP_DIR)/os-packages-installed
+
 # Python virtual environments
+# FIXME: These are currently unused... Do we need them?!
 UTIL_VENV_DIR := .util-venv
 UTIL_VENV_CREATED := $(UTIL_VENV_DIR)/pyvenv.cfg
 UTIL_VENV_INSTALLED := $(UTIL_VENV_DIR)/packages.txt
@@ -23,6 +33,23 @@ MAKEFLAGS += --no-print-directory
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
+
+# These recipes perform the actual setup of mailsrv
+
+# Actually perform the complete setup of the mailsrv. This command is to be
+# used to trigger everything else.
+# TODO: Will need adjustment while building up the sequence of recipes!
+install : $(STAMP_OS_PACKAGES)
+.PHONY : install
+
+# Installation of the required packages (from the repositories)
+$(STAMP_OS_PACKAGES) : $(SCRIPT_OS_PACKAGES)
+	$(create_dir)
+	./$(SCRIPT_OS_PACKAGES)
+	touch $@
+
+
+# Utility commands, i.e. linters
 
 mypy_files ?= ""
 util/local/mypy :
@@ -52,18 +79,20 @@ util/pre-commit : $(PRE_COMMIT_READY)
 .PHONY : util/pre-commit
 
 
-
 # Internal utility stuff to make the actual commands work
 
 # Install the pre-commit hooks
 $(PRE_COMMIT_READY) : | $(TOX_VENV_INSTALLED)
 	$(TOX_CMD) -e util -- pre-commit install
 
-# Create the virtual environment for the test suite
+# Create the virtual environment for running tox
 $(TOX_VENV_CREATED) :
 	/usr/bin/env python3 -m venv $(TOX_VENV_DIR)
 
-# Install the required packages in the test suite virtual environment
+# Install the required packages in tox's virtual environment
 $(TOX_VENV_INSTALLED) : $(TOX_VENV_CREATED) requirements/tox.txt
 	$(TOX_VENV_DIR)/bin/pip install -r requirements/tox.txt
 	$(TOX_VENV_DIR)/bin/pip freeze > $@
+
+# Utility function to create required directories on the fly
+create_dir = @mkdir -p $(@D)

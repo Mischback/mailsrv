@@ -14,6 +14,9 @@ configs/*/*/*
 # data (configuration data) and may be used *as is*.
 !configs/dovecot/quota-warning.sh
 
+# Ignore make's stamp dir
+.make-stamps/
+
 # Ignore Python virtual environments
 .test-venv/
 .tox-venv/
