@@ -34,4 +34,5 @@ server setup.
 - Get configuration files for ``Dovecot``:
   - ``/etc/dovecot/conf.d/10-auth.conf``
   - ``/etc/dovecot/conf.d/auth-passwdfile.conf.ext``
+  - ``/etc/dovecot/vmail_users``
   - ``/etc/dovecot/conf.d/10-mail.conf``
