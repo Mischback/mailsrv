@@ -39,6 +39,8 @@ server setup.
   - ``/etc/dovecot/vmail_users``
   - ``/etc/dovecot/conf.d/10-mail.conf``
   - ``/etc/dovecot/conf.d/10-master.conf``
+  - ``/etc/dovecot/conf.d/90-quota.conf``
+  - ``/etc/dovecot/quota-warning.sh``
 - Create directory for Dovecot's sockets
   - ``# mkdir -p /var/spool/postfix/socket/dovecot``
   - ``# chown -R postfix:root /var/spool/postfix/socket``
