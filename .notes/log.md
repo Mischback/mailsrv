@@ -15,7 +15,8 @@ server setup.
 
 ## Log
 
-- ``# DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends postfix/stable``
+- Install ``Postfix``
+  - ``# DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends postfix/stable``
 - Get configuration files for ``Postfix``:
   - ``/etc/postfix/master.cf``
   - ``/etc/postfix/main.cf``
@@ -30,10 +31,17 @@ server setup.
   - ``# useradd -g vmail -u 5000 -d /var/vmail vmail``
   - ``# chsh -s /usr/sbin/nologin vmail``
   - ``# chown -R vmail:vmail /var/vmail``
-- ``# DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends dovecot-core/stable dovecot-lmtpd/stable dovecot-pop3d/stable dovecot-imapd/stable``
+- Install ``Dovecot``
+  - ``# DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends dovecot-core/stable dovecot-lmtpd/stable dovecot-pop3d/stable dovecot-imapd/stable``
 - Get configuration files for ``Dovecot``:
   - ``/etc/dovecot/conf.d/10-auth.conf``
   - ``/etc/dovecot/conf.d/auth-passwdfile.conf.ext``
   - ``/etc/dovecot/vmail_users``
   - ``/etc/dovecot/conf.d/10-mail.conf``
   - ``/etc/dovecot/conf.d/10-master.conf``
+- Create directory for Dovecot's sockets
+  - ``# mkdir -p /var/spool/postfix/socket/dovecot``
+  - ``# chown -R postfix:root /var/spool/postfix/socket``
+  - ``# chmod -R u=rwx,g=,o= /var/spool/postfix/socket``
+- Restart the whole setup
+  - ``# systemctl restart postfix && systemctl restart dovecot``
