@@ -25,7 +25,7 @@ passdb {
 # Ref: https://doc.dovecot.org/configuration_manual/authentication/user_databases_userdb/
 userdb {
   driver = passwd-file
-  args = username_format=%u /etc/mailsrv/dovecot/vmail_users
+  args = username_format=%u /etc/dovecot/vmail_users
 
   # Default fields that can be overridden by passwd-file
   #default_fields = quota_rule=*:storage=1G
