@@ -1,3 +1,12 @@
+# Make sure to actually ignore all configuration files! They may contain
+# user-specific, probably sensitive, configuration data, that should not be
+# exposed!
+configs/*
+# ... but do include this repository's samples!
+!configs/*/
+configs/*/*
+!configs/*/**.sample
+
 # Ignore Python virtual environments
 .test-venv/
 .tox-venv/
