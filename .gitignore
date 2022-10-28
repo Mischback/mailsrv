@@ -6,6 +6,9 @@ configs/*
 !configs/*/
 configs/*/*
 !configs/*/**.sample
+!configs/*/*/
+configs/*/*/*
+!configs/*/*/**.sample
 
 # Ignore Python virtual environments
 .test-venv/
