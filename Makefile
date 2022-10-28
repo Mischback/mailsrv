@@ -25,9 +25,9 @@ MAKEFLAGS += --no-builtin-rules
 
 
 mypy_files ?= ""
-local/mypy :
+util/local/mypy :
 	$(TOX_CMD) -e typechecking -- mypy $(mypy_files)
-.PHONY : local/mypy
+.PHONY : util/local/mypy
 
 util/black :
 	$(MAKE) util/pre-commit pre-commit_id="black" pre-commit_files="--all-files"
