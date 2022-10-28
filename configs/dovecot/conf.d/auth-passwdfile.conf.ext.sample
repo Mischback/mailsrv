@@ -1,0 +1,47 @@
+# This is a **sample** of Dovecots's ``auth-passwdfile.conf.ext`` config file.
+#
+# This makes Dovecot use a *passwd-like* file as its user database, placed in
+# ``/etc/dovecot/vmail_users``. This also applies the system's user ``vmail``
+# as owner of all virtual mails.
+#
+# This file might work out of the box, but needs adjustment if the user
+# database file is placed in another location.
+#
+# Obviously, this file will be obsolete when
+# https://github.com/Mischback/mailsrv/issues/16 is processed.
+
+# Authentication for passwd-file users. Included from 10-auth.conf.
+#
+# passwd-like file with specified location.
+# <doc/wiki/AuthDatabase.PasswdFile.txt>
+
+passdb {
+  driver = passwd-file
+  args = scheme=CRYPT username_format=%u /etc/dovecot/vmail_users
+}
+
+# The user database is used to lookup user-specific settings.
+#
+# Ref: https://doc.dovecot.org/configuration_manual/authentication/user_databases_userdb/
+userdb {
+  driver = passwd-file
+  args = username_format=%u /etc/mailsrv/dovecot/vmail_users
+
+  # Default fields that can be overridden by passwd-file
+  #default_fields = quota_rule=*:storage=1G
+
+  # All mails will be delivered to virtual mailboxes, located at /var/vmail
+  # and owned by vmail:vmail user/group
+  #
+  # These fields may be omitted in the actual passwd-file and are provided
+  # here.
+  default_fields = uid=vmail gid=vmail home=/var/vmail/%u
+
+  # This is the single source of truth for virtual users, so NEVER skip this!
+  skip = never
+
+  # This is the single source of truth for virtual users, lookups are final!
+  result_success = return-ok
+  result_failure = return-fail
+  result_internalfail = return-fail
+}

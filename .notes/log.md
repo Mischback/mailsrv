@@ -33,4 +33,5 @@ server setup.
 - ``# DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends dovecot-core/stable dovecot-lmtpd/stable dovecot-pop3d/stable dovecot-imapd/stable``
 - Get configuration files for ``Dovecot``:
   - ``/etc/dovecot/conf.d/10-auth.conf``
+  - ``/etc/dovecot/conf.d/auth-passwdfile.conf.ext``
   - ``/etc/dovecot/conf.d/10-mail.conf``
