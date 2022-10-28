@@ -1,0 +1,27 @@
+# This is a **sample** of Postfix's ``sender_login_map`` file.
+#
+# It is not meant to be used directly, but will need automatic or manual
+# adjustments to make it actually work.
+#
+# Provide the sender to login map for the mail setup.
+# These will be applied in Postfix's ``smtpd_sender_login_maps`` setting.
+#
+# FIXME: With the current setup it is required to have entries for every
+#        mailbox in this file.
+#
+#
+# FORMAT: [key][BLANK][list of logins]
+#
+# Examples:
+#
+# This allows the owner of *mailbox01@mailsrv.test* to use *alias@mailsrv.test*
+# as its *MAIL FROM* address.
+#
+#   alias@mailsrv.test  mailbox01@mailsrv.test
+#
+#
+# This allows the owners of *mailbox01@mailsrv.test* and
+# *mailbox02@mailsrv.test* to use *alias@mailsrv.test* as its *MAIL FROM*
+# address.
+#
+#   alias@mailsrv.test  mailbox01@mailsrv.test mailbox02@mailsrv.test
