@@ -36,3 +36,4 @@ server setup.
   - ``/etc/dovecot/conf.d/auth-passwdfile.conf.ext``
   - ``/etc/dovecot/vmail_users``
   - ``/etc/dovecot/conf.d/10-mail.conf``
+  - ``/etc/dovecot/conf.d/10-master.conf``
