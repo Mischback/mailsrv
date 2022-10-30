@@ -23,6 +23,7 @@ CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf $(POSTFIX_CONF_DIR)/master.cf
 # The name of the actual setup scripts
 SCRIPT_OS_PACKAGES := $(SCRIPT_DIR)/install-packages.sh
 SCRIPT_VMAIL_USER := $(SCRIPT_DIR)/create-vmail-user.sh
+SCRIPT_CONFIG_FROM_TEMPLATE := $(SCRIPT_DIR)/apply-env-to-template.sh
 
 # make's internal stamps
 # These are artificial files to track the status of commands / operations /
@@ -66,8 +67,7 @@ $(POSTFIX_CONF_DIR)/%.cf : $(CONFIG_DIR)/postfix/%.cf
 	echo $@
 
 $(CONFIG_DIR)/postfix/%.cf : $(CONFIG_DIR)/postfix/%.cf.sample
-	echo $@
-	echo $<
+	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $<
 
 # Installation of the required packages (from the repositories)
 $(STAMP_OS_PACKAGES) : $(SCRIPT_OS_PACKAGES)
