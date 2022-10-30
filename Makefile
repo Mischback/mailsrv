@@ -17,6 +17,9 @@ SCRIPT_DIR := $(MAKE_FILE_DIR)util/scripts
 # This directory contains all the configs
 CONFIG_DIR := $(MAKE_FILE_DIR)configs
 
+# This is a list of all required config files with their final destination.
+CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf $(POSTFIX_CONF_DIR)/master.cf
+
 # The name of the actual setup scripts
 SCRIPT_OS_PACKAGES := $(SCRIPT_DIR)/install-packages.sh
 SCRIPT_VMAIL_USER := $(SCRIPT_DIR)/create-vmail-user.sh
@@ -56,7 +59,7 @@ MAKEFLAGS += --no-builtin-rules
 # Actually perform the complete setup of the mailsrv. This command is to be
 # used to trigger everything else.
 # TODO: Will need adjustment while building up the sequence of recipes!
-install : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(POSTFIX_CONF_DIR)/main.cf
+install : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(CONFIG_FILES)
 .PHONY : install
 
 $(POSTFIX_CONF_DIR)/%.cf : $(CONFIG_DIR)/postfix/%.cf
