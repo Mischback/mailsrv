@@ -4,12 +4,14 @@
 
 # The name of the actual setup script
 SCRIPT_OS_PACKAGES := util/scripts/install-packages.sh
+SCRIPT_VMAIL_USER := util/scripts/create-vmail-user.sh
 
 # make's internal stamps
 # These are artificial files to track the status of commands / operations /
 # recipes, that do not directly result in output files.
 MAKE_STAMP_DIR := .make-stamps
 STAMP_OS_PACKAGES := $(MAKE_STAMP_DIR)/os-packages-installed
+STAMP_VMAIL_USER := $(MAKE_STAMP_DIR)/vmail-user-created
 
 # Python virtual environments
 # FIXME: These are currently unused... Do we need them?!
@@ -39,13 +41,19 @@ MAKEFLAGS += --no-builtin-rules
 # Actually perform the complete setup of the mailsrv. This command is to be
 # used to trigger everything else.
 # TODO: Will need adjustment while building up the sequence of recipes!
-install : $(STAMP_OS_PACKAGES)
+install : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER)
 .PHONY : install
 
 # Installation of the required packages (from the repositories)
 $(STAMP_OS_PACKAGES) : $(SCRIPT_OS_PACKAGES)
 	$(create_dir)
 	./$(SCRIPT_OS_PACKAGES)
+	touch $@
+
+# Create the required system user and group and create the mailbox directory
+$(STAMP_VMAIL_USER) : $(SCRIPT_VMAIL_USER)
+	$(create_dir)
+	./$(SCRIPT_VMAIL_USER)
 	touch $@
 
 
