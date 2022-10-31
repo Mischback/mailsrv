@@ -21,8 +21,9 @@
 set -euxo pipefail
 
 
-out=$1
-in=$2
+OUTPUT_FILE=$1
+INPUT_FILE=$2
+ENV_FILE=$3
 
-echo "$out"
-echo "$in"
+env -vi $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
+  envsubst '$MAILSRV_TEST' < ${INPUT_FILE} > ${OUTPUT_FILE}

@@ -17,8 +17,12 @@ SCRIPT_DIR := $(MAKE_FILE_DIR)util/scripts
 # This directory contains all the configs
 CONFIG_DIR := $(MAKE_FILE_DIR)configs
 
+SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
+
 # This is a list of all required config files with their final destination.
-CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf $(POSTFIX_CONF_DIR)/master.cf
+# FIXME: Provide the list of required config files!
+# CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf $(POSTFIX_CONF_DIR)/master.cf
+CONFIG_FILES := $(CONFIG_DIR)/postfix/test.cf
 
 # The name of the actual setup scripts
 SCRIPT_OS_PACKAGES := $(SCRIPT_DIR)/install-packages.sh
@@ -48,7 +52,8 @@ PRE_COMMIT_READY := .git/hooks/pre-commit
 
 
 # ``make``-specific settings
-.SILENT :
+# FIXME: Make it silent again!
+#.SILENT :
 .DELETE_ON_ERROR :
 MAKEFLAGS += --no-print-directory
 MAKEFLAGS += --warn-undefined-variables
@@ -66,8 +71,8 @@ install : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(CONFIG_FILES)
 $(POSTFIX_CONF_DIR)/%.cf : $(CONFIG_DIR)/postfix/%.cf
 	echo $@
 
-$(CONFIG_DIR)/postfix/%.cf : $(CONFIG_DIR)/postfix/%.cf.sample
-	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $<
+$(CONFIG_DIR)/postfix/%.cf : $(CONFIG_DIR)/postfix/%.cf.sample $(SETTINGS_ENV_FILE)
+	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(SETTINGS_ENV_FILE)
 
 # Installation of the required packages (from the repositories)
 $(STAMP_OS_PACKAGES) : $(SCRIPT_OS_PACKAGES)

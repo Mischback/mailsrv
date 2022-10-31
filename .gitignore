@@ -3,6 +3,7 @@
 # exposed!
 configs/*
 # ... but do include this repository's samples!
+!configs/**.sample
 !configs/*/
 configs/*/*
 !configs/*/**.sample
