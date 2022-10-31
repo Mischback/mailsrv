@@ -4,10 +4,14 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileType: SOURCE
 
-# FIXME: ADD DOCUMENTATION!
+# Create actual configuration files off of the provided templates/samples.
+#
+# This applies the settings as provided in an environment file to the
+# placeholders in the provided samples using ``envsubst``.
 #
 # References:
-#   - https://stackoverflow.com/a/52111696
+#   - hint for ``envsubst``: https://stackoverflow.com/a/14157575
+#   - use ``env`` in combination with ``xargs``: https://stackoverflow.com/a/20909045
 
 
 # Be really strict and defensive about the script!
@@ -20,10 +24,29 @@
 # See https://gist.github.com/mohanpedala/1e2ff5661761d3abd0385e8223e16425
 set -euxo pipefail
 
-
+# Fetch parameters.
 OUTPUT_FILE=$1
 INPUT_FILE=$2
 ENV_FILE=$3
 
+# This is where the magic happens!
+#
+# This might look like arcane sorcery, but in fact it is just using ``envsubst``
+# in combination with ``env``:
+#
+# ``env`` is used to prepare a clean (``-i``) environment for calling
+# ``envsubst``. The provided environment variables are read from an input file
+# ``ENV_FILE``, using ``grep`` to ignore comments in that file. ``xargs`` is
+# only used to provide the required structure.
+#
+# ``envsubst`` then reads ``INPUT_FILE``, performs the substitution and writes
+# the result to ``OUTPUT_FILE``. The first parameter given to ``envsubst``
+# determines, which variables will get substituted. This list limits the
+# operation to the set of variables that are required in this repository,
+# leaving other occurences of the pattern``$something`` untouched.
 env -vi $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
-  envsubst '$MAILSRV_TEST' < ${INPUT_FILE} > ${OUTPUT_FILE}
+  envsubst '
+    $MAILSRV_TEST
+    ' \
+    < ${INPUT_FILE} \
+    > ${OUTPUT_FILE}
