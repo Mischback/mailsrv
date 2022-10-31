@@ -27,7 +27,9 @@
 #
 # Ref: https://www.postfix.org/postconf.5.html#smtpd_banner
 #
-# Starting with ``$myhostname`` is actually required by SMTP.
+# Starting with ``$myhostname`` is actually required by SMTP (see
+# https://datatracker.ietf.org/doc/html/rfc5321#section-4.3.1). ``$myhostname``
+# is specified explicitly in this config file below.
 smtpd_banner = $myhostname ESMTP $mail_name
 
 # Do not send local notifications.
@@ -135,12 +137,14 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 # Ref: https://www.postfix.org/postconf.5.html#smtpd_relay_restrictions
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
 
-# The servers FQDN
+# The server's FQDN
 #
 # Ref: https://www.postfix.org/postconf.5.html#myhostname
 #
-# FIXME: Needs customization!
-myhostname = mail.mailsrv.test
+# See ``smtp_banner`` for an actual application.
+#
+# CONFIGURATION_REQUIRED!
+myhostname = ${MAILSRV_HOSTNAME}
 
 # Aliases for "local" accounts.
 #

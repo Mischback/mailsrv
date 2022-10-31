@@ -46,7 +46,7 @@ ENV_FILE=$3
 # leaving other occurences of the pattern``$something`` untouched.
 env -vi $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
   envsubst '
-    $MAILSRV_TEST
+    $MAILSRV_HOSTNAME
     ' \
     < ${INPUT_FILE} \
     > ${OUTPUT_FILE}
