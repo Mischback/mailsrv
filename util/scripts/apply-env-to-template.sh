@@ -47,6 +47,9 @@ ENV_FILE=$3
 env -vi $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
   envsubst '
     $MAILSRV_HOSTNAME
+    $MAILSRV_POSTFIX_INTERFACES
+    $MAILSRV_BIND_IPV4
+    $MAILSRV_BIND_IPV6
     $MAILSRV_IP_VERSION
     $MAILSRV_IP_PREFERENCE
     ' \
