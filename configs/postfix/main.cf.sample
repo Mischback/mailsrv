@@ -14,6 +14,7 @@
 #   - myhostname
 #   - inet_interfaces
 #   - inet_protocols
+#   - smtp_address_preferece
 #
 # Issues:
 #   - https://github.com/Mischback/mailsrv/issues/13#issuecomment-1293650333
@@ -215,8 +216,23 @@ inet_interfaces = all
 #
 # Ref: https://www.postfix.org/postconf.5.html#inet_protocols
 #
-# FIXME: Needs customization!
-inet_protocols = all
+# Accepted values: ``ipv4``, ``ipv6``, ``all``
+#
+# Default value: ``all``
+#
+# CONFIGURATION_REQUIRED!
+inet_protocols = ${MAILSRV_IP_VERSION}
+
+# Specify a preference for the IP version used to connect to destination.
+#
+# Ref: https://www.postfix.org/postconf.5.html#smtp_address_preference
+#
+# Accepted values: ``ipv4``, ``ipv6``, ``any``
+#
+# Default value: ``any``
+#
+# CONFIGURATION_REQUIRED!
+smtp_address_preference = ${MAILSRV_IP_PREFERENCE}
 
 ###
 # THE FOLLOWING SETTINGS GET ADJUSTMENTS WHILE FOLLOWING

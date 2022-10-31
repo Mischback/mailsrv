@@ -74,6 +74,14 @@ $(POSTFIX_CONF_DIR)/%.cf : $(CONFIG_DIR)/postfix/%.cf
 $(CONFIG_DIR)/postfix/%.cf : $(CONFIG_DIR)/postfix/%.cf.sample $(SETTINGS_ENV_FILE)
 	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(SETTINGS_ENV_FILE)
 
+# Generate the actual setting file from the sample
+# TODO: Is this recipe really relevant? It is added during development of the
+#       sample settings file.
+# FIXME: If this is kept, make sure to not overwrite existing sample files, even
+#        if the sample is newer! Or at least create a backup!
+$(SETTINGS_ENV_FILE) : $(SETTINGS_ENV_FILE).sample
+	cp $< $@
+
 # Installation of the required packages (from the repositories)
 $(STAMP_OS_PACKAGES) : $(SCRIPT_OS_PACKAGES)
 	$(create_dir)

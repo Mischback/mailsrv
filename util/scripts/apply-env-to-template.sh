@@ -47,6 +47,8 @@ ENV_FILE=$3
 env -vi $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
   envsubst '
     $MAILSRV_HOSTNAME
+    $MAILSRV_IP_VERSION
+    $MAILSRV_IP_PREFERENCE
     ' \
     < ${INPUT_FILE} \
     > ${OUTPUT_FILE}
