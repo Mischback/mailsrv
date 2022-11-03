@@ -24,10 +24,42 @@
 # See https://gist.github.com/mohanpedala/1e2ff5661761d3abd0385e8223e16425
 set -euxo pipefail
 
+# Create a backup of an existing file.
+#
+# @param: The path/name of the symlink, relative to the user's home directory
+# @param: The target of the link, relative to this script's directory (which
+#         should be the repository root)
+#
+# The function will remove existing symlinks and create backups of existing
+# files and directories before creating the actual symlink.
+function backup_existing_target {
+  # Get the current date, if a backup has to be created.
+  local date_str=$(date +%Y-%m-%d-%H%M)
+
+  local dst="$1"
+
+  # echo " [DEBUG] destination: $dst"  # just for debugging
+  # echo " [DEBUG] source: $src"  # just for debugging
+
+  if [ -h $dst ]; then
+    # echo " [INFO] Removing existing symlink!"  # just for debugging
+    rm $dst
+  elif [ -f $dst ]; then
+    # echo " [INFO] Creating backup of existing file!"  # just for debugging
+    mv $dst{,.$date_str}
+  elif [ -d $dst ]; then
+    # echo " [INFO] Creating backup of existing directory!"  # just for debugging
+    mv $dst{,.$date_str}
+  fi
+}
+
 # Fetch parameters.
 OUTPUT_FILE=$1
 INPUT_FILE=$2
 ENV_FILE=$3
+
+# Create a backup if the output file already exists.
+backup_existing_target ${OUTPUT_FILE}
 
 # This is where the magic happens!
 #
