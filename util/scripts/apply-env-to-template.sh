@@ -53,6 +53,8 @@ env -vi $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
     $MAILSRV_IP_VERSION
     $MAILSRV_IP_PREFERENCE
     $MAILSRV_DNS_LOOKUP
+    $MAILSRV_TLS_CERT
+    $MAILSRV_TLS_KEY
     ' \
     < ${INPUT_FILE} \
     > ${OUTPUT_FILE}

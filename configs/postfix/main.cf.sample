@@ -99,15 +99,15 @@ smtpd_tls_security_level = may
 #
 # Ref: https://www.postfix.org/postconf.5.html#smtpd_tls_cert_file
 #
-# FIXME: Needs customization!
-smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+# CONFIGURATION_REQUIRED!
+smtpd_tls_cert_file = ${MAILSRV_TLS_CERT}
 
 # The (private) key to use for TLS
 #
 # Ref: https://www.postfix.org/postconf.5.html#smtpd_tls_key_file
 #
-# FIXME: Needs customization!
-smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+# CONFIGURATION_REQUIRED!
+smtpd_tls_key_file = ${MAILSRV_TLS_KEY}
 
 # Require TLS for authentication (AUTH)
 #
