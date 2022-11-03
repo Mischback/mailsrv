@@ -52,6 +52,7 @@ env -vi $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
     $MAILSRV_BIND_IPV6
     $MAILSRV_IP_VERSION
     $MAILSRV_IP_PREFERENCE
+    $MAILSRV_DNS_LOOKUP
     ' \
     < ${INPUT_FILE} \
     > ${OUTPUT_FILE}

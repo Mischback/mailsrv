@@ -280,6 +280,19 @@ inet_protocols = ${MAILSRV_IP_VERSION}
 # CONFIGURATION_REQUIRED!
 smtp_address_preference = ${MAILSRV_IP_PREFERENCE}
 
+# Which mechanism is used for name resolution.
+#
+# Generally Postfix uses the system's DNS resolver setting, which is desirable.
+# However, it may be necessary to make usage of the system's ``/etc/hosts`` for
+# temporary overrides.
+#
+# Ref: https://www.postfix.org/postconf.5.html#smtp_host_lookup
+#
+# Accepted values: ``dns``, ``native``, ``dns,native``
+#
+# CONFIGURATION_REQUIRED!
+smtp_host_lookup = ${MAILSRV_DNS_LOOKUP}
+
 ###
 # THE FOLLOWING SETTINGS GET ADJUSTMENTS WHILE FOLLOWING
 # https://workaround.org/ispmail/bullseye/
