@@ -69,8 +69,6 @@ append_dot_mydomain = no
 # Debian (bullseye) default: 2
 # This value (99) ensures, that no backward-compatible settings are applied.
 # Instead, make the settings that are actually required!
-#
-# TODO: This may need adjustment when newer versions of Postfix are used!
 compatibility_level = 99
 
 # TLS parameters

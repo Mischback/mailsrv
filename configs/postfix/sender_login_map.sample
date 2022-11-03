@@ -6,8 +6,9 @@
 # Provide the sender to login map for the mail setup.
 # These will be applied in Postfix's ``smtpd_sender_login_maps`` setting.
 #
-# FIXME: With the current setup it is required to have entries for every
-#        mailbox in this file.
+# TODO: With the current setup it is required to have entries for every
+#       mailbox in this file. This must be considered while working on
+#       https://github.com/Mischback/mailsrv/issues/16
 #
 #
 # FORMAT: [key][BLANK][list of logins]
