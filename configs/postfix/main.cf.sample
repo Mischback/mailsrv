@@ -7,14 +7,17 @@
 # https://github.com/Mischback/mailsrv should be non-invasive, meaning the
 # original configuration is still present (and commented) beside the adjusted
 # active configuration.
-#
-# List of customizable settings:
-#   - smtpd_tls_cert_file
-#   - smtpd_tls_key_file
-#   - myhostname
+# # List of customizable settings:
 #   - inet_interfaces
 #   - inet_protocols
+#   - myhostname
 #   - smtp_address_preferece
+#   - smtp_bind_address
+#   - smtp_bind_address6
+#   - smtp_bind_address_enforce
+#   - smtp_host_lookup
+#   - smtpd_tls_cert_file
+#   - smtpd_tls_key_file
 #
 # Issues:
 #   - https://github.com/Mischback/mailsrv/issues/19
