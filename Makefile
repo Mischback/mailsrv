@@ -22,8 +22,19 @@ SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
 # This is a list of all required config files with their final destination.
 # FIXME: Provide the list of required config files!
 # TODO: Will need adjustment while building up the sequence of recipes!
-CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf $(POSTFIX_CONF_DIR)/master.cf
-# CONFIG_FILES := $(CONFIG_DIR)/postfix/main.cf $(CONFIG_DIR)/postfix/master.cf
+CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf \
+                $(POSTFIX_CONF_DIR)/master.cf \
+                $(POSTFIX_CONF_DIR)/lookup_local_aliases \
+                $(POSTFIX_CONF_DIR)/lookup_local_aliases.db \
+                $(POSTFIX_CONF_DIR)/lookup_sender2login \
+                $(POSTFIX_CONF_DIR)/lookup_sender2login.db \
+                $(POSTFIX_CONF_DIR)/lookup_valiases \
+                $(POSTFIX_CONF_DIR)/lookup_valiases.db \
+                $(POSTFIX_CONF_DIR)/lookup_vdomains \
+                $(POSTFIX_CONF_DIR)/lookup_vdomains.db \
+                $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
+                $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
+                $(POSTFIX_CONF_DIR)/lookup_vmailboxes.db
 
 # The name of the actual setup scripts
 SCRIPT_OS_PACKAGES := $(SCRIPT_DIR)/install-packages.sh
@@ -78,6 +89,23 @@ install : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(CONFIG_FILES)
 # ``/etc/postfix``) directly.
 $(POSTFIX_CONF_DIR)/%.cf : $(CONFIG_DIR)/postfix/%.cf.sample $(SETTINGS_ENV_FILE)
 	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(SETTINGS_ENV_FILE)
+
+# Create Postfix's lookup tables.
+#
+# This recipe creates ``lookup_sender2login``, ``lookup_valiases``,
+# ``lookup_vdomains`` and ``lookup_vmailboxes``.
+#
+# The configuration files are placed in Postfix's main directory (by default:
+# ``/etc/postfix``) directly.
+$(POSTFIX_CONF_DIR)/% : $(CONFIG_DIR)/postfix/%.sample
+	$(SCRIPT_SAVE_COPY) $@ $<
+
+# Compile the actual lookup databases.
+#
+# This uses Postfix's ``postmap`` utility to create / compile the actual lookup
+# databases.
+$(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/%
+	$(shell which postmap) $<
 
 # Generate the actual setting file from the sample
 # TODO: Is this recipe really relevant? It is added during development of the

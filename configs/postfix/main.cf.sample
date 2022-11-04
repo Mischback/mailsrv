@@ -144,8 +144,8 @@ myhostname = ${MAILSRV_HOSTNAME}
 #
 # Ref: https://www.postfix.org/postconf.5.html#alias_maps
 # Ref: https://www.postfix.org/postconf.5.html#alias_database
-alias_maps = hash:/etc/postfix/local_aliases
-alias_database = hash:/etc/postfix/local_aliases
+alias_maps = hash:/etc/postfix/lookup_local_aliases
+alias_database = hash:/etc/postfix/lookup_local_aliases
 
 # The list of domains that are delivered locally.
 #
@@ -300,7 +300,7 @@ smtp_host_lookup = ${MAILSRV_DNS_LOOKUP}
 # Remember to run ``postmap`` on that file after any edit!
 #
 # TODO: See https://github.com/Mischback/mailsrv/issues/16
-virtual_mailbox_domains = hash:/etc/postfix/virtual_domains
+virtual_mailbox_domains = hash:/etc/postfix/lookup_vdomains
 
 # These are the actual virtual mailboxes.
 #
@@ -313,7 +313,7 @@ virtual_mailbox_domains = hash:/etc/postfix/virtual_domains
 # Remember to run ``postmap`` on that file after any edit!
 #
 # TODO: See https://github.com/Mischback/mailsrv/issues/16
-virtual_mailbox_maps = hash:/etc/postfix/virtual_mailboxes
+virtual_mailbox_maps = hash:/etc/postfix/lookup_vmailboxes
 
 # These are virtual aliases.
 #
@@ -328,7 +328,7 @@ virtual_mailbox_maps = hash:/etc/postfix/virtual_mailboxes
 # Remember to run ``postmap`` on that file after any edit!
 #
 # TODO: See https://github.com/Mischback/mailsrv/issues/16
-virtual_alias_maps = hash:/etc/postfix/virtual_aliases
+virtual_alias_maps = hash:/etc/postfix/lookup_valiases
 
 # Use Dovecot's LMTP implementation for actual delivery to mailboxes.
 #
@@ -370,5 +370,5 @@ smtpd_sasl_auth_enable = yes
 # Ref: https://www.postfix.org/postconf.5.html#smtpd_sender_login_maps
 #
 # TODO: See https://github.com/Mischback/mailsrv/issues/16
-smtpd_sender_login_maps = hash:/etc/postfix/sender_login_map
+smtpd_sender_login_maps = hash:/etc/postfix/lookup_sender2login
 
