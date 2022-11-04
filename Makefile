@@ -21,6 +21,7 @@ SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
 
 # This is a list of all required config files with their final destination.
 # FIXME: Provide the list of required config files!
+# TODO: Will need adjustment while building up the sequence of recipes!
 CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf $(POSTFIX_CONF_DIR)/master.cf
 # CONFIG_FILES := $(CONFIG_DIR)/postfix/main.cf $(CONFIG_DIR)/postfix/master.cf
 
@@ -29,6 +30,7 @@ SCRIPT_OS_PACKAGES := $(SCRIPT_DIR)/install-packages.sh
 SCRIPT_VMAIL_USER := $(SCRIPT_DIR)/create-vmail-user.sh
 SCRIPT_CONFIG_FROM_TEMPLATE := $(SCRIPT_DIR)/apply-env-to-template.sh
 SCRIPT_LINK_CONFIG := $(SCRIPT_DIR)/create-symlink.sh
+SCRIPT_SAVE_COPY := $(SCRIPT_DIR)/save-copy.sh
 
 # make's internal stamps
 # These are artificial files to track the status of commands / operations /
@@ -65,7 +67,6 @@ MAKEFLAGS += --no-builtin-rules
 
 # Actually perform the complete setup of the mailsrv. This command is to be
 # used to trigger everything else.
-# TODO: Will need adjustment while building up the sequence of recipes!
 install : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(CONFIG_FILES)
 .PHONY : install
 
@@ -81,10 +82,8 @@ $(POSTFIX_CONF_DIR)/%.cf : $(CONFIG_DIR)/postfix/%.cf.sample $(SETTINGS_ENV_FILE
 # Generate the actual setting file from the sample
 # TODO: Is this recipe really relevant? It is added during development of the
 #       sample settings file.
-# FIXME: If this is kept, make sure to not overwrite existing sample files, even
-#        if the sample is newer! Or at least create a backup!
 $(SETTINGS_ENV_FILE) : $(SETTINGS_ENV_FILE).sample
-	cp $< $@
+	$(SCRIPT_SAVE_COPY) $@ $<
 
 # Installation of the required packages (from the repositories)
 $(STAMP_OS_PACKAGES) : $(SCRIPT_OS_PACKAGES)
