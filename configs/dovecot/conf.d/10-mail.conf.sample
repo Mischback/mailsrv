@@ -6,36 +6,14 @@
 # List of customizable settings:
 #   - mail_server_admin
 
-# Location for users' mailboxes. The default is empty, which means that Dovecot
-# tries to find the mailboxes automatically. This won't work if the user
-# doesn't yet have any mail, so you should explicitly tell Dovecot the full
-# location.
-#
-# If you're using mbox, giving a path to the INBOX file (eg. /var/mail/%u)
-# isn't enough. You'll also need to tell Dovecot where the other mailboxes are
-# kept. This is called the "root mail directory", and it must be the first
-# path given in the mail_location setting.
-#
-# There are a few special variables you can use, eg.:
-#
-#   %u - username
-#   %n - user part in user@domain, same as %u if there's no domain
-#   %d - domain part in user@domain, empty if there's no domain
-#   %h - home directory
-#
-# See doc/wiki/Variables.txt for full list. Some examples:
-#
-#   mail_location = maildir:~/Maildir
-#   mail_location = mbox:~/mail:INBOX=/var/mail/%u
-#   mail_location = mbox:/var/mail/%d/%1n/%n:INDEX=/var/indexes/%d/%1n/%n
-#
-# <doc/wiki/MailLocation.txt>
+# Set the type and location for the users' mailboxes.
 #
 # Default (bullseye): mail_location = mbox:~/mail:INBOX=/var/mail/%u
 #
-# The setup relies on virtual users and automatically sets the corresponding
-# UID/GID and $HOME in ``auth-passwdfile.conf.ext``. Hint: all mails will be
-# *owned* by the user ``vmail``.
+# The setup uses the Maildir mailbox type (see
+# https://doc.dovecot.org/admin_manual/mailbox_formats/maildir/#maildir-mbox-format
+# for further reference) and sets the corresponding values for UID/GID and
+# $HOME in ``auth-passwdfile.conf.ext``.
 #
 # Ref: https://doc.dovecot.org/settings/core/#core_setting-mail_location
 mail_location = maildir:~/Maildir
@@ -100,7 +78,7 @@ namespace inbox {
 # Original default value of Dovecot: [blank]
 #
 # Ref: https://doc.dovecot.org/settings/core/#core_setting-mail_privileged_group
-mail_privileged_group = mail
+# mail_privileged_group = mail
 
 # Indicates a method for contacting the server administrator. According to
 # RFC 5464, this value MUST be a URI (e.g., a mailto: or tel: URL), but that
@@ -110,20 +88,17 @@ mail_privileged_group = mail
 #
 # Ref: https://doc.dovecot.org/settings/core/#core_setting-mail_server_admin
 #
-# FIXME: Needs customization!
-mail_server_admin = mailto:postmaster@mailsrv.test
+# CONFIGURATION_REQUIRED!
+mail_server_admin = mailto:${MAILSRV_SERVER_ADMIN}
 
 # Space separated list of plugins to load for all services. Plugins specific to
 # IMAP, LDA, etc. are added to this list in their own .conf files.
-#
-# May be specified multiple times in different configuration files by using
-# the syntax ``mail_plugins = $mail_plugins ADDED_PLUGIN``
 #
 # As per https://workaround.org/ispmail/bullseye/setting-up-dovecot-2/ "quota"
 # is added here.
 #
 # TODO: check setting after configuration is completed!
-mail_plugins = quota
+mail_plugins = $mail_plugins quota
 
 protocol !indexer-worker {
   # If folder vsize calculation requires opening more than this many mails from

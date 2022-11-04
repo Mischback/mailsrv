@@ -69,6 +69,7 @@ env -i $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
     $MAILSRV_DNS_LOOKUP
     $MAILSRV_TLS_CERT
     $MAILSRV_TLS_KEY
+    $MAILSRV_SERVER_ADMIN
     ' \
     < ${INPUT_FILE} \
     > ${OUTPUT_FILE}

@@ -39,6 +39,7 @@ CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf \
                 $(POSTFIX_CONF_DIR)/lookup_vmailboxes.db \
                 $(DOVECOT_BASE_DIR)/vmail_users \
                 $(DOVECOT_CONF_DIR)/10-auth.conf \
+                $(DOVECOT_CONF_DIR)/10-mail.conf \
                 $(DOVECOT_CONF_DIR)/auth-passwdfile.conf.ext
 
 # The name of the actual setup scripts
