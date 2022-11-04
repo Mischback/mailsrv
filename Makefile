@@ -69,10 +69,13 @@ MAKEFLAGS += --no-builtin-rules
 install : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(CONFIG_FILES)
 .PHONY : install
 
-$(POSTFIX_CONF_DIR)/%.cf : $(CONFIG_DIR)/postfix/%.cf
-	$(SCRIPT_LINK_CONFIG) $@ $<
-
-$(CONFIG_DIR)/postfix/%.cf : $(CONFIG_DIR)/postfix/%.cf.sample $(SETTINGS_ENV_FILE)
+# Create Postfix's required configuration files from the provided samples.
+#
+# This recipe creates ``main.cf`` and ``master.cf``.
+#
+# The configuration files are placed in Postfix's main directory (by default:
+# ``/etc/postfix``) directly.
+$(POSTFIX_CONF_DIR)/%.cf : $(CONFIG_DIR)/postfix/%.cf.sample $(SETTINGS_ENV_FILE)
 	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(SETTINGS_ENV_FILE)
 
 # Generate the actual setting file from the sample
