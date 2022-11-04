@@ -6,6 +6,8 @@
 # Postfix's directory (Debian's default ``/etc/postfix``)
 # Postfix will assume its ``master.cf`` and ``main.cf`` in this directory.
 POSTFIX_CONF_DIR := /etc/postfix
+DOVECOT_BASE_DIR := /etc/dovecot
+DOVECOT_CONF_DIR := $(DOVECOT_BASE_DIR)/conf.d
 
 # Find the location of this Makefile, which should also be the repository root,
 # which is the root for all path's.
@@ -34,7 +36,10 @@ CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf \
                 $(POSTFIX_CONF_DIR)/lookup_vdomains.db \
                 $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
                 $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
-                $(POSTFIX_CONF_DIR)/lookup_vmailboxes.db
+                $(POSTFIX_CONF_DIR)/lookup_vmailboxes.db \
+                $(DOVECOT_BASE_DIR)/vmail_users \
+                $(DOVECOT_CONF_DIR)/10-auth.conf \
+                $(DOVECOT_CONF_DIR)/auth-passwdfile.conf.ext
 
 # The name of the actual setup scripts
 SCRIPT_OS_PACKAGES := $(SCRIPT_DIR)/install-packages.sh
@@ -81,22 +86,48 @@ MAKEFLAGS += --no-builtin-rules
 install : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(CONFIG_FILES)
 .PHONY : install
 
+# Create Dovecot's required configuration files from the provided samples.
+#
+# This recipe creates:
+#   - ``10-auth.conf``
+#   - ``auth-passwdfile.conf.ext``
+#
+# The configuration files are placed directly in Dovecot's configuration
+# directory (by default: ``/etc/dovecot/conf.d``).
+$(DOVECOT_CONF_DIR)/% : $(CONFIG_DIR)/dovecot/conf.d/%.sample $(SETTINGS_ENV_FILE)
+	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(SETTINGS_ENV_FILE)
+
+# Create Dovecot's additional configuration files from the provided samples.
+#
+# This recipe creates:
+#   - ``vmail_users``
+#
+# The configuration files are placed directly in Dovecot's base directory (by
+# default ``/etc/dovecot``).
+$(DOVECOT_BASE_DIR)/% : $(CONFIG_DIR)/dovecot/%.sample
+	$(SCRIPT_SAVE_COPY) $@ $<
+
 # Create Postfix's required configuration files from the provided samples.
 #
-# This recipe creates ``main.cf`` and ``master.cf``.
+# This recipe creates:
+#   - ``main.cf``
+#   - ``master.cf``
 #
-# The configuration files are placed in Postfix's main directory (by default:
-# ``/etc/postfix``) directly.
+# The configuration files are placed directly in Postfix's main directory (by
+# default: ``/etc/postfix``).
 $(POSTFIX_CONF_DIR)/%.cf : $(CONFIG_DIR)/postfix/%.cf.sample $(SETTINGS_ENV_FILE)
 	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(SETTINGS_ENV_FILE)
 
 # Create Postfix's lookup tables.
 #
-# This recipe creates ``lookup_sender2login``, ``lookup_valiases``,
-# ``lookup_vdomains`` and ``lookup_vmailboxes``.
+# This recipe creates:
+#   - ``lookup_sender2login``
+#   - ``lookup_valiases``
+#   - ``lookup_vdomains``
+#   - ``lookup_vmailboxes``
 #
-# The configuration files are placed in Postfix's main directory (by default:
-# ``/etc/postfix``) directly.
+# The configuration files are placed directly in Postfix's main directory (by
+# default: ``/etc/postfix``).
 $(POSTFIX_CONF_DIR)/% : $(CONFIG_DIR)/postfix/%.sample
 	$(SCRIPT_SAVE_COPY) $@ $<
 

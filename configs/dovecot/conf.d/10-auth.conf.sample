@@ -30,7 +30,7 @@ disable_plaintext_auth = yes
 #auth_username_chars = abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890.-_@
 
 # Maximum number of dovecot-auth worker processes. They're used to execute
-# blocking passdb and userdb queries (eg. MySQL and PAM). They're
+# blocking passdb and userdb queries (eg. SQL and PAM). They're
 # automatically created and destroyed as needed.
 #
 # Default value (bullseye): 30
@@ -64,21 +64,20 @@ auth_mechanisms = plain login
 # allow both system users (/etc/passwd) and virtual users to login without
 # duplicating the system users into virtual database.
 #
-# <doc/wiki/PasswordDatabase.txt>
+# https://doc.dovecot.org/configuration_manual/authentication/password_databases_passdb/
 #
 # User database specifies where mails are located and what user/group IDs
 # own them. For single-UID configuration use "static" userdb.
 #
-# <doc/wiki/UserDatabase.txt>
+# https://doc.dovecot.org/configuration_manual/authentication/user_databases_userdb/
 #
-# Disabled auth-system.conf.ext!
-# Enabled auth-passwdfile.conf.ext
+# The current setup uses a *passwd-like* **combined** user and password
+# database.
 #
 # TODO: https://github.com/Mischback/mailsrv/issues/16
 
 #!include auth-deny.conf.ext
 #!include auth-master.conf.ext
-
 #!include auth-system.conf.ext
 #!include auth-sql.conf.ext
 #!include auth-ldap.conf.ext
