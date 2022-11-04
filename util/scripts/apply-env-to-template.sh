@@ -22,7 +22,7 @@
 # -o pipefail : cause pipes to fail
 #
 # See https://gist.github.com/mohanpedala/1e2ff5661761d3abd0385e8223e16425
-set -euxo pipefail
+set -euo pipefail
 
 # Determine the script's directory, required for includes of auxiliary scripts.
 #
@@ -37,6 +37,8 @@ source "$DIR/backup-existing-target.sh"
 OUTPUT_FILE=$1
 INPUT_FILE=$2
 ENV_FILE=$3
+
+echo "[INFO] (Re-)generating ${OUTPUT_FILE}"
 
 # Create a backup if the output file already exists.
 backup_existing_target ${OUTPUT_FILE}
@@ -56,7 +58,7 @@ backup_existing_target ${OUTPUT_FILE}
 # determines, which variables will get substituted. This list limits the
 # operation to the set of variables that are required in this repository,
 # leaving other occurences of the pattern``$something`` untouched.
-env -vi $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
+env -i $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
   envsubst '
     $MAILSRV_HOSTNAME
     $MAILSRV_POSTFIX_INTERFACES

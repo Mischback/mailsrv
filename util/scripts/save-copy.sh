@@ -34,8 +34,7 @@ source "$DIR/backup-existing-target.sh"
 DST=$1
 SRC=$2
 
-echo ${SRC}
-echo ${DST}
+echo "[INFO] Copying ${SRC} to ${DST}!"
 
 # Create a backup if the output file already exists.
 backup_existing_target ${DST}

@@ -20,7 +20,7 @@
 # -o pipefail : cause pipes to fail
 #
 # See https://gist.github.com/mohanpedala/1e2ff5661761d3abd0385e8223e16425
-set -euxo pipefail
+set -euo pipefail
 
 # Determine the script's directory, required for includes of auxiliary scripts.
 #
@@ -34,6 +34,8 @@ source "$DIR/backup-existing-target.sh"
 # Fetch parameters.
 LINK_NAME=$1
 TARGET=$2
+
+echo "[INFO] Linking ${LINK_NAME} to ${TARGET}"
 
 # Create a backup if the output file already exists.
 backup_existing_target ${LINK_NAME}

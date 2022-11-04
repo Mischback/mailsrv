@@ -18,8 +18,9 @@
 # -o pipefail : cause pipes to fail
 #
 # See https://gist.github.com/mohanpedala/1e2ff5661761d3abd0385e8223e16425
-set -euxo pipefail
+set -euo pipefail
 
+echo "[INFO] Installing packages!"
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   postfix/stable \

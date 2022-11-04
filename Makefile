@@ -67,7 +67,7 @@ PRE_COMMIT_READY := .git/hooks/pre-commit
 
 # ``make``-specific settings
 # FIXME: Make it silent again!
-#.SILENT :
+.SILENT :
 .DELETE_ON_ERROR :
 MAKEFLAGS += --no-print-directory
 MAKEFLAGS += --warn-undefined-variables

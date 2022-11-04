@@ -22,13 +22,14 @@ function backup_existing_target {
   # echo " [DEBUG] source: $src"  # just for debugging
 
   if [ -h $dst ]; then
-    # echo " [INFO] Removing existing symlink!"  # just for debugging
+    echo "[INFO] Found existing symlink! Will remove it."
+    ls -lah $dst
     rm $dst
   elif [ -f $dst ]; then
-    # echo " [INFO] Creating backup of existing file!"  # just for debugging
+    echo "[INFO] Found existing file! Will create backup."
     mv $dst{,.$date_str}
   elif [ -d $dst ]; then
-    # echo " [INFO] Creating backup of existing directory!"  # just for debugging
+    echo "[INFO] Found existing directory! Will create backup."
     mv $dst{,.$date_str}
   fi
 }
