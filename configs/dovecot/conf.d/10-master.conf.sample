@@ -23,12 +23,6 @@ service pop3-login {
   }
 }
 
-service submission-login {
-  inet_listener submission {
-    #port = 587
-  }
-}
-
 service lmtp {
   # LMTP for Postfix
   #
@@ -36,7 +30,7 @@ service lmtp {
   #
   # The socket must be placed in Postfix's chroot environment.
   unix_listener /var/spool/postfix/socket/dovecot/lmtp {
-    # as per https://workaround.org/ispmail/bullseye/postfix-send-emails-to-dovecot/
+    # As per https://workaround.org/ispmail/bullseye/postfix-send-emails-to-dovecot/
     # user and group should be set to "postfix", while
     # https://doc.dovecot.org/configuration_manual/service_configuration/#unix-listeners-and-fifo-listeners
     # suggests, that (numerical) ids may be used.
@@ -54,17 +48,12 @@ service imap {
   #vsz_limit = $default_vsz_limit
 
   # Max. number of IMAP processes (connections)
-  #process_limit = 1024
+  process_limit = 0
 }
 
 service pop3 {
   # Max. number of POP3 processes (connections)
-  #process_limit = 1024
-}
-
-service submission {
-  # Max. number of SMTP Submission processes (connections)
-  #process_limit = 1024
+  process_limit = 0
 }
 
 service auth {
@@ -112,7 +101,7 @@ service auth-worker {
   # Auth worker process is run as root by default, so that it can access
   # /etc/shadow. If this isn't necessary, the user should be changed to
   # $default_internal_user.
-  #user = root
+  user = $default_internal_user
 }
 
 service dict {
