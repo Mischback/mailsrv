@@ -107,6 +107,13 @@ $(POSTFIX_CONF_DIR)/% : $(CONFIG_DIR)/postfix/%.sample
 $(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/%
 	$(shell which postmap) $<
 
+# Compile the local alias lookup database.
+#
+# The local alias database is special, as it is compiled with ``newaliases``
+# instead of ``postmap``.
+$(POSTFIX_CONF_DIR)/lookup_local_aliases.db : $(POSTFIX_CONF_DIR)/lookup_local_aliases $(POSTFIX_CONF_DIR)/main.cf
+	$(shell which newaliases)
+
 # Generate the actual setting file from the sample
 # TODO: Is this recipe really relevant? It is added during development of the
 #       sample settings file.
