@@ -53,6 +53,7 @@ SCRIPT_VMAIL_USER := $(SCRIPT_DIR)/create-vmail-user.sh
 SCRIPT_CONFIG_FROM_TEMPLATE := $(SCRIPT_DIR)/apply-env-to-template.sh
 SCRIPT_LINK_CONFIG := $(SCRIPT_DIR)/create-symlink.sh
 SCRIPT_SAVE_COPY := $(SCRIPT_DIR)/save-copy.sh
+SCRIPT_POSTFIX_CHROOT := $(SCRIPT_DIR)/prepare-postfix-chroot.sh
 
 # make's internal stamps
 # These are artificial files to track the status of commands / operations /
@@ -60,6 +61,7 @@ SCRIPT_SAVE_COPY := $(SCRIPT_DIR)/save-copy.sh
 MAKE_STAMP_DIR := $(MAKE_FILE_DIR).make-stamps
 STAMP_OS_PACKAGES := $(MAKE_STAMP_DIR)/os-packages-installed
 STAMP_VMAIL_USER := $(MAKE_STAMP_DIR)/vmail-user-created
+STAMP_POSTFIX_CHROOT := $(MAKE_STAMP_DIR)/postfix-chroot-prepared
 
 # Python virtual environments
 # FIXME: These are currently unused... Do we need them?!
@@ -89,7 +91,7 @@ MAKEFLAGS += --no-builtin-rules
 
 # Actually perform the complete setup of the mailsrv. This command is to be
 # used to trigger everything else.
-install : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(CONFIG_FILES)
+install : $(STAMP_OS_PACKAGES) $(STAMP_POSTFIX_CHROOT) $(STAMP_VMAIL_USER) $(CONFIG_FILES)
 .PHONY : install
 
 # Create Dovecot's required configuration files from the provided samples.
@@ -167,6 +169,11 @@ $(STAMP_OS_PACKAGES) : $(SCRIPT_OS_PACKAGES)
 $(STAMP_VMAIL_USER) : $(SCRIPT_VMAIL_USER)
 	$(create_dir)
 	$(SCRIPT_VMAIL_USER)
+	touch $@
+
+$(STAMP_POSTFIX_CHROOT) : $(SCRIPT_POSTFIX_CHROOT) | $(STAMP_OS_PACKAGES)
+	$(create_dir)
+	$(SCRIPT_POSTFIX_CHROOT)
 	touch $@
 
 
