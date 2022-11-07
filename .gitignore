@@ -19,6 +19,9 @@ configs/*/*/*
 .tox-venv/
 .tox/
 
+# Ignore Sphinx's bulid directory
+docs/build/
+
 # Ignore byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

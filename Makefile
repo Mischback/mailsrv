@@ -51,6 +51,13 @@ util/pre-commit : $(PRE_COMMIT_READY)
 	$(TOX_CMD) -e util -- pre-commit run $(pre-commit_files) $(pre-commit_id)
 .PHONY : util/pre-commit
 
+util/docs/build/html : $(TOX_VENV_INSTALLED)
+	$(TOX_CMD) -q -e docs
+.PHONY : util/docs/build/html
+
+util/docs/serve/html : $(TOX_VENV_INSTALLED)
+	$(TOX_CMD) -q -e docs-serve
+.PHONY : util/docs/serve/html
 
 
 # Internal utility stuff to make the actual commands work
