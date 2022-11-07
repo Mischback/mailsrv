@@ -24,6 +24,7 @@
 #   - https://github.com/Mischback/mailsrv/issues/19
 #   - https://github.com/Mischback/mailsrv/issues/16
 #   - https://github.com/Mischback/mailsrv/issues/17
+#   - https://github.com/Mischback/mailsrv/issues/25
 
 # Postfix's main configuration file
 # /etc/postfix/main.cf
@@ -100,6 +101,54 @@ smtpd_tls_cert_file = ${MAILSRV_TLS_CERT}
 #
 # CONFIGURATION_REQUIRED!
 smtpd_tls_key_file = ${MAILSRV_TLS_KEY}
+
+# The minimum required TLS/SSL protocol version.
+#
+# Ref: https://www.postfix.org/postconf.5.html#smtpd_tls_mandatory_protocols
+# Ref: https://www.postfix.org/postconf.5.html#smtpd_tls_protocols
+#
+# Effectively we want to use TLS > v1.2, but providing this setting like this
+# is only supported from Postfix 3.6 on. Instead, we exclude the lower version
+# of TLS/SSL, as per
+# https://ssl-config.mozilla.org/#server=postfix&version=3.5.13&config=intermediate
+#
+# The settings set the protocol for mandatory and opportunistic TLS.
+#
+# smtpd_tls_mandatory_protocols = >=TLSv1.2
+# smtpd_tls_protocols = >=TLSv1.2
+smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+
+# Select which ciphers should be used.
+#
+# Ref: https://www.postfix.org/postconf.5.html#smtpd_tls_mandatory_ciphers
+# Ref: https://www.postfix.org/postconf.5.html#smtpd_tls_ciphers
+# Ref: https://www.postfix.org/postconf.5.html#tls_medium_cipherlist
+#
+# These settings are changed according to
+# https://ssl-config.mozilla.org/#server=postfix&version=3.5.13&config=intermediate
+# ignoring Postfix's recommendation to **not change** the medium cipherlist.
+smtpd_tls_mandatory_ciphers = medium
+smtpd_tls_ciphers = medium
+tls_medium_cipherlist = ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+
+# Allow the client to choose the cipher.
+#
+# Ref: https://www.postfix.org/postconf.5.html#tls_preempt_cipherlist
+#
+# ``no`` is actually the default value, just make it explicit here!
+#
+# This setting is used in order to maximize compatibility.
+tls_preempt_cipherlist = no
+
+# Perfect Forward Secrecy
+#
+# The Diffie-Hellman parameters that are used for PFS.
+#
+# Ref: https://www.postfix.org/postconf.5.html#smtpd_tls_dh1024_param_file
+#
+# TODO: https://github.com/Mischback/mailsrv/issues/25
+# smtpd_tls_dh1024_param_file
 
 # Require TLS for authentication (AUTH)
 #
