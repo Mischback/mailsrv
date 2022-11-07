@@ -70,6 +70,7 @@ env -i $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
     $MAILSRV_TLS_CERT
     $MAILSRV_TLS_KEY
     $MAILSRV_SERVER_ADMIN
+    $MAILSRV_MAILBOX_QUOTA
     ' \
     < ${INPUT_FILE} \
     > ${OUTPUT_FILE}
