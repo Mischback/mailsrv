@@ -19,8 +19,9 @@ plugin {
   quota_vsizes = yes
 
   # Provide 1GB of storage for any user...
-  # FIXME: Needs customization!
-  quota_rule = *:storage=1G
+  #
+  # CONFIGURATION_REQUIRED!
+  quota_rule = *:storage=${MAILSRV_MAILBOX_QUOTA}
   # ... and be gracious about the content of Trash
   #
   # This is only relevant for an IMAP-based setup.
