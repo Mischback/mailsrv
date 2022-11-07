@@ -41,6 +41,7 @@ CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf \
                 $(DOVECOT_CONF_DIR)/10-auth.conf \
                 $(DOVECOT_CONF_DIR)/10-mail.conf \
                 $(DOVECOT_CONF_DIR)/10-master.conf \
+                $(DOVECOT_CONF_DIR)/10-ssl.conf \
                 $(DOVECOT_CONF_DIR)/auth-passwdfile.conf.ext
 
 # The name of the actual setup scripts
