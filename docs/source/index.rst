@@ -21,3 +21,5 @@ raised `there <https://github.com/Mischback/mailsrv/issues>`_.
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+   references
