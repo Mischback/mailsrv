@@ -1,0 +1,37 @@
+; Zone file for REVERSE ZONE of ``devnet.test`` and associated domains.
+;
+; This file is meant to be used as ``/etc/bind/db.reverse.ipv6.devnet``.
+
+; Define the default TTL.
+;
+; This is the default caching time of a resource record (RR).
+$TTL 5m
+
+; Define the origin.
+;
+; This is the common suffix to all unqualified entries.
+$ORIGIN 6.e.1.5.5.8.e.d.0.e.9.0.1.2.d.f.ip6.arpa.
+
+; Define the Start of Authority (SOA).
+;
+; First parameter to the SOA record is the (human readable) name of the
+; nameserver, second one is a (widely unused) representation of the email
+; address of the nameserver's administrator (hostmaster@devnet.test).
+@           IN      SOA     ns.devnet.test. hostmaster.devnet.test. (
+                            1       ; Serial (keep it simple here!)
+                            4h      ; Refresh
+                            15m     ; Retry
+                            8h      ; Expire
+                            30s     ; negative caching TTL
+)
+
+; Define the nameserver for this domain.
+;
+; This is a human readable pointer, needs an ``A`` or ``AAAA`` record in the
+; forward lookup zone.
+@           IN      NS      ns.devnet.test.
+
+; The actual RRs.
+$ORIGIN e.d.0.c.7.5.e.7.f.f.f.f.6.e.1.5.5.8.e.d.0.e.9.0.1.2.d.f.ip6.arpa.
+
+2           IN      PTR     ns.devnet.test.

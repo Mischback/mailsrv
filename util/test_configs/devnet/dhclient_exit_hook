@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# This file will **force** our nameserver, regardless of what was received by
+# DHCP (dhclient in this case).
+#
+# This file is meant to be placed in
+# ``/etc/dhcp/dhclient-exit-hooks.d/devnet-nameserver``.
+
+# Actually overwrite whatever there was in the DHCP response!
+echo "# FORCE devnet's nameserver" > /etc/resolv.conf
+echo "nameserver fd21:9e0:de85:51e6:ffff:7e57:c0de:2" >> /etc/resolv.conf
+echo "nameserver 192.168.100.164" >> /etc/resolv.conf

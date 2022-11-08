@@ -1,0 +1,19 @@
+// Local bind9 configuration for the test setup.
+//
+// This file is meant to be used as ``/etc/bind/named.conf.local`` for a
+// standard bind9 installation.
+
+zone "devnet.test" {
+    type master;
+    file "/etc/bind/db.devnet.test";
+};
+
+zone "100.168.192.in-addr.arpa" {
+    type master;
+    file "/etc/bind/db.reverse.ipv4.devnet";
+};
+
+zone "6.e.1.5.5.8.e.d.0.e.9.0.1.2.d.f.ip6.arpa" {
+    type master;
+    file "/etc/bind/db.reverse.ipv6.devnet";
+};
