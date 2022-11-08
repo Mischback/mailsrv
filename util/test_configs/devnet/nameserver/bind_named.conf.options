@@ -1,0 +1,35 @@
+// bind9 options for the test setup.
+//
+// This file is meant to be used as ``/etc/bind/named.conf.options`` for a
+// standard bind9 installation.
+
+// Define an Access Control List for our known clients
+acl devnet-clients {
+    fd21:9e0:de85:51e6::/64;
+    192.168.100.0/24;
+    localhost;
+};
+
+options {
+
+    directory "/var/cache/bind";
+
+    // Allow recursion and queries for our known clients only.
+    recursion yes;
+    allow-query { devnet-clients; };
+
+    // Use the VMs parent DNS server as forwarder
+    forwarders {
+        192.168.100.1;
+    };
+
+    auth-nxdomain no;
+
+    dnssec-validation yes;
+
+    allow-transfer { none; };
+
+    listen-on-v6 {
+        any;
+    };
+};

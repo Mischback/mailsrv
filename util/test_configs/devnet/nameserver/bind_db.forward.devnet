@@ -1,6 +1,6 @@
 ; Zone file for ``devnet.test``.
 ;
-; This file is meant to be used as ``/etc/bind/db.devnet.test``.
+; This file is meant to be used as ``/etc/bind/db.forward.devnet``.
 
 ; Define the default TTL.
 ;
