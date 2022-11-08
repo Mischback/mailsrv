@@ -1,0 +1,4 @@
+# This is a static manually assigned IPv6 for the development network.
+iface enp1s0 inet6 static
+    address fd21:9e0:de85:51e6:7e57:c0de:ffff:2/64
+    dns-nameservers fd21:9e0:de85:51e6:7e57:c0de:ffff:2
