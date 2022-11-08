@@ -8,6 +8,11 @@ zone "devnet.test" {
     file "/etc/bind/db.forward.devnet";
 };
 
+zone "sut.test" {
+    type master;
+    file "/etc/bind/db.forward.sut";
+};
+
 zone "100.168.192.in-addr.arpa" {
     type master;
     file "/etc/bind/db.reverse.ipv4.devnet";

@@ -1,6 +1,6 @@
-; Zone file for ``devnet.test``.
+; Zone file for ``sut.test``.
 ;
-; This file is meant to be used as ``/etc/bind/db.forward.devnet``.
+; This file is meant to be used as ``/etc/bind/db.forward.sut``.
 
 ; Define the default TTL.
 ;
@@ -10,15 +10,15 @@ $TTL 5m
 ; Define the origin.
 ;
 ; This is the common suffix to all unqualified entries.
-$ORIGIN devnet.test.
+$ORIGIN sut.test.
 
 ; Define the Start of Authority (SOA).
 ;
 ; First parameter to the SOA record is the (human readable) name of the
 ; nameserver, second one is a (widely unused) representation of the email
 ; address of the nameserver's administrator (hostmaster@devnet.test).
-@               IN      SOA     ns.devnet.test. hostmaster.devnet.test. (
-                            3       ; Serial (keep it simple here!)
+@           IN      SOA     ns.devnet.test. hostmaster.devnet.test. (
+                            2       ; Serial (keep it simple here!)
                             4h      ; Refresh
                             15m     ; Retry
                             8h      ; Expire
@@ -28,9 +28,8 @@ $ORIGIN devnet.test.
 ; Define the nameserver for this domain.
 ;
 ; This is a human readable pointer, needs an ``A`` or ``AAAA`` record below.
-@               IN      NS      ns.devnet.test.
+@           IN      NS      ns.devnet.test.
 
 ; The actual host RRs.
-ns              IN      A       192.168.100.164
-ns              IN      AAAA    fd21:9e0:de85:51e6:7e57:c0de:ffff:2
-mailsrv-test    IN      AAAA    fd21:9e0:de85:51e6:7e57:c0de:ffff:21
+mail        IN      A       192.168.100.239
+mail        IN      AAAA    fd21:9e0:de85:51e6:7e57:c0de:2000:21
