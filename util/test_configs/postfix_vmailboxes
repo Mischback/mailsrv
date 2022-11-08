@@ -1,8 +1,0 @@
-# Provide the virtual mailboxes for the mail setup
-# These will be applied in Postfix's ``virtual_mailbox_maps`` setting.
-#
-# FORMAT: [key][BLANK][ANYTHING], where only [key] is relevant
-user_one@sut-one.test    OK
-user_two@sut-one.test    OK
-user@sut-two.test        OK
-submission@sut-one.test  OK
