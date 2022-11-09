@@ -23,9 +23,6 @@ disable_plaintext_auth = yes
 # vulnerabilities with SQL/LDAP databases. If you want to allow all characters,
 # set this value to empty.
 #
-# TODO: Verify the setting, should match all viable mail adresses, as these
-#       will be used for login.
-#
 # Ref: https://doc.dovecot.org/settings/core/#core_setting-auth_username_chars
 #auth_username_chars = abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890.-_@
 
@@ -37,9 +34,9 @@ disable_plaintext_auth = yes
 #
 # Seems pretty high, assuming we don't have that many users.
 #
-# TODO: See if we can get away with 5 or 10
-#
 # Ref: https://doc.dovecot.org/settings/core/#core_setting-auth_worker_max_count
+#
+# TODO: https://github.com/Mischback/mailsrv/issues/27
 auth_worker_max_count = 5
 
 # Space separated list of wanted authentication mechanisms:
