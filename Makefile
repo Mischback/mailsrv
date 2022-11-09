@@ -4,10 +4,13 @@
 
 # ### INTERNAL SETTINGS / CONSTANTS
 
-
 # Postfix's directory (Debian's default ``/etc/postfix``)
 # Postfix will assume its ``master.cf`` and ``main.cf`` in this directory.
 POSTFIX_CONF_DIR := /etc/postfix
+
+# Dovecot's directory (Debian's default ``/etc/dovecot``)
+# Actually more relevant is the ``conf.d`` directory inside of ``/etc/dovecot``,
+# as it will contain the actual configuration files.
 DOVECOT_BASE_DIR := /etc/dovecot
 DOVECOT_CONF_DIR := $(DOVECOT_BASE_DIR)/conf.d
 
@@ -64,22 +67,25 @@ STAMP_VMAIL_USER := $(MAKE_STAMP_DIR)/vmail-user-created
 STAMP_POSTFIX_CHROOT := $(MAKE_STAMP_DIR)/postfix-chroot-prepared
 
 # Python virtual environments
-# FIXME: These are currently unused... Do we need them?!
-UTIL_VENV_DIR := $(MAKE_FILE_DIR).util-venv
-UTIL_VENV_CREATED := $(UTIL_VENV_DIR)/pyvenv.cfg
-UTIL_VENV_INSTALLED := $(UTIL_VENV_DIR)/packages.txt
-
+#
+# Python is used as additional tooling in this repository. Most of the utility
+# is run through ``tox``, as of now it is sufficient to create a dedicated
+# (Python) virtual environment for ``tox``.
+#
+# ``tox``'s configuration is included in ``pyproject.toml``.
 TOX_VENV_DIR := $(MAKE_FILE_DIR).tox-venv
 TOX_VENV_CREATED := $(TOX_VENV_DIR)/pyvenv.cfg
 TOX_VENV_INSTALLED := $(TOX_VENV_DIR)/packages.txt
 TOX_CMD := $(TOX_VENV_DIR)/bin/tox
 
+# ``pre-commit`` is used to run several code-quality tools automatically.
+#
+# ``pre-commit`` is run through ``tox`` aswell, see ``tox``'s ``util``
+# environment.
 PRE_COMMIT_READY := .git/hooks/pre-commit
 
 
-
 # ``make``-specific settings
-# FIXME: Make it silent again!
 .SILENT :
 .DELETE_ON_ERROR :
 MAKEFLAGS += --no-print-directory
@@ -155,9 +161,10 @@ $(POSTFIX_CONF_DIR)/lookup_local_aliases.db : $(POSTFIX_CONF_DIR)/lookup_local_a
 	echo "[INFO] Regenerating $@ using newaliases"
 	$(shell which newaliases)
 
-# Generate the actual setting file from the sample
-# TODO: Is this recipe really relevant? It is added during development of the
-#       sample settings file.
+# Generate the actual setting file from the sample.
+#
+# This will overwrite existing settings, if there is a more recent ``.sample``.
+# This should not be a problem, as the existing file is backed up.
 $(SETTINGS_ENV_FILE) : $(SETTINGS_ENV_FILE).sample
 	$(SCRIPT_SAVE_COPY) $@ $<
 
@@ -173,6 +180,10 @@ $(STAMP_VMAIL_USER) : $(SCRIPT_VMAIL_USER)
 	$(SCRIPT_VMAIL_USER)
 	touch $@
 
+# Prepare Postfix's ``chroot`` environment.
+#
+# As Dovecot's sockets are placed in non-default locations, this has to be run
+# once.
 $(STAMP_POSTFIX_CHROOT) : $(SCRIPT_POSTFIX_CHROOT) | $(STAMP_OS_PACKAGES)
 	$(create_dir)
 	$(SCRIPT_POSTFIX_CHROOT)
