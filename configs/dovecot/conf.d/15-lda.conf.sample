@@ -3,7 +3,7 @@
 # FIXME: Dovecot's LDA is not directly used in the setup, but some settings of
 #        this file are picked up by Dovecot's ``lmtp`` service, which **is**
 #        used.
-#        Can these settings (``postmaster_address`` and ``hostname`` be moved
+#        Can these settings (``postmaster_address`` and ``hostname``) be moved
 #        to another configuration file?!
 
 ##
