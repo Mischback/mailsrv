@@ -61,6 +61,7 @@ backup_existing_target ${OUTPUT_FILE}
 env -i $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
   envsubst '
     $MAILSRV_HOSTNAME
+    $MAILSRV_DOVECOT_INTERFACES
     $MAILSRV_POSTFIX_INTERFACES
     $MAILSRV_BIND_IPV4
     $MAILSRV_BIND_IPV6
