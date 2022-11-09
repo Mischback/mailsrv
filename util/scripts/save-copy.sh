@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileType: SOURCE
 
-# Create a symbolic link to the actual config file.
+# Create a backup of the target before overwriting it with ``cp``.
 #
 # @param $1 The link's name
 # @param $2 The target of the link, the file to be referenced
