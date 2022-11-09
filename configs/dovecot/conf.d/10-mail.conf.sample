@@ -96,8 +96,6 @@ mail_server_admin = mailto:${MAILSRV_SERVER_ADMIN}
 #
 # As per https://workaround.org/ispmail/bullseye/setting-up-dovecot-2/ "quota"
 # is added here.
-#
-# TODO: check setting after configuration is completed!
 mail_plugins = $mail_plugins quota
 
 protocol !indexer-worker {
