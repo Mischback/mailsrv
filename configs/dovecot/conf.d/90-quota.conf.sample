@@ -18,7 +18,14 @@ plugin {
   # Use virtual instead of physical sizes (required by ``count`` backend)
   quota_vsizes = yes
 
-  # Provide 1GB of storage for any user...
+  # Define the default quota for user mailboxes.
+  #
+  # Please note: This may be overridden in the *user database*.
+  #
+  # See https://doc.dovecot.org/settings/plugin/quota-plugin/#plugin_setting-quota-quota_rule
+  # for reference. This setting uses the ``storage`` backend, the actual
+  # quota can be defined using Dovecot's internal ``size`` syntax (see
+  # https://doc.dovecot.org/settings/types/#size).
   #
   # CONFIGURATION_REQUIRED!
   quota_rule = *:storage=${MAILSRV_MAILBOX_QUOTA}
