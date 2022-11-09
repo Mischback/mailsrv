@@ -26,7 +26,7 @@ if __name__ == "__main__":
     files = "mypy_files={}".format(" ".join(files_args))
 
     tmp = subprocess.run(
-        ["make", "local/mypy", files],
+        ["make", "util/local/mypy", files],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,

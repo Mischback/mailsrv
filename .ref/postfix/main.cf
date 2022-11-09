@@ -93,14 +93,14 @@ smtpd_tls_security_level = may
 # Ref: https://www.postfix.org/postconf.5.html#smtpd_tls_cert_file
 #
 # CONFIGURATION_REQUIRED!
-smtpd_tls_cert_file = ${MAILSRV_TLS_CERT}
+smtpd_tls_cert_file = /etc/ssl/certs/ssl-cert-snakeoil.pem
 
 # The (private) key to use for TLS
 #
 # Ref: https://www.postfix.org/postconf.5.html#smtpd_tls_key_file
 #
 # CONFIGURATION_REQUIRED!
-smtpd_tls_key_file = ${MAILSRV_TLS_KEY}
+smtpd_tls_key_file = /etc/ssl/private/ssl-cert-snakeoil.key
 
 # The minimum required TLS/SSL protocol version.
 #
@@ -186,7 +186,7 @@ smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_una
 # See ``smtp_banner`` for an actual application.
 #
 # CONFIGURATION_REQUIRED!
-myhostname = ${MAILSRV_HOSTNAME}
+myhostname = mail.mailsrv.test
 
 # Aliases for "local" accounts.
 #
@@ -251,10 +251,9 @@ mailbox_size_limit = 26214400
 # Accepted values: ``all`` to listen on all interfaces or an IPv4/IPv6 address
 #                  to listen to.
 #
-# FIXME: https://github.com/Mischback/mailsrv/issues/19
-#
+# FIXME: See https://github.com/Mischback/mailsrv/issues/19
 # CONFIGURATION_REQUIRED!
-inet_interfaces = ${MAILSRV_POSTFIX_INTERFACES}
+inet_interfaces = all
 
 # Use this IPv4 address for outgoing connections.
 #
@@ -269,7 +268,7 @@ inet_interfaces = ${MAILSRV_POSTFIX_INTERFACES}
 # Default value: [blank]
 #
 # CONFIGURATION_REQUIRED!
-smtp_bind_address = ${MAILSRV_BIND_IPV4}
+smtp_bind_address = 
 
 # Use this IPv6 address for outgoing connections.
 #
@@ -284,21 +283,21 @@ smtp_bind_address = ${MAILSRV_BIND_IPV4}
 # Default value: [blank]
 #
 # CONFIGURATION_REQUIRED!
-smtp_bind_address6 = ${MAILSRV_BIND_IPV6}
+smtp_bind_address6 = 
 
 # Force the address bind as specified by smtp_bind_address[6]
 #
 # Actually the binding should be enforced. This logs lots of warnings while
 # Postfix starts up, if ``smtp_bind_address`` and ``smtp_bind_address6`` are
-# not provided or empty. If your setup uses either of the mentioned
-# configuration values, consider turning this to ``yes``.
+# not provided and this is set to ``yes``. If your setup uses either of the
+# mentioned configuration values, consider turning this to ``yes``.
 #
 # Ref: https://www.postfix.org/postconf.5.html#smtp_bind_address_enforce
 #
 # Default value: no
 #
 # CONFIGURATION_REQUIRED!
-# smtp_bind_address_enforce = yes
+smtp_bind_address_enforce = no
 
 # Limit the usage of the internet protocol to v4 or v6.
 #
@@ -309,7 +308,7 @@ smtp_bind_address6 = ${MAILSRV_BIND_IPV6}
 # Default value: ``all``
 #
 # CONFIGURATION_REQUIRED!
-inet_protocols = ${MAILSRV_IP_VERSION}
+inet_protocols = all
 
 # Specify a preference for the IP version used to connect to destination.
 #
@@ -320,7 +319,7 @@ inet_protocols = ${MAILSRV_IP_VERSION}
 # Default value: ``any``
 #
 # CONFIGURATION_REQUIRED!
-smtp_address_preference = ${MAILSRV_IP_PREFERENCE}
+smtp_address_preference = any
 
 # Which mechanism is used for name resolution.
 #
@@ -333,7 +332,7 @@ smtp_address_preference = ${MAILSRV_IP_PREFERENCE}
 # Accepted values: ``dns``, ``native``, ``dns,native``
 #
 # CONFIGURATION_REQUIRED!
-smtp_host_lookup = ${MAILSRV_DNS_LOOKUP}
+smtp_host_lookup = dns
 
 ###
 # THE FOLLOWING SETTINGS GET ADJUSTMENTS WHILE FOLLOWING
@@ -350,7 +349,7 @@ smtp_host_lookup = ${MAILSRV_DNS_LOOKUP}
 # The file actually follows the common Postfix syntax of [key][BLANK][value].
 # Remember to run ``postmap`` on that file after any edit!
 #
-# TODO: https://github.com/Mischback/mailsrv/issues/16
+# TODO: See https://github.com/Mischback/mailsrv/issues/16
 virtual_mailbox_domains = hash:/etc/postfix/lookup_vdomains
 
 # These are the actual virtual mailboxes.
@@ -363,7 +362,7 @@ virtual_mailbox_domains = hash:/etc/postfix/lookup_vdomains
 # The file actually follows the common Postfix syntax of [key][BLANK][value].
 # Remember to run ``postmap`` on that file after any edit!
 #
-# TODO: https://github.com/Mischback/mailsrv/issues/16
+# TODO: See https://github.com/Mischback/mailsrv/issues/16
 virtual_mailbox_maps = hash:/etc/postfix/lookup_vmailboxes
 
 # These are virtual aliases.
@@ -378,7 +377,7 @@ virtual_mailbox_maps = hash:/etc/postfix/lookup_vmailboxes
 # The file actually follows the common Postfix syntax of [key][BLANK][value].
 # Remember to run ``postmap`` on that file after any edit!
 #
-# TODO: https://github.com/Mischback/mailsrv/issues/16
+# TODO: See https://github.com/Mischback/mailsrv/issues/16
 virtual_alias_maps = hash:/etc/postfix/lookup_valiases
 
 # Use Dovecot's LMTP implementation for actual delivery to mailboxes.
@@ -420,6 +419,6 @@ smtpd_sasl_auth_enable = yes
 #
 # Ref: https://www.postfix.org/postconf.5.html#smtpd_sender_login_maps
 #
-# TODO: https://github.com/Mischback/mailsrv/issues/16
+# TODO: See https://github.com/Mischback/mailsrv/issues/16
 smtpd_sender_login_maps = hash:/etc/postfix/lookup_sender2login
 
