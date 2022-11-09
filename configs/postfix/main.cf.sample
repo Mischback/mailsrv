@@ -21,7 +21,6 @@
 #   - smtpd_tls_key_file
 #
 # Issues:
-#   - https://github.com/Mischback/mailsrv/issues/19
 #   - https://github.com/Mischback/mailsrv/issues/16
 #   - https://github.com/Mischback/mailsrv/issues/17
 #   - https://github.com/Mischback/mailsrv/issues/25
@@ -251,8 +250,6 @@ mailbox_size_limit = 26214400
 # Accepted values: ``all`` to listen on all interfaces or an IPv4/IPv6 address
 #                  to listen to.
 #
-# FIXME: https://github.com/Mischback/mailsrv/issues/19
-#
 # CONFIGURATION_REQUIRED!
 inet_interfaces = ${MAILSRV_POSTFIX_INTERFACES}
 
@@ -294,6 +291,9 @@ smtp_bind_address6 = ${MAILSRV_BIND_IPV6}
 # configuration values, consider turning this to ``yes``.
 #
 # Ref: https://www.postfix.org/postconf.5.html#smtp_bind_address_enforce
+#
+# NOTE: This setting is available with Postfix 3.7, which is currently not
+#       included in Debian/stable (as of *bullseye*).
 #
 # Default value: no
 #

@@ -3,6 +3,17 @@
 # There are some modifications of Debian bullseye's default version of this
 # file, but they should work for the setup without further adjustments.
 
+
+# Bind Dovecot only to specific IP addresses.
+#
+# By default, Dovecot binds to all IP addresses. The setting is originally
+# provided in ``/etc/dovecot/dovecot.conf``.
+#
+# Ref: https://doc.dovecot.org/settings/core/#core_setting-listen
+#
+# Default value: *, ::
+listen = ${MAILSRV_DOVECOT_INTERFACES}
+
 service imap-login {
   inet_listener imap {
     #port = 143
