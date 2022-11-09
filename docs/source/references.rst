@@ -68,3 +68,16 @@ Guides
 
   Even if you use **mailsrv** out-of-the-box, this is a highly recommended read
   for a deeper understanding of the setup.
+
+- `Mailserver mit Dovecot, Postfix, MySQL und Rspamd unter Debian 10 Buster <https://thomas-leister.de/mailserver-debian-buster/>`_
+  is another detailed tutorial for a mail setup, only available in German
+  (there is an
+  `English version <https://thomas-leister.de/en/mailserver-debian-stretch/>`_,
+  based on Debian 9 Stretch).
+
+  It provides details on the required DNS setup, even including
+  `unbound <https://www.nlnetlabs.nl/projects/unbound/about/>`_ as a local DNS
+  resolver.
+
+  Additionally, there is a section about *TLS policies* which might be
+  included in future releases.
