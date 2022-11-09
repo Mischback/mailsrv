@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileType: SOURCE
 
-# ### INTERNAL SETTINGS / CONSTANTS
+# ### SETTINGS
 
 # Postfix's directory (Debian's default ``/etc/postfix``)
 # Postfix will assume its ``master.cf`` and ``main.cf`` in this directory.
@@ -14,6 +14,12 @@ POSTFIX_CONF_DIR := /etc/postfix
 DOVECOT_BASE_DIR := /etc/dovecot
 DOVECOT_CONF_DIR := $(DOVECOT_BASE_DIR)/conf.d
 
+# Keep a reference to the actual settings file
+SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
+
+
+# ### INTERNAL SETTINGS / CONSTANTS
+
 # Find the location of this Makefile, which should also be the repository root,
 # which is the root for all path's.
 MAKE_FILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -23,9 +29,6 @@ SCRIPT_DIR := $(MAKE_FILE_DIR)util/scripts
 
 # This directory contains all the configs
 CONFIG_DIR := $(MAKE_FILE_DIR)configs
-
-# Keep a reference to the actual settings file
-SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
 
 # This is a list of all required config files with their final destination.
 CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf \
@@ -84,7 +87,6 @@ TOX_CMD := $(TOX_VENV_DIR)/bin/tox
 # environment.
 PRE_COMMIT_READY := .git/hooks/pre-commit
 
-
 # ``make``-specific settings
 .SILENT :
 .DELETE_ON_ERROR :
@@ -93,7 +95,9 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 
-# These recipes perform the actual setup of mailsrv
+# ### RECIPES
+
+# ##### These recipes perform the actual setup of the **mailsrv**.
 
 # Actually perform the complete setup of the mailsrv. This command is to be
 # used to trigger everything else.
@@ -190,7 +194,10 @@ $(STAMP_POSTFIX_CHROOT) : $(SCRIPT_POSTFIX_CHROOT) | $(STAMP_OS_PACKAGES)
 	touch $@
 
 
-# Utility commands, i.e. linters
+# ##### Utility commands, i.e. linters
+#
+# Basically all of them are PHONY targets. ``make`` is (mis-) used as a mere
+# task runner here.
 
 mypy_files ?= ""
 util/local/mypy :
@@ -220,7 +227,7 @@ util/pre-commit : $(PRE_COMMIT_READY)
 .PHONY : util/pre-commit
 
 
-# Internal utility stuff to make the actual commands work
+# ##### Internal utility stuff to make the actual commands work
 
 # Install the pre-commit hooks
 $(PRE_COMMIT_READY) : | $(TOX_VENV_INSTALLED)
