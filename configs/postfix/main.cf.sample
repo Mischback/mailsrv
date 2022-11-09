@@ -289,15 +289,15 @@ smtp_bind_address6 = ${MAILSRV_BIND_IPV6}
 #
 # Actually the binding should be enforced. This logs lots of warnings while
 # Postfix starts up, if ``smtp_bind_address`` and ``smtp_bind_address6`` are
-# not provided and this is set to ``yes``. If your setup uses either of the
-# mentioned configuration values, consider turning this to ``yes``.
+# not provided or empty. If your setup uses either of the mentioned
+# configuration values, consider turning this to ``yes``.
 #
 # Ref: https://www.postfix.org/postconf.5.html#smtp_bind_address_enforce
 #
 # Default value: no
 #
 # CONFIGURATION_REQUIRED!
-smtp_bind_address_enforce = no
+# smtp_bind_address_enforce = yes
 
 # Limit the usage of the internet protocol to v4 or v6.
 #
