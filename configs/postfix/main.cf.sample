@@ -251,7 +251,8 @@ mailbox_size_limit = 26214400
 # Accepted values: ``all`` to listen on all interfaces or an IPv4/IPv6 address
 #                  to listen to.
 #
-# FIXME: See https://github.com/Mischback/mailsrv/issues/19
+# FIXME: https://github.com/Mischback/mailsrv/issues/19
+#
 # CONFIGURATION_REQUIRED!
 inet_interfaces = ${MAILSRV_POSTFIX_INTERFACES}
 
@@ -349,7 +350,7 @@ smtp_host_lookup = ${MAILSRV_DNS_LOOKUP}
 # The file actually follows the common Postfix syntax of [key][BLANK][value].
 # Remember to run ``postmap`` on that file after any edit!
 #
-# TODO: See https://github.com/Mischback/mailsrv/issues/16
+# TODO: https://github.com/Mischback/mailsrv/issues/16
 virtual_mailbox_domains = hash:/etc/postfix/lookup_vdomains
 
 # These are the actual virtual mailboxes.
@@ -362,7 +363,7 @@ virtual_mailbox_domains = hash:/etc/postfix/lookup_vdomains
 # The file actually follows the common Postfix syntax of [key][BLANK][value].
 # Remember to run ``postmap`` on that file after any edit!
 #
-# TODO: See https://github.com/Mischback/mailsrv/issues/16
+# TODO: https://github.com/Mischback/mailsrv/issues/16
 virtual_mailbox_maps = hash:/etc/postfix/lookup_vmailboxes
 
 # These are virtual aliases.
@@ -377,7 +378,7 @@ virtual_mailbox_maps = hash:/etc/postfix/lookup_vmailboxes
 # The file actually follows the common Postfix syntax of [key][BLANK][value].
 # Remember to run ``postmap`` on that file after any edit!
 #
-# TODO: See https://github.com/Mischback/mailsrv/issues/16
+# TODO: https://github.com/Mischback/mailsrv/issues/16
 virtual_alias_maps = hash:/etc/postfix/lookup_valiases
 
 # Use Dovecot's LMTP implementation for actual delivery to mailboxes.
@@ -419,6 +420,6 @@ smtpd_sasl_auth_enable = yes
 #
 # Ref: https://www.postfix.org/postconf.5.html#smtpd_sender_login_maps
 #
-# TODO: See https://github.com/Mischback/mailsrv/issues/16
+# TODO: https://github.com/Mischback/mailsrv/issues/16
 smtpd_sender_login_maps = hash:/etc/postfix/lookup_sender2login
 
