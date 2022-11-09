@@ -1,10 +1,4 @@
 # This is a **sample** of Dovecot's ``15-lda.conf`` config file.
-#
-# FIXME: Dovecot's LDA is not directly used in the setup, but some settings of
-#        this file are picked up by Dovecot's ``lmtp`` service, which **is**
-#        used.
-#        Can these settings (``postmaster_address`` and ``hostname``) be moved
-#        to another configuration file?!
 
 ##
 ## LDA specific settings (also used by LMTP)
@@ -13,6 +7,9 @@
 # Address to use when sending rejection mails.
 # Default is postmaster@%d. %d expands to recipient domain.
 #
+# This setting is also picked up by LMTP, see
+# https://doc.dovecot.org/configuration_manual/protocols/lmtp_server/.
+#
 # Ref: https://doc.dovecot.org/settings/core/#core_setting-postmaster_address
 #
 # CONFIGURATION_REQUIRED!
@@ -20,6 +17,9 @@ postmaster_address = ${MAILSRV_SERVER_ADMIN}
 
 # Hostname to use in various parts of sent mails (e.g. in Message-Id) and
 # in LMTP replies. Default is the system's real hostname@domain.
+#
+# This setting is also picked up by LMTP, see
+# https://doc.dovecot.org/configuration_manual/protocols/lmtp_server/.
 #
 # Ref: https://doc.dovecot.org/settings/core/#core_setting-hostname
 #
