@@ -1,0 +1,29 @@
+# This is a **sample** of Dovecots's ``vmail_users`` config file.
+# That file is used as *passwd-like* user database file in
+# ``auth-passwdfile.conf.ext``.
+#
+# Obviously, this file will be obsolete when
+# https://github.com/Mischback/mailsrv/issues/16 is processed.
+
+# Define the actual accounts for virtual mails.
+#
+# This file acts as the passdb and userdb, meaning it contains the
+# users' login names and passwords aswell as account specific settings. The
+# general syntax of an entry is:
+#   user:password:uid:gid:(gecos):home:(shell):extra_fields
+#
+# Please note that ``uid`` and ``gid`` should not be set here, as all
+# mailboxes are only virtual and owned by a dedicated system user ``vmail``.
+# ``gecos``, ``home`` and ``shell`` are not used.
+#
+# Examples:
+#
+# foo@example.com:{plain}bar::::::
+#   This would be a default line.
+#   It applies the globally configured options for Maildir location, quota
+#   limits, ...
+#
+# bar@example.com:{plain}foo::::::userdb_quota_rule=*:bytes=5000
+#   This sets an account specific quota for the user's mailbox.
+user@other-domain.test:{plain}other::::::
+system@devnet.test:{plain}other::::::
