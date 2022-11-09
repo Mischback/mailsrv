@@ -14,9 +14,6 @@ POSTFIX_CONF_DIR := /etc/postfix
 DOVECOT_BASE_DIR := /etc/dovecot
 DOVECOT_CONF_DIR := $(DOVECOT_BASE_DIR)/conf.d
 
-# Keep a reference to the actual settings file
-SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
-
 
 # ### INTERNAL SETTINGS / CONSTANTS
 
@@ -29,6 +26,9 @@ SCRIPT_DIR := $(MAKE_FILE_DIR)util/scripts
 
 # This directory contains all the configs
 CONFIG_DIR := $(MAKE_FILE_DIR)configs
+
+# Keep a reference to the actual settings file
+SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
 
 # This is a list of all required config files with their final destination.
 CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf \
