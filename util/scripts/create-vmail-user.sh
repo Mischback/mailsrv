@@ -4,7 +4,13 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileType: SOURCE
 
-# FIXME: ADD DOCUMENTATION!
+# Create the required system user and its group.
+#
+# The setup relies on virtual users. This script creates a common user/group
+# as owner of the actual mailboxes.
+#
+# Basically ``vmail`` will have a significantly high UID/GID and is not able
+# to login into the machine.
 #
 # References:
 #   - https://stackoverflow.com/a/36131231
