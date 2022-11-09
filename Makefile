@@ -1,4 +1,6 @@
+# SPDX-FileCopyrightText: 2022 Mischback
 # SPDX-License-Identifier: MIT
+# SPDX-FileType: SOURCE
 
 # ### INTERNAL SETTINGS / CONSTANTS
 
@@ -19,11 +21,10 @@ SCRIPT_DIR := $(MAKE_FILE_DIR)util/scripts
 # This directory contains all the configs
 CONFIG_DIR := $(MAKE_FILE_DIR)configs
 
+# Keep a reference to the actual settings file
 SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
 
 # This is a list of all required config files with their final destination.
-# FIXME: Provide the list of required config files!
-# TODO: Will need adjustment while building up the sequence of recipes!
 CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf \
                 $(POSTFIX_CONF_DIR)/master.cf \
                 $(POSTFIX_CONF_DIR)/lookup_local_aliases \
@@ -51,7 +52,6 @@ CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf \
 SCRIPT_OS_PACKAGES := $(SCRIPT_DIR)/install-packages.sh
 SCRIPT_VMAIL_USER := $(SCRIPT_DIR)/create-vmail-user.sh
 SCRIPT_CONFIG_FROM_TEMPLATE := $(SCRIPT_DIR)/apply-env-to-template.sh
-SCRIPT_LINK_CONFIG := $(SCRIPT_DIR)/create-symlink.sh
 SCRIPT_SAVE_COPY := $(SCRIPT_DIR)/save-copy.sh
 SCRIPT_POSTFIX_CHROOT := $(SCRIPT_DIR)/prepare-postfix-chroot.sh
 
@@ -144,6 +144,7 @@ $(POSTFIX_CONF_DIR)/% : $(CONFIG_DIR)/postfix/%.sample
 # This uses Postfix's ``postmap`` utility to create / compile the actual lookup
 # databases.
 $(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/%
+	echo "[INFO] Regenerating $@ using postmap"
 	$(shell which postmap) $<
 
 # Compile the local alias lookup database.
@@ -151,6 +152,7 @@ $(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/%
 # The local alias database is special, as it is compiled with ``newaliases``
 # instead of ``postmap``.
 $(POSTFIX_CONF_DIR)/lookup_local_aliases.db : $(POSTFIX_CONF_DIR)/lookup_local_aliases $(POSTFIX_CONF_DIR)/main.cf
+	echo "[INFO] Regenerating $@ using newaliases"
 	$(shell which newaliases)
 
 # Generate the actual setting file from the sample
