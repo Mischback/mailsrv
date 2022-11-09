@@ -4,6 +4,11 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileType: SOURCE
 
+# Utility script, meant to be included in other scripts.
+#
+# This does nothing on its own, as the provided function is never called in the
+# script. Furthermore, this file is not executable by default.
+
 # Create a backup of an existing file.
 #
 # @param: The path/name of the symlink, relative to the user's home directory
