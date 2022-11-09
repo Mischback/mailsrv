@@ -18,7 +18,7 @@ $ORIGIN 100.168.192.in-addr.arpa.
 ; nameserver, second one is a (widely unused) representation of the email
 ; address of the nameserver's administrator (hostmaster@devnet.test).
 @           IN      SOA     ns.devnet.test. hostmaster.devnet.test. (
-                            3       ; Serial (keep it simple here!)
+                            4       ; Serial (keep it simple here!)
                             4h      ; Refresh
                             15m     ; Retry
                             8h      ; Expire
@@ -32,5 +32,6 @@ $ORIGIN 100.168.192.in-addr.arpa.
 @           IN      NS      ns.devnet.test.
 
 ; The actual RRs.
+130         IN      PTR     mailsrv-dev.devnet.test.
 164         IN      PTR     ns.devnet.test.
 239         IN      PTR     mailsrv-test.devnet.test.

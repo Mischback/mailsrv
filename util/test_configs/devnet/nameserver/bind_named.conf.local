@@ -8,6 +8,11 @@ zone "devnet.test" {
     file "/etc/bind/db.forward.devnet";
 };
 
+zone "other-domain.test" {
+    type master;
+    file "/etc/bind/db.forward.other-domain";
+};
+
 zone "sut.test" {
     type master;
     file "/etc/bind/db.forward.sut";

@@ -18,7 +18,7 @@ $ORIGIN devnet.test.
 ; nameserver, second one is a (widely unused) representation of the email
 ; address of the nameserver's administrator (hostmaster@devnet.test).
 @               IN      SOA     ns.devnet.test. hostmaster.devnet.test. (
-                            3       ; Serial (keep it simple here!)
+                            4       ; Serial (keep it simple here!)
                             4h      ; Refresh
                             15m     ; Retry
                             8h      ; Expire
@@ -33,4 +33,7 @@ $ORIGIN devnet.test.
 ; The actual host RRs.
 ns              IN      A       192.168.100.164
 ns              IN      AAAA    fd21:9e0:de85:51e6:7e57:c0de:ffff:2
+mailsrv-dev     IN      A       192.168.100.130
+mailsrv-dev     IN      AAAA    fd21:9e0:de85:51e6:7e57:c0de:ffff:11
+mailsrv-test    IN      A       192.168.100.239
 mailsrv-test    IN      AAAA    fd21:9e0:de85:51e6:7e57:c0de:ffff:21
