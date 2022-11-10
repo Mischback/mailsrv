@@ -52,7 +52,7 @@ SETTINGS_ENV_FILE := settings.env
 # This is used instead of make's built-in ``wildcard``, as it automatically
 # supports infinite depth of directories. Portability is probably not an issue
 # here, all Linux/Unix boxes should have ``find``.
-ALL_SAMPLES := $(shell find $(SAMPLE_DIR) -iname "*.sample" -printf "%P\n")
+ALL_SAMPLES := $(shell find $(SAMPLE_DIR) -type f -iname "*.sample" ! -iname "$(SETTINGS_ENV_FILE).sample" -printf "%P\n")
 
 # Generate a list of all required configuration files.
 #
@@ -68,8 +68,6 @@ ALL_SAMPLES := $(shell find $(SAMPLE_DIR) -iname "*.sample" -printf "%P\n")
 CONFIGURATION_FILES := $(addprefix $(CONFIG_DIR)/,$(patsubst %.sample, %, $(ALL_SAMPLES)))
 
 # Keep a reference to the actual settings file
-#
-# This file is included in the list $(CONFIGURATION_FILES).
 CONFIGURATION_ENV_FILE := $(CONFIG_DIR)/$(SETTINGS_ENV_FILE)
 
 # This is a list of all required config files with their final destination.
@@ -141,13 +139,21 @@ MAKEFLAGS += --no-builtin-rules
 
 # ##### DEVELOPMENT
 
+tmp :
+	echo $(CONFIGURATION_FILES)
+.PHONY : tmp
+
 configure : $(CONFIGURATION_FILES)
 .PHONY : configure
 
+# Generate the actual configuration files from the samples.
+#
+# This implicit rule is used to generate all configuration files, applying
+# variable substitution from $(CONFIGURATION_ENV_FILE).
 $(CONFIG_DIR)/% : $(SAMPLE_DIR)/%.sample $(CONFIGURATION_ENV_FILE)
 	echo "[DEBUG] Implicit rule - <$*> - $@"
 	$(create_dir)
-	touch $@
+	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(CONFIGURATION_ENV_FILE)
 
 # Generate the actual setting file from the sample.
 #
@@ -157,6 +163,16 @@ $(CONFIGURATION_ENV_FILE) : $(SAMPLE_DIR)/$(SETTINGS_ENV_FILE).sample
 	echo "[DEBUG] Explicit rule - <$*> - $@"
 	$(create_dir)
 	$(SCRIPT_SAVE_COPY) $@ $<
+
+# TODO: This could be a dedicated rule to create lookup tables
+#       This would create the table sources without processing them.
+#       Needs testing!
+# TODO: If this is desired, this would basically require renaming all of them
+#       and adjusting main.cf.sample!
+#$(CONFIG_DIR)/%.lookup : $(SAMPLE_DIR)/%.lookup.sample
+#	echo "[DEBUG] lookup - <$*> - $@"
+#	$(create_dir)
+#	$(SCRIPT_SAVE_COPY) $@ $<
 
 # ##### INSTALLATION
 #
