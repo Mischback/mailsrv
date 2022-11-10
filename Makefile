@@ -17,15 +17,23 @@ DOVECOT_CONF_DIR := $(DOVECOT_BASE_DIR)/conf.d
 
 # ### INTERNAL SETTINGS / CONSTANTS
 
-# Find the location of this Makefile, which should also be the repository root,
-# which is the root for all path's.
-MAKE_FILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+# The absolute path to the repository.
+#
+# This assumes that this ``Makefile`` is placed in the root of the repository.
+# REPO_ROOT does not contain a trailing ``/``
+#
+# Ref: https://stackoverflow.com/a/324782
+# Ref: https://stackoverflow.com/a/2547973
+# Ref: https://stackoverflow.com/a/73450593
+REPO_ROOT := $(patsubst %/, %, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 # This directory contains all the scripts
-SCRIPT_DIR := $(MAKE_FILE_DIR)util/scripts
+SCRIPT_DIR := $(REPO_ROOT)/util/scripts
 
-# This directory contains all the configs
-CONFIG_DIR := $(MAKE_FILE_DIR)configs
+# The base directory for all configuration samples.
+SAMPLE_DIR := $(REPO_ROOT)/configs
+
+CONFIG_DIR ?= $(REPO_ROOT)
 
 # Keep a reference to the actual settings file
 SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
@@ -64,7 +72,7 @@ SCRIPT_POSTFIX_CHROOT := $(SCRIPT_DIR)/prepare-postfix-chroot.sh
 # make's internal stamps
 # These are artificial files to track the status of commands / operations /
 # recipes, that do not directly result in output files.
-MAKE_STAMP_DIR := $(MAKE_FILE_DIR).make-stamps
+MAKE_STAMP_DIR := $(REPO_ROOT)/.make-stamps
 STAMP_OS_PACKAGES := $(MAKE_STAMP_DIR)/os-packages-installed
 STAMP_VMAIL_USER := $(MAKE_STAMP_DIR)/vmail-user-created
 STAMP_POSTFIX_CHROOT := $(MAKE_STAMP_DIR)/postfix-chroot-prepared
@@ -76,7 +84,7 @@ STAMP_POSTFIX_CHROOT := $(MAKE_STAMP_DIR)/postfix-chroot-prepared
 # (Python) virtual environment for ``tox``.
 #
 # ``tox``'s configuration is included in ``pyproject.toml``.
-TOX_VENV_DIR := $(MAKE_FILE_DIR).tox-venv
+TOX_VENV_DIR := $(REPO_ROOT)/.tox-venv
 TOX_VENV_CREATED := $(TOX_VENV_DIR)/pyvenv.cfg
 TOX_VENV_INSTALLED := $(TOX_VENV_DIR)/packages.txt
 TOX_CMD := $(TOX_VENV_DIR)/bin/tox
@@ -97,7 +105,16 @@ MAKEFLAGS += --no-builtin-rules
 
 # ### RECIPES
 
-# ##### These recipes perform the actual setup of the **mailsrv**.
+# ##### DEVELOPMENT
+
+repo :
+	echo $(REPO_ROOT)
+.PHONY : repo
+
+
+# ##### INSTALLATION
+#
+# These recipes are used to perform configuration and installation.
 
 
 # ##### Utility commands, i.e. linters
