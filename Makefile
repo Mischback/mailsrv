@@ -43,8 +43,8 @@ SAMPLE_DIR := $(REPO_ROOT)/configs
 # leaking of actual configurations.
 CONFIG_DIR ?= $(REPO_ROOT)/configs
 
-# Keep a reference to the actual settings file
-SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
+# The filename of the settings file.
+SETTINGS_ENV_FILE := settings.env
 
 # Generate a list of all ``.sample`` files, stripping the common part of the
 # path.
@@ -66,6 +66,11 @@ ALL_SAMPLES := $(shell find $(SAMPLE_DIR) -iname "*.sample" -printf "%P\n")
 # - when explicitly specifying $(CONFIG_DIR), the structure is created in
 #   another location, but making them fully compatible.
 CONFIGURATION_FILES := $(addprefix $(CONFIG_DIR)/,$(patsubst %.sample, %, $(ALL_SAMPLES)))
+
+# Keep a reference to the actual settings file
+#
+# This file is included in the list $(CONFIGURATION_FILES).
+CONFIGURATION_ENV_FILE := $(CONFIG_DIR)/$(SETTINGS_ENV_FILE)
 
 # This is a list of all required config files with their final destination.
 INSTALLATION_FILES := $(POSTFIX_CONF_DIR)/main.cf \
@@ -139,11 +144,19 @@ MAKEFLAGS += --no-builtin-rules
 configure : $(CONFIGURATION_FILES)
 .PHONY : configure
 
-$(CONFIG_DIR)/% : $(SAMPLE_DIR)/%.sample
-	echo "Processing $@"
+$(CONFIG_DIR)/% : $(SAMPLE_DIR)/%.sample $(CONFIGURATION_ENV_FILE)
+	echo "[DEBUG] Implicit rule - <$*> - $@"
 	$(create_dir)
 	touch $@
 
+# Generate the actual setting file from the sample.
+#
+# This will overwrite existing settings, if there is a more recent ``.sample``.
+# This should not be a problem, as the existing file is backed up.
+$(CONFIGURATION_ENV_FILE) : $(SAMPLE_DIR)/$(SETTINGS_ENV_FILE).sample
+	echo "[DEBUG] Explicit rule - <$*> - $@"
+	$(create_dir)
+	$(SCRIPT_SAVE_COPY) $@ $<
 
 # ##### INSTALLATION
 #
