@@ -46,29 +46,50 @@ CONFIG_DIR ?= $(REPO_ROOT)/configs
 # Keep a reference to the actual settings file
 SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
 
+# Generate a list of all ``.sample`` files, stripping the common part of the
+# path.
+#
+# This is used instead of make's built-in ``wildcard``, as it automatically
+# supports infinite depth of directories. Portability is probably not an issue
+# here, all Linux/Unix boxes should have ``find``.
+ALL_SAMPLES := $(shell find $(SAMPLE_DIR) -iname "*.sample" -printf "%P\n")
+
+# Generate a list of all required configuration files.
+#
+# Basically this is a list of all sample files, removing the suffix ``.sample``
+# and adding the value of $(CONFIG_DIR) as common prefix.
+#
+# This allows for some interesting applications:
+# - it recreates the existing structure inside of $(SAMPLE_DIR) in $(CONFIG_DIR)
+# - without specifying $(CONFIG_DIR) while calling make, this creates all
+#   config files beneath their respective sample
+# - when explicitly specifying $(CONFIG_DIR), the structure is created in
+#   another location, but making them fully compatible.
+CONFIGURATION_FILES := $(addprefix $(CONFIG_DIR)/,$(patsubst %.sample, %, $(ALL_SAMPLES)))
+
 # This is a list of all required config files with their final destination.
-CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf \
-                $(POSTFIX_CONF_DIR)/master.cf \
-                $(POSTFIX_CONF_DIR)/lookup_local_aliases \
-                $(POSTFIX_CONF_DIR)/lookup_local_aliases.db \
-                $(POSTFIX_CONF_DIR)/lookup_sender2login \
-                $(POSTFIX_CONF_DIR)/lookup_sender2login.db \
-                $(POSTFIX_CONF_DIR)/lookup_valiases \
-                $(POSTFIX_CONF_DIR)/lookup_valiases.db \
-                $(POSTFIX_CONF_DIR)/lookup_vdomains \
-                $(POSTFIX_CONF_DIR)/lookup_vdomains.db \
-                $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
-                $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
-                $(POSTFIX_CONF_DIR)/lookup_vmailboxes.db \
-                $(DOVECOT_BASE_DIR)/vmail_users \
-                $(DOVECOT_CONF_DIR)/10-auth.conf \
-                $(DOVECOT_CONF_DIR)/10-mail.conf \
-                $(DOVECOT_CONF_DIR)/10-master.conf \
-                $(DOVECOT_CONF_DIR)/10-ssl.conf \
-                $(DOVECOT_CONF_DIR)/15-lda.conf \
-                $(DOVECOT_CONF_DIR)/90-quota.conf \
-                $(DOVECOT_BASE_DIR)/quota-warning.sh \
-                $(DOVECOT_CONF_DIR)/auth-passwdfile.conf.ext
+INSTALLATION_FILES := $(POSTFIX_CONF_DIR)/main.cf \
+                      $(POSTFIX_CONF_DIR)/master.cf \
+                      $(POSTFIX_CONF_DIR)/lookup_local_aliases \
+                      $(POSTFIX_CONF_DIR)/lookup_local_aliases.db \
+                      $(POSTFIX_CONF_DIR)/lookup_sender2login \
+                      $(POSTFIX_CONF_DIR)/lookup_sender2login.db \
+                      $(POSTFIX_CONF_DIR)/lookup_valiases \
+                      $(POSTFIX_CONF_DIR)/lookup_valiases.db \
+                      $(POSTFIX_CONF_DIR)/lookup_vdomains \
+                      $(POSTFIX_CONF_DIR)/lookup_vdomains.db \
+                      $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
+                      $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
+                      $(POSTFIX_CONF_DIR)/lookup_vmailboxes.db \
+                      $(DOVECOT_BASE_DIR)/vmail_users \
+                      $(DOVECOT_CONF_DIR)/10-auth.conf \
+                      $(DOVECOT_CONF_DIR)/10-mail.conf \
+                      $(DOVECOT_CONF_DIR)/10-master.conf \
+                      $(DOVECOT_CONF_DIR)/10-ssl.conf \
+                      $(DOVECOT_CONF_DIR)/15-lda.conf \
+                      $(DOVECOT_CONF_DIR)/90-quota.conf \
+                      $(DOVECOT_BASE_DIR)/quota-warning.sh \
+                      $(DOVECOT_CONF_DIR)/auth-passwdfile.conf.ext
 
 # The name of the actual setup scripts
 SCRIPT_OS_PACKAGES := $(SCRIPT_DIR)/install-packages.sh
@@ -114,6 +135,14 @@ MAKEFLAGS += --no-builtin-rules
 # ### RECIPES
 
 # ##### DEVELOPMENT
+
+configure : $(CONFIGURATION_FILES)
+.PHONY : configure
+
+$(CONFIG_DIR)/% : $(SAMPLE_DIR)/%.sample
+	echo "Processing $@"
+	$(create_dir)
+	touch $@
 
 
 # ##### INSTALLATION
