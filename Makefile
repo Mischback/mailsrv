@@ -105,12 +105,14 @@ SCRIPT_POSTFIX_CHROOT := $(SCRIPT_DIR)/prepare-postfix-chroot.sh
 # These are artificial files to track the status of commands / operations /
 # recipes, that do not directly result in output files.
 MAKE_STAMP_DIR := $(REPO_ROOT)/.make-stamps
+STAMP_SETUP_COMPLETED := $(MAKE_STAMP_DIR)/setup-completed
 STAMP_SOFTWARE_READY := $(MAKE_STAMP_DIR)/software-ready
 STAMP_POSTFIX_READY := $(MAKE_STAMP_DIR)/postfix-ready
 STAMP_DOVECOT_READY := $(MAKE_STAMP_DIR)/dovecot-ready
 STAMP_OS_PACKAGES := $(MAKE_STAMP_DIR)/os-packages-installed
 STAMP_VMAIL_USER := $(MAKE_STAMP_DIR)/vmail-user-created
 STAMP_POSTFIX_CHROOT := $(MAKE_STAMP_DIR)/postfix-chroot-prepared
+STAMP_RESTART_AFTER_SETUP := $(MAKE_STAMP_DIR)/restart-after-setup
 
 # Python virtual environments
 #
@@ -146,10 +148,27 @@ tmp :
 	echo $(CONFIGURATION_FILES)
 .PHONY : tmp
 
+
+# ##### INSTALLATION
+#
+# These recipes are used to perform configuration and installation.
+
+configure : $(CONFIGURATION_FILES) $(STAMP_SOFTWARE_READY)
+.PHONY : configure
+
+install : $(STAMP_SETUP_COMPLETED)
+.PHONY : install
+
+restart : $(STAMP_RESTART_AFTER_SETUP)
+.PHONY : restart
+
+
+# This recipe places Dovecot's configuration files in the desired directories.
 $(DOVECOT_BASE_DIR)/% : $(CONFIG_DIR)/dovecot/%
 	echo "[DEBUG] INSTALL - <$*> - $@"
 	$(SCRIPT_SAVE_COPY) $@ $<
 
+# This recipe places Postfix's configuration files in the desired directories.
 $(POSTFIX_CONF_DIR)/% : $(CONFIG_DIR)/postfix/%
 	echo "[DEBUG] INSTALL - <$*> - $@"
 	$(SCRIPT_SAVE_COPY) $@ $<
@@ -169,6 +188,19 @@ $(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/%
 $(POSTFIX_CONF_DIR)/lookup_local_aliases.db : $(POSTFIX_CONF_DIR)/lookup_local_aliases $(POSTFIX_CONF_DIR)/main.cf
 	echo "[INFO] Regenerating $@ using newaliases"
 	$(shell which newaliases)
+
+# Meta stamp to track, if a restart is required
+$(STAMP_RESTART_AFTER_SETUP) : $(STAMP_SETUP_COMPLETED)
+	echo "[INFO] Restarting services!"
+	systemctl restart postfix*
+	systemctl restart dovecot*
+	$(create_dir)
+	touch $@
+
+# Meta stamp to track the overall status of the setup
+$(STAMP_SETUP_COMPLETED) : $(INSTALLATION_FILES) $(STAMP_SOFTWARE_READY)
+	$(create_dir)
+	touch $@
 
 # Meta stamp to track the overall status of the software
 $(STAMP_SOFTWARE_READY) : $(STAMP_POSTFIX_READY) $(STAMP_DOVECOT_READY)
@@ -205,17 +237,6 @@ $(STAMP_POSTFIX_CHROOT) : $(SCRIPT_POSTFIX_CHROOT) | $(STAMP_OS_PACKAGES)
 	$(create_dir)
 	$(SCRIPT_POSTFIX_CHROOT)
 	touch $@
-
-
-# ##### INSTALLATION
-#
-# These recipes are used to perform configuration and installation.
-
-configure : $(CONFIGURATION_FILES) $(STAMP_SOFTWARE_READY)
-.PHONY : configure
-
-install : $(INSTALLATION_FILES)
-.PHONY : install
 
 # Generate the actual configuration files from the samples.
 #
