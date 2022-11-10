@@ -33,7 +33,15 @@ SCRIPT_DIR := $(REPO_ROOT)/util/scripts
 # The base directory for all configuration samples.
 SAMPLE_DIR := $(REPO_ROOT)/configs
 
-CONFIG_DIR ?= $(REPO_ROOT)
+# The actual configuration files are placed in this directory.
+#
+# This directory may be determined while calling a recipe of this ``Makefile``.
+# By default, the actual configs will be generated along the corresponding
+# sample files.
+#
+# Please note: The actual configuration files are ignored in order to prevent
+# leaking of actual configurations.
+CONFIG_DIR ?= $(REPO_ROOT)/configs
 
 # Keep a reference to the actual settings file
 SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
@@ -106,10 +114,6 @@ MAKEFLAGS += --no-builtin-rules
 # ### RECIPES
 
 # ##### DEVELOPMENT
-
-repo :
-	echo $(REPO_ROOT)
-.PHONY : repo
 
 
 # ##### INSTALLATION
