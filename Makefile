@@ -105,6 +105,9 @@ SCRIPT_POSTFIX_CHROOT := $(SCRIPT_DIR)/prepare-postfix-chroot.sh
 # These are artificial files to track the status of commands / operations /
 # recipes, that do not directly result in output files.
 MAKE_STAMP_DIR := $(REPO_ROOT)/.make-stamps
+STAMP_SOFTWARE_READY := $(MAKE_STAMP_DIR)/software-ready
+STAMP_POSTFIX_READY := $(MAKE_STAMP_DIR)/postfix-ready
+STAMP_DOVECOT_READY := $(MAKE_STAMP_DIR)/dovecot-ready
 STAMP_OS_PACKAGES := $(MAKE_STAMP_DIR)/os-packages-installed
 STAMP_VMAIL_USER := $(MAKE_STAMP_DIR)/vmail-user-created
 STAMP_POSTFIX_CHROOT := $(MAKE_STAMP_DIR)/postfix-chroot-prepared
@@ -167,12 +170,48 @@ $(POSTFIX_CONF_DIR)/lookup_local_aliases.db : $(POSTFIX_CONF_DIR)/lookup_local_a
 	echo "[INFO] Regenerating $@ using newaliases"
 	$(shell which newaliases)
 
+# Meta stamp to track the overall status of the software
+$(STAMP_SOFTWARE_READY) : $(STAMP_POSTFIX_READY) $(STAMP_DOVECOT_READY)
+	$(create_dir)
+	touch $@
+
+# Meta stamp to track the status of Dovecot
+$(STAMP_DOVECOT_READY) : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(STAMP_POSTFIX_CHROOT)
+	$(create_dir)
+	touch $@
+
+# Meta stamp to track the status of Postfix
+$(STAMP_POSTFIX_READY) : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(STAMP_POSTFIX_CHROOT)
+	$(create_dir)
+	touch $@
+
+# Installation of the required packages (from the repositories)
+$(STAMP_OS_PACKAGES) : $(SCRIPT_OS_PACKAGES)
+	$(create_dir)
+	$(SCRIPT_OS_PACKAGES)
+	touch $@
+
+# Create the required system user and group and create the mailbox directory
+$(STAMP_VMAIL_USER) : $(SCRIPT_VMAIL_USER)
+	$(create_dir)
+	$(SCRIPT_VMAIL_USER)
+	touch $@
+
+# Prepare Postfix's ``chroot`` environment.
+#
+# As Dovecot's sockets are placed in non-default locations, this has to be run
+# once.
+$(STAMP_POSTFIX_CHROOT) : $(SCRIPT_POSTFIX_CHROOT) | $(STAMP_OS_PACKAGES)
+	$(create_dir)
+	$(SCRIPT_POSTFIX_CHROOT)
+	touch $@
+
 
 # ##### INSTALLATION
 #
 # These recipes are used to perform configuration and installation.
 
-configure : $(CONFIGURATION_FILES)
+configure : $(CONFIGURATION_FILES) $(STAMP_SOFTWARE_READY)
 .PHONY : configure
 
 install : $(INSTALLATION_FILES)
