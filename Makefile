@@ -143,8 +143,40 @@ tmp :
 	echo $(CONFIGURATION_FILES)
 .PHONY : tmp
 
+$(DOVECOT_BASE_DIR)/% : $(CONFIG_DIR)/dovecot/%
+	echo "[DEBUG] INSTALL - <$*> - $@"
+	$(SCRIPT_SAVE_COPY) $@ $<
+
+$(POSTFIX_CONF_DIR)/% : $(CONFIG_DIR)/postfix/%
+	echo "[DEBUG] INSTALL - <$*> - $@"
+	$(SCRIPT_SAVE_COPY) $@ $<
+
+# Compile the actual lookup databases.
+#
+# This uses Postfix's ``postmap`` utility to create / compile the actual lookup
+# databases.
+$(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/%
+	echo "[INFO] Regenerating $@ using postmap"
+	$(shell which postmap) $<
+
+# Compile the local alias lookup database.
+#
+# The local alias database is special, as it is compiled with ``newaliases``
+# instead of ``postmap``.
+$(POSTFIX_CONF_DIR)/lookup_local_aliases.db : $(POSTFIX_CONF_DIR)/lookup_local_aliases $(POSTFIX_CONF_DIR)/main.cf
+	echo "[INFO] Regenerating $@ using newaliases"
+	$(shell which newaliases)
+
+
+# ##### INSTALLATION
+#
+# These recipes are used to perform configuration and installation.
+
 configure : $(CONFIGURATION_FILES)
 .PHONY : configure
+
+install : $(INSTALLATION_FILES)
+.PHONY : install
 
 # Generate the actual configuration files from the samples.
 #
@@ -163,20 +195,6 @@ $(CONFIGURATION_ENV_FILE) : $(SAMPLE_DIR)/$(SETTINGS_ENV_FILE).sample
 	echo "[DEBUG] Explicit rule - <$*> - $@"
 	$(create_dir)
 	$(SCRIPT_SAVE_COPY) $@ $<
-
-# TODO: This could be a dedicated rule to create lookup tables
-#       This would create the table sources without processing them.
-#       Needs testing!
-# TODO: If this is desired, this would basically require renaming all of them
-#       and adjusting main.cf.sample!
-#$(CONFIG_DIR)/%.lookup : $(SAMPLE_DIR)/%.lookup.sample
-#	echo "[DEBUG] lookup - <$*> - $@"
-#	$(create_dir)
-#	$(SCRIPT_SAVE_COPY) $@ $<
-
-# ##### INSTALLATION
-#
-# These recipes are used to perform configuration and installation.
 
 
 # ##### Utility commands, i.e. linters
