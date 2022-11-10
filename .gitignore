@@ -1,19 +1,15 @@
-# Make sure to actually ignore all configuration files! They may contain
-# user-specific, probably sensitive, configuration data, that should not be
-# exposed!
-configs/*
-# ... but do include this repository's samples!
-!configs/**.sample
-!configs/*/
-configs/*/*
-!configs/*/**.sample
-# Dovecot's samples are in fact deeper (in configs/dovecot/conf.d/*)
-!configs/*/*/
-configs/*/*/*
-!configs/*/*/**.sample
-# The following script is provided directly... It will not disclose sensitive
-# data (configuration data) and may be used *as is*.
-!configs/dovecot/quota-warning.sh
+# Ignore the actual configuration files, if they are generated in-place.
+#
+# 1) ignore anything in /configs
+# 2) unignore all directories below /configs
+# 3) unignore all files with the suffix ``.sample``
+#
+# Ref: https://stackoverflow.com/a/19023985
+# Ref: https://stackoverflow.com/a/30476326
+# Ref: https://git-scm.com/docs/gitignore
+/configs/**
+!/configs/**/
+!/configs/**/*.sample
 
 # Ignore make's stamp dir
 .make-stamps/
