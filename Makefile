@@ -261,7 +261,7 @@ $(CONFIGURATION_ENV_FILE) : $(SAMPLE_DIR)/$(SETTINGS_ENV_FILE).sample
 
 mypy_files ?= ""
 util/local/mypy :
-	$(TOX_CMD) -e typechecking -- mypy $(mypy_files)
+	$(TOX_CMD) -vve typechecking -- mypy $(mypy_files)
 .PHONY : util/local/mypy
 
 util/black :
