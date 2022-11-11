@@ -22,7 +22,28 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - name: Pre-commit Linters
+      - name: Linters
         run: |
           python -m pip install --upgrade pip
           make util/ci/linting
+
+  # If the workflow is run because of a Dependabot-created PR, automatically
+  # approve the PR if it is a minor/patch update of a dependency.
+  # This requires the completion of the ``testing`` step.
+  dependabot:
+    name: Dependabot (auto approve)
+    needs: linting
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1.3.4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Automatically approve minor and patch updates
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
