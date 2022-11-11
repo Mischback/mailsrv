@@ -29,6 +29,7 @@ DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 # Include auxiliary scripts
+# shellcheck source=util/scripts/backup-existing-target.sh
 source "$DIR/backup-existing-target.sh"
 
 DST=$1
@@ -37,7 +38,7 @@ SRC=$2
 echo "[INFO] Copying ${SRC} to ${DST}!"
 
 # Create a backup if the output file already exists.
-backup_existing_target ${DST}
+backup_existing_target "${DST}"
 
 # Actually copy the file
-cp ${SRC} ${DST}
+cp "${SRC}" "${DST}"

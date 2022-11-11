@@ -259,26 +259,55 @@ $(CONFIGURATION_ENV_FILE) : $(SAMPLE_DIR)/$(SETTINGS_ENV_FILE).sample
 # Basically all of them are PHONY targets. ``make`` is (mis-) used as a mere
 # task runner here.
 
+# This is an artificial recipe run the linters.
+#
+# It is called in GitHub Actions workflow, but it **would** be preferable to
+# just run ``make util/pre-commit`` to run all linters.
+# However, because of #33 this is currently not possible.
+#
+# FIXME: https://github.com/Mischback/mailsrv/issues/33
+util/ci/linting : util/linter/black util/linter/isort util/linter/flake8 util/linter/shellcheck util/linter/doc8
+	$(MAKE) util/pre-commit pre-commit_id="check-executables-have-shebangs" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="check-json" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="check-toml" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="check-yaml" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="check-vcs-permalinks" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="requirements-txt-fixer" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="end-of-file-fixer" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="trailing-whitespace" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="mixed-line-ending" pre-commit_files="--all-files"
+.PHONY : util/ci/linting
+
+# FIXME: https://github.com/Mischback/mailsrv/issues/33
 mypy_files ?= ""
 util/local/mypy :
 	$(TOX_CMD) -e typechecking -- mypy $(mypy_files)
 .PHONY : util/local/mypy
 
-util/black :
+util/linter/black :
 	$(MAKE) util/pre-commit pre-commit_id="black" pre-commit_files="--all-files"
-.PHONY : util/black
+.PHONY : util/linter/black
 
-util/isort :
+util/linter/doc8 :
+	$(MAKE) util/pre-commit pre-commit_id="doc8" pre-commit_files="--all-files"
+.PHONY : util/linter/doc8
+
+util/linter/isort :
 	$(MAKE) util/pre-commit pre-commit_id="isort" pre-commit_files="--all-files"
-.PHONY : util/isort
+.PHONY : util/linter/isort
 
-util/flake8 :
+util/linter/flake8 :
 	$(MAKE) util/pre-commit pre-commit_id="flake8" pre-commit_files="--all-files"
-.PHONY : util/isort
+.PHONY : util/linter/flake8
 
-util/mypy :
+# FIXME: https://github.com/Mischback/mailsrv/issues/33
+util/linter/mypy :
 	$(MAKE) util/pre-commit pre-commit_id="mypy" pre-commit_files="--all-files"
-.PHONY : util/mypy
+.PHONY : util/linter/mypy
+
+util/linter/shellcheck :
+	$(MAKE) util/pre-commit pre-commit_id="shellcheck" pre-commit_files="--all-files"
+.PHONY : util/linter/shellcheck
 
 pre-commit_id ?= ""
 pre-commit_files ?= ""
