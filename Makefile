@@ -165,12 +165,10 @@ restart : $(STAMP_RESTART_AFTER_SETUP)
 
 # This recipe places Dovecot's configuration files in the desired directories.
 $(DOVECOT_BASE_DIR)/% : $(CONFIG_DIR)/dovecot/%
-	echo "[DEBUG] INSTALL - <$*> - $@"
 	$(SCRIPT_SAVE_COPY) $@ $<
 
 # This recipe places Postfix's configuration files in the desired directories.
 $(POSTFIX_CONF_DIR)/% : $(CONFIG_DIR)/postfix/%
-	echo "[DEBUG] INSTALL - <$*> - $@"
 	$(SCRIPT_SAVE_COPY) $@ $<
 
 # Compile the actual lookup databases.
@@ -244,7 +242,6 @@ $(STAMP_POSTFIX_CHROOT) : $(SCRIPT_POSTFIX_CHROOT) | $(STAMP_OS_PACKAGES)
 # This implicit rule is used to generate all configuration files, applying
 # variable substitution from $(CONFIGURATION_ENV_FILE).
 $(CONFIG_DIR)/% : $(SAMPLE_DIR)/%.sample $(CONFIGURATION_ENV_FILE) | $(STAMP_SOFTWARE_READY)
-	echo "[DEBUG] Implicit rule - <$*> - $@"
 	$(create_dir)
 	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(CONFIGURATION_ENV_FILE)
 
@@ -253,7 +250,6 @@ $(CONFIG_DIR)/% : $(SAMPLE_DIR)/%.sample $(CONFIGURATION_ENV_FILE) | $(STAMP_SOF
 # This will overwrite existing settings, if there is a more recent ``.sample``.
 # This should not be a problem, as the existing file is backed up.
 $(CONFIGURATION_ENV_FILE) : $(SAMPLE_DIR)/$(SETTINGS_ENV_FILE).sample
-	echo "[DEBUG] Explicit rule - <$*> - $@"
 	$(create_dir)
 	$(SCRIPT_SAVE_COPY) $@ $<
 
