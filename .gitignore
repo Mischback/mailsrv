@@ -11,6 +11,33 @@
 !/configs/**/
 !/configs/**/*.sample
 
+# Ignore the actual configuration files for the test setup.
+#
+# These files will be generated while setting up the test systems from the
+# provided settings files.
+#
+# Please note: All config file related to virtual mails are included, these
+# define the actual setup.
+#
+# 1) ignore anything in /util/test_configs/devnet/[sut|other-domain]
+# 2) unignore all directories below
+# 3) unignore specific configuration files
+# 4) ignore auto-generated backup files
+/util/test_configs/devnet/sut/**
+/util/test_configs/devnet/other-domain/**
+!/util/test_configs/devnet/sut/**/
+!/util/test_configs/devnet/other-domain/**/
+!/util/test_configs/devnet/sut/interfaces_*
+!/util/test_configs/devnet/other-domain/interfaces_*
+!/util/test_configs/devnet/sut/settings.env
+!/util/test_configs/devnet/other-domain/settings.env
+!/util/test_configs/devnet/sut/dovecot/vmail_users
+!/util/test_configs/devnet/other-domain/dovecot/vmail_users
+!/util/test_configs/devnet/sut/postfix/lookup_*
+!/util/test_configs/devnet/other-domain/postfix/lookup_*
+/util/test_configs/devnet/sut/postfix/lookup_*.*
+/util/test_configs/devnet/other-domain/postfix/lookup_*.*
+
 # Ignore make's stamp dir
 .make-stamps/
 
