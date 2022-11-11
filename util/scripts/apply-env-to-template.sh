@@ -31,6 +31,7 @@ DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 # Include auxiliary scripts
+# shellcheck source=util/scripts/backup-existing-target.sh
 source "$DIR/backup-existing-target.sh"
 
 # Fetch parameters.
@@ -41,7 +42,7 @@ ENV_FILE=$3
 echo "[INFO] (Re-)generating ${OUTPUT_FILE}"
 
 # Create a backup if the output file already exists.
-backup_existing_target ${OUTPUT_FILE}
+backup_existing_target "${OUTPUT_FILE}"
 
 # This is where the magic happens!
 #
@@ -58,7 +59,15 @@ backup_existing_target ${OUTPUT_FILE}
 # determines, which variables will get substituted. This list limits the
 # operation to the set of variables that are required in this repository,
 # leaving other occurences of the pattern``$something`` untouched.
-env -i $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
+#
+# The *outer* ``$(grep ...)`` is not included in double-quotes, the splitting
+# is actually required.
+# shellcheck disable=SC2046
+#
+# ``envsubst`` requires a list of variable names, they **must** not be
+# expanded.
+# shellcheck disable=SC2016
+env -i $(grep -v '^#' "${ENV_FILE}" | xargs -d '\n') \
   envsubst '
     $MAILSRV_HOSTNAME
     $MAILSRV_DOVECOT_INTERFACES
@@ -73,5 +82,5 @@ env -i $(grep -v '^#' ${ENV_FILE} | xargs -d '\n') \
     $MAILSRV_SERVER_ADMIN
     $MAILSRV_MAILBOX_QUOTA
     ' \
-    < ${INPUT_FILE} \
-    > ${OUTPUT_FILE}
+    < "${INPUT_FILE}" \
+    > "${OUTPUT_FILE}"

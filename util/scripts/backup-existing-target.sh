@@ -19,22 +19,24 @@
 # files and directories before creating the actual symlink.
 function backup_existing_target {
   # Get the current date, if a backup has to be created.
-  local date_str=$(date +%Y-%m-%d-%H%M)
+  local date_str
+  date_str=$(date +%Y-%m-%d-%H%M)
 
-  local dst="$1"
+  local dst
+  dst="$1"
 
   # echo " [DEBUG] destination: $dst"  # just for debugging
   # echo " [DEBUG] source: $src"  # just for debugging
 
-  if [ -h $dst ]; then
+  if [ -h "$dst" ]; then
     echo "[INFO] Found existing symlink! Will remove it."
-    ls -lah $dst
-    rm $dst
-  elif [ -f $dst ]; then
+    ls -lah "$dst"
+    rm "$dst"
+  elif [ -f "$dst" ]; then
     echo "[INFO] Found existing file! Will create backup."
-    mv $dst{,.$date_str}
-  elif [ -d $dst ]; then
+    mv "$dst"{,."$date_str"}
+  elif [ -d "$dst" ]; then
     echo "[INFO] Found existing directory! Will create backup."
-    mv $dst{,.$date_str}
+    mv "$dst"{,."$date_str"}
   fi
 }

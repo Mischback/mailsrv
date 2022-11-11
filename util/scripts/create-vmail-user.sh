@@ -32,7 +32,7 @@ set -euo pipefail
 # existing group is the same group ID as specified here. It silently assumes
 # that this will work out, even if the ``vmail`` group was created manually
 # with another group ID (which should work).
-if [ ! $(getent group vmail) ]; then
+if [ ! "$(getent group vmail)" ]; then
   echo "[INFO] Creating group vmail"
   groupadd -g 5000 vmail
 fi
@@ -52,7 +52,7 @@ mkdir -p /var/vmail
 # specified here.
 # If you have created the user manually, make sure to limit its access rights
 # as far as possible.
-if [ ! $(getent passwd vmail) ]; then
+if [ ! "$(getent passwd vmail)" ]; then
   echo "[INFO] Creating user vmail"
   useradd -g vmail -u 5000 -d /var/vmail vmail
   echo "[INFO] Disabling login for user vmail"
