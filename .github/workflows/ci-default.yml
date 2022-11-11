@@ -1,0 +1,27 @@
+name: CI default branch
+
+on:
+  push:
+    branches: [dependabot-setup]
+  pull_request:
+    branches: [development]
+
+# Dependabot PRs of minor/patch versions should be auto-approved. This requires
+# the permission to modify the PR from this workflow.
+permissions:
+  pull-requests: write
+
+jobs:
+  linting:
+    name: Run Linters
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Pre-commit Linters
+        run: |
+          make util/pre-commit pre-commit_files="--all-files"
