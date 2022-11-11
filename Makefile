@@ -280,6 +280,10 @@ util/mypy :
 	$(MAKE) util/pre-commit pre-commit_id="mypy" pre-commit_files="--all-files"
 .PHONY : util/mypy
 
+util/shellcheck :
+	$(MAKE) util/pre-commit pre-commit_id="shellcheck" pre-commit_files="--all-files"
+.PHONY : util/shellcheck
+
 pre-commit_id ?= ""
 pre-commit_files ?= ""
 util/pre-commit : $(PRE_COMMIT_READY)
