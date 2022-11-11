@@ -81,4 +81,3 @@ auth_mechanisms = plain login
 !include auth-passwdfile.conf.ext
 #!include auth-checkpassword.conf.ext
 #!include auth-static.conf.ext
-

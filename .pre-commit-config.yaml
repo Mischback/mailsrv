@@ -47,12 +47,18 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
+      # check scripts to have shebangs
+      - id: check-executables-have-shebangs
       # check JSON files
       - id: check-json
       # check TOML files
       - id: check-toml
       # check YAML files
       - id: check-yaml
+      # check links to GitHub
+      - id: check-vcs-permalinks
+      # sort Python requirements files
+      - id: requirements-txt-fixer
       # let all files end with a single new line (this *should be ensured by
       # .editorconfig already)
       - id: end-of-file-fixer

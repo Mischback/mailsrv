@@ -422,4 +422,3 @@ smtpd_sasl_auth_enable = yes
 #
 # TODO: https://github.com/Mischback/mailsrv/issues/16
 smtpd_sender_login_maps = hash:/etc/postfix/lookup_sender2login
-
