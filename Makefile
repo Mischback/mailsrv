@@ -177,7 +177,7 @@ $(POSTFIX_CONF_DIR)/% : $(CONFIG_DIR)/postfix/%
 #
 # This uses Postfix's ``postmap`` utility to create / compile the actual lookup
 # databases.
-$(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/%
+$(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/% | $(STAMP_POSTFIX_READY)
 	echo "[INFO] Regenerating $@ using postmap"
 	$(shell which postmap) $<
 
@@ -185,9 +185,10 @@ $(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/%
 #
 # The local alias database is special, as it is compiled with ``newaliases``
 # instead of ``postmap``.
-$(POSTFIX_CONF_DIR)/lookup_local_aliases.db : $(POSTFIX_CONF_DIR)/lookup_local_aliases $(POSTFIX_CONF_DIR)/main.cf
+$(POSTFIX_CONF_DIR)/lookup_local_aliases.db : $(POSTFIX_CONF_DIR)/lookup_local_aliases $(POSTFIX_CONF_DIR)/main.cf | $(STAMP_POSTFIX_READY)
 	echo "[INFO] Regenerating $@ using newaliases"
 	$(shell which newaliases)
+	touch $@
 
 # Meta stamp to track, if a restart is required
 $(STAMP_RESTART_AFTER_SETUP) : $(STAMP_SETUP_COMPLETED)
@@ -242,7 +243,7 @@ $(STAMP_POSTFIX_CHROOT) : $(SCRIPT_POSTFIX_CHROOT) | $(STAMP_OS_PACKAGES)
 #
 # This implicit rule is used to generate all configuration files, applying
 # variable substitution from $(CONFIGURATION_ENV_FILE).
-$(CONFIG_DIR)/% : $(SAMPLE_DIR)/%.sample $(CONFIGURATION_ENV_FILE)
+$(CONFIG_DIR)/% : $(SAMPLE_DIR)/%.sample $(CONFIGURATION_ENV_FILE) | $(STAMP_SOFTWARE_READY)
 	echo "[DEBUG] Implicit rule - <$*> - $@"
 	$(create_dir)
 	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(CONFIGURATION_ENV_FILE)
