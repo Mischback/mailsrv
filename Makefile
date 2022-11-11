@@ -259,14 +259,31 @@ $(CONFIGURATION_ENV_FILE) : $(SAMPLE_DIR)/$(SETTINGS_ENV_FILE).sample
 # Basically all of them are PHONY targets. ``make`` is (mis-) used as a mere
 # task runner here.
 
+util/ci/linting : util/black util/isort util/flake8 util/shellcheck util/doc8
+	$(MAKE) util/pre-commit pre-commit_id="check-executables-have-shebangs" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="check-json" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="check-toml" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="check-yaml" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="check-vcs-permalinks" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="requirements-txt-fixer" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="end-of-file-fixer" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="trailing-whitespace" pre-commit_files="--all-files"
+	$(MAKE) util/pre-commit pre-commit_id="mixed-line-ending" pre-commit_files="--all-files"
+.PHONY : util/ci/linting
+
+# FIXME: https://github.com/Mischback/mailsrv/issues/33
 mypy_files ?= ""
 util/local/mypy :
-	$(TOX_CMD) -vve typechecking -- mypy $(mypy_files)
+	$(TOX_CMD) -e typechecking -- mypy $(mypy_files)
 .PHONY : util/local/mypy
 
 util/black :
 	$(MAKE) util/pre-commit pre-commit_id="black" pre-commit_files="--all-files"
 .PHONY : util/black
+
+util/doc8 :
+	$(MAKE) util/pre-commit pre-commit_id="doc8" pre-commit_files="--all-files"
+.PHONY : util/doc8
 
 util/isort :
 	$(MAKE) util/pre-commit pre-commit_id="isort" pre-commit_files="--all-files"
