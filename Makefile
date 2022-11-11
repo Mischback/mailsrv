@@ -17,42 +17,82 @@ DOVECOT_CONF_DIR := $(DOVECOT_BASE_DIR)/conf.d
 
 # ### INTERNAL SETTINGS / CONSTANTS
 
-# Find the location of this Makefile, which should also be the repository root,
-# which is the root for all path's.
-MAKE_FILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+# The absolute path to the repository.
+#
+# This assumes that this ``Makefile`` is placed in the root of the repository.
+# REPO_ROOT does not contain a trailing ``/``
+#
+# Ref: https://stackoverflow.com/a/324782
+# Ref: https://stackoverflow.com/a/2547973
+# Ref: https://stackoverflow.com/a/73450593
+REPO_ROOT := $(patsubst %/, %, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 # This directory contains all the scripts
-SCRIPT_DIR := $(MAKE_FILE_DIR)util/scripts
+SCRIPT_DIR := $(REPO_ROOT)/util/scripts
 
-# This directory contains all the configs
-CONFIG_DIR := $(MAKE_FILE_DIR)configs
+# The base directory for all configuration samples.
+SAMPLE_DIR := $(REPO_ROOT)/configs
+
+# The actual configuration files are placed in this directory.
+#
+# This directory may be determined while calling a recipe of this ``Makefile``.
+# By default, the actual configs will be generated along the corresponding
+# sample files.
+#
+# Please note: The actual configuration files are ignored in order to prevent
+# leaking of actual configurations.
+CONFIG_DIR ?= $(REPO_ROOT)/configs
+
+# The filename of the settings file.
+SETTINGS_ENV_FILE := settings.env
+
+# Generate a list of all ``.sample`` files, stripping the common part of the
+# path.
+#
+# This is used instead of make's built-in ``wildcard``, as it automatically
+# supports infinite depth of directories. Portability is probably not an issue
+# here, all Linux/Unix boxes should have ``find``.
+ALL_SAMPLES := $(shell find $(SAMPLE_DIR) -type f -iname "*.sample" ! -iname "$(SETTINGS_ENV_FILE).sample" -printf "%P\n")
+
+# Generate a list of all required configuration files.
+#
+# Basically this is a list of all sample files, removing the suffix ``.sample``
+# and adding the value of $(CONFIG_DIR) as common prefix.
+#
+# This allows for some interesting applications:
+# - it recreates the existing structure inside of $(SAMPLE_DIR) in $(CONFIG_DIR)
+# - without specifying $(CONFIG_DIR) while calling make, this creates all
+#   config files beneath their respective sample
+# - when explicitly specifying $(CONFIG_DIR), the structure is created in
+#   another location, but making them fully compatible.
+CONFIGURATION_FILES := $(addprefix $(CONFIG_DIR)/,$(patsubst %.sample, %, $(ALL_SAMPLES)))
 
 # Keep a reference to the actual settings file
-SETTINGS_ENV_FILE := $(CONFIG_DIR)/settings.env
+CONFIGURATION_ENV_FILE := $(CONFIG_DIR)/$(SETTINGS_ENV_FILE)
 
 # This is a list of all required config files with their final destination.
-CONFIG_FILES := $(POSTFIX_CONF_DIR)/main.cf \
-                $(POSTFIX_CONF_DIR)/master.cf \
-                $(POSTFIX_CONF_DIR)/lookup_local_aliases \
-                $(POSTFIX_CONF_DIR)/lookup_local_aliases.db \
-                $(POSTFIX_CONF_DIR)/lookup_sender2login \
-                $(POSTFIX_CONF_DIR)/lookup_sender2login.db \
-                $(POSTFIX_CONF_DIR)/lookup_valiases \
-                $(POSTFIX_CONF_DIR)/lookup_valiases.db \
-                $(POSTFIX_CONF_DIR)/lookup_vdomains \
-                $(POSTFIX_CONF_DIR)/lookup_vdomains.db \
-                $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
-                $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
-                $(POSTFIX_CONF_DIR)/lookup_vmailboxes.db \
-                $(DOVECOT_BASE_DIR)/vmail_users \
-                $(DOVECOT_CONF_DIR)/10-auth.conf \
-                $(DOVECOT_CONF_DIR)/10-mail.conf \
-                $(DOVECOT_CONF_DIR)/10-master.conf \
-                $(DOVECOT_CONF_DIR)/10-ssl.conf \
-                $(DOVECOT_CONF_DIR)/15-lda.conf \
-                $(DOVECOT_CONF_DIR)/90-quota.conf \
-                $(DOVECOT_BASE_DIR)/quota-warning.sh \
-                $(DOVECOT_CONF_DIR)/auth-passwdfile.conf.ext
+INSTALLATION_FILES := $(POSTFIX_CONF_DIR)/main.cf \
+                      $(POSTFIX_CONF_DIR)/master.cf \
+                      $(POSTFIX_CONF_DIR)/lookup_local_aliases \
+                      $(POSTFIX_CONF_DIR)/lookup_local_aliases.db \
+                      $(POSTFIX_CONF_DIR)/lookup_sender2login \
+                      $(POSTFIX_CONF_DIR)/lookup_sender2login.db \
+                      $(POSTFIX_CONF_DIR)/lookup_valiases \
+                      $(POSTFIX_CONF_DIR)/lookup_valiases.db \
+                      $(POSTFIX_CONF_DIR)/lookup_vdomains \
+                      $(POSTFIX_CONF_DIR)/lookup_vdomains.db \
+                      $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
+                      $(POSTFIX_CONF_DIR)/lookup_vmailboxes \
+                      $(POSTFIX_CONF_DIR)/lookup_vmailboxes.db \
+                      $(DOVECOT_BASE_DIR)/vmail_users \
+                      $(DOVECOT_CONF_DIR)/10-auth.conf \
+                      $(DOVECOT_CONF_DIR)/10-mail.conf \
+                      $(DOVECOT_CONF_DIR)/10-master.conf \
+                      $(DOVECOT_CONF_DIR)/10-ssl.conf \
+                      $(DOVECOT_CONF_DIR)/15-lda.conf \
+                      $(DOVECOT_CONF_DIR)/90-quota.conf \
+                      $(DOVECOT_BASE_DIR)/quota-warning.sh \
+                      $(DOVECOT_CONF_DIR)/auth-passwdfile.conf.ext
 
 # The name of the actual setup scripts
 SCRIPT_OS_PACKAGES := $(SCRIPT_DIR)/install-packages.sh
@@ -64,10 +104,15 @@ SCRIPT_POSTFIX_CHROOT := $(SCRIPT_DIR)/prepare-postfix-chroot.sh
 # make's internal stamps
 # These are artificial files to track the status of commands / operations /
 # recipes, that do not directly result in output files.
-MAKE_STAMP_DIR := $(MAKE_FILE_DIR).make-stamps
+MAKE_STAMP_DIR := $(REPO_ROOT)/.make-stamps
+STAMP_SETUP_COMPLETED := $(MAKE_STAMP_DIR)/setup-completed
+STAMP_SOFTWARE_READY := $(MAKE_STAMP_DIR)/software-ready
+STAMP_POSTFIX_READY := $(MAKE_STAMP_DIR)/postfix-ready
+STAMP_DOVECOT_READY := $(MAKE_STAMP_DIR)/dovecot-ready
 STAMP_OS_PACKAGES := $(MAKE_STAMP_DIR)/os-packages-installed
 STAMP_VMAIL_USER := $(MAKE_STAMP_DIR)/vmail-user-created
 STAMP_POSTFIX_CHROOT := $(MAKE_STAMP_DIR)/postfix-chroot-prepared
+STAMP_RESTART_AFTER_SETUP := $(MAKE_STAMP_DIR)/restart-after-setup
 
 # Python virtual environments
 #
@@ -76,7 +121,7 @@ STAMP_POSTFIX_CHROOT := $(MAKE_STAMP_DIR)/postfix-chroot-prepared
 # (Python) virtual environment for ``tox``.
 #
 # ``tox``'s configuration is included in ``pyproject.toml``.
-TOX_VENV_DIR := $(MAKE_FILE_DIR).tox-venv
+TOX_VENV_DIR := $(REPO_ROOT)/.tox-venv
 TOX_VENV_CREATED := $(TOX_VENV_DIR)/pyvenv.cfg
 TOX_VENV_INSTALLED := $(TOX_VENV_DIR)/packages.txt
 TOX_CMD := $(TOX_VENV_DIR)/bin/tox
@@ -97,63 +142,40 @@ MAKEFLAGS += --no-builtin-rules
 
 # ### RECIPES
 
-# ##### These recipes perform the actual setup of the **mailsrv**.
+# ##### DEVELOPMENT
 
-# Actually perform the complete setup of the mailsrv. This command is to be
-# used to trigger everything else.
-install : $(STAMP_OS_PACKAGES) $(STAMP_POSTFIX_CHROOT) $(STAMP_VMAIL_USER) $(CONFIG_FILES)
+tmp :
+	echo $(CONFIGURATION_FILES)
+.PHONY : tmp
+
+
+# ##### INSTALLATION
+#
+# These recipes are used to perform configuration and installation.
+
+configure : $(CONFIGURATION_FILES) $(STAMP_SOFTWARE_READY)
+.PHONY : configure
+
+install : $(STAMP_SETUP_COMPLETED)
 .PHONY : install
 
-# Create Dovecot's required configuration files from the provided samples.
-#
-# This recipe creates:
-#   - ``10-auth.conf``
-#   - ``auth-passwdfile.conf.ext``
-#
-# The configuration files are placed directly in Dovecot's configuration
-# directory (by default: ``/etc/dovecot/conf.d``).
-$(DOVECOT_CONF_DIR)/% : $(CONFIG_DIR)/dovecot/conf.d/%.sample $(SETTINGS_ENV_FILE)
-	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(SETTINGS_ENV_FILE)
+restart : $(STAMP_RESTART_AFTER_SETUP)
+.PHONY : restart
 
-# Create Dovecot's additional configuration files from the provided samples.
-#
-# This recipe creates:
-#   - ``vmail_users``
-#
-# The configuration files are placed directly in Dovecot's base directory (by
-# default ``/etc/dovecot``).
-$(DOVECOT_BASE_DIR)/% : $(CONFIG_DIR)/dovecot/%.sample
+
+# This recipe places Dovecot's configuration files in the desired directories.
+$(DOVECOT_BASE_DIR)/% : $(CONFIG_DIR)/dovecot/%
 	$(SCRIPT_SAVE_COPY) $@ $<
 
-# Create Postfix's required configuration files from the provided samples.
-#
-# This recipe creates:
-#   - ``main.cf``
-#   - ``master.cf``
-#
-# The configuration files are placed directly in Postfix's main directory (by
-# default: ``/etc/postfix``).
-$(POSTFIX_CONF_DIR)/%.cf : $(CONFIG_DIR)/postfix/%.cf.sample $(SETTINGS_ENV_FILE)
-	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(SETTINGS_ENV_FILE)
-
-# Create Postfix's lookup tables.
-#
-# This recipe creates:
-#   - ``lookup_sender2login``
-#   - ``lookup_valiases``
-#   - ``lookup_vdomains``
-#   - ``lookup_vmailboxes``
-#
-# The configuration files are placed directly in Postfix's main directory (by
-# default: ``/etc/postfix``).
-$(POSTFIX_CONF_DIR)/% : $(CONFIG_DIR)/postfix/%.sample
+# This recipe places Postfix's configuration files in the desired directories.
+$(POSTFIX_CONF_DIR)/% : $(CONFIG_DIR)/postfix/%
 	$(SCRIPT_SAVE_COPY) $@ $<
 
 # Compile the actual lookup databases.
 #
 # This uses Postfix's ``postmap`` utility to create / compile the actual lookup
 # databases.
-$(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/%
+$(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/% | $(STAMP_POSTFIX_READY)
 	echo "[INFO] Regenerating $@ using postmap"
 	$(shell which postmap) $<
 
@@ -161,16 +183,38 @@ $(POSTFIX_CONF_DIR)/%.db : $(POSTFIX_CONF_DIR)/%
 #
 # The local alias database is special, as it is compiled with ``newaliases``
 # instead of ``postmap``.
-$(POSTFIX_CONF_DIR)/lookup_local_aliases.db : $(POSTFIX_CONF_DIR)/lookup_local_aliases $(POSTFIX_CONF_DIR)/main.cf
+$(POSTFIX_CONF_DIR)/lookup_local_aliases.db : $(POSTFIX_CONF_DIR)/lookup_local_aliases $(POSTFIX_CONF_DIR)/main.cf | $(STAMP_POSTFIX_READY)
 	echo "[INFO] Regenerating $@ using newaliases"
 	$(shell which newaliases)
+	touch $@
 
-# Generate the actual setting file from the sample.
-#
-# This will overwrite existing settings, if there is a more recent ``.sample``.
-# This should not be a problem, as the existing file is backed up.
-$(SETTINGS_ENV_FILE) : $(SETTINGS_ENV_FILE).sample
-	$(SCRIPT_SAVE_COPY) $@ $<
+# Meta stamp to track, if a restart is required
+$(STAMP_RESTART_AFTER_SETUP) : $(STAMP_SETUP_COMPLETED)
+	echo "[INFO] Restarting services!"
+	systemctl restart postfix*
+	systemctl restart dovecot*
+	$(create_dir)
+	touch $@
+
+# Meta stamp to track the overall status of the setup
+$(STAMP_SETUP_COMPLETED) : $(INSTALLATION_FILES) $(STAMP_SOFTWARE_READY)
+	$(create_dir)
+	touch $@
+
+# Meta stamp to track the overall status of the software
+$(STAMP_SOFTWARE_READY) : $(STAMP_POSTFIX_READY) $(STAMP_DOVECOT_READY)
+	$(create_dir)
+	touch $@
+
+# Meta stamp to track the status of Dovecot
+$(STAMP_DOVECOT_READY) : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(STAMP_POSTFIX_CHROOT)
+	$(create_dir)
+	touch $@
+
+# Meta stamp to track the status of Postfix
+$(STAMP_POSTFIX_READY) : $(STAMP_OS_PACKAGES) $(STAMP_VMAIL_USER) $(STAMP_POSTFIX_CHROOT)
+	$(create_dir)
+	touch $@
 
 # Installation of the required packages (from the repositories)
 $(STAMP_OS_PACKAGES) : $(SCRIPT_OS_PACKAGES)
@@ -192,6 +236,22 @@ $(STAMP_POSTFIX_CHROOT) : $(SCRIPT_POSTFIX_CHROOT) | $(STAMP_OS_PACKAGES)
 	$(create_dir)
 	$(SCRIPT_POSTFIX_CHROOT)
 	touch $@
+
+# Generate the actual configuration files from the samples.
+#
+# This implicit rule is used to generate all configuration files, applying
+# variable substitution from $(CONFIGURATION_ENV_FILE).
+$(CONFIG_DIR)/% : $(SAMPLE_DIR)/%.sample $(CONFIGURATION_ENV_FILE) | $(STAMP_SOFTWARE_READY)
+	$(create_dir)
+	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(CONFIGURATION_ENV_FILE)
+
+# Generate the actual setting file from the sample.
+#
+# This will overwrite existing settings, if there is a more recent ``.sample``.
+# This should not be a problem, as the existing file is backed up.
+$(CONFIGURATION_ENV_FILE) : $(SAMPLE_DIR)/$(SETTINGS_ENV_FILE).sample
+	$(create_dir)
+	$(SCRIPT_SAVE_COPY) $@ $<
 
 
 # ##### Utility commands, i.e. linters

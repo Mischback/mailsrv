@@ -1,19 +1,3 @@
-# This is a **sample** of Postfix's ``master.cf`` config file.
-#
-# It is not meant to be used directly, but will need automatic or manual
-# adjustments to make it actually work.
-#
-# All changes made during the development of
-# https://github.com/Mischback/mailsrv should be non-invasive, meaning the
-# original configuration is still present (and commented) beside the adjusted
-# active configuration.
-#
-# List of customizable settings:
-#   - None
-#
-# Issues:
-#   - https://github.com/Mischback/mailsrv/issues/17
-
 #
 # Postfix master process configuration file.  For details on the format
 # of the file, see the master(5) manual page (command: "man 5 master" or
@@ -42,16 +26,6 @@ smtp      inet  n       -       y       -       -       smtpd
 #  -o smtpd_recipient_restrictions=
 #  -o smtpd_relay_restrictions=permit_sasl_authenticated,reject
 #  -o milter_macro_daemon_name=ORIGINATING
-submission inet n       -       y       -       -       smtpd
-  -o syslog_name=postfix/submission
-  -o smtpd_tls_security_level=encrypt
-  -o smtpd_sasl_auth_enable=yes
-  -o smtpd_tls_auth_only=yes
-  -o smtpd_reject_unlisted_recipient=no
-  -o smtpd_recipient_restrictions=
-  -o smtpd_relay_restrictions=permit_sasl_authenticated,reject
-  -o smtpd_sender_restrictions=reject_sender_login_mismatch,permit_sasl_authenticated,reject
-  -o milter_macro_daemon_name=ORIGINATING
 #smtps     inet  n       -       y       -       -       smtpd
 #  -o syslog_name=postfix/smtps
 #  -o smtpd_tls_wrappermode=yes
@@ -149,4 +123,3 @@ scalemail-backend unix -       n       n       -       2       pipe
   flags=R user=scalemail argv=/usr/lib/scalemail/bin/scalemail-store ${nexthop} ${user} ${extension}
 mailman   unix  -       n       n       -       -       pipe
   flags=FRX user=list argv=/usr/lib/mailman/bin/postfix-to-mailman.py ${nexthop} ${user}
-

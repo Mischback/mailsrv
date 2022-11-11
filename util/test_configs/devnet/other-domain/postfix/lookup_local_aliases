@@ -1,0 +1,13 @@
+# This is a **sample** of Postfix's ``local_aliases`` file.
+#
+# It is not meant to be used directly, but will need automatic or manual
+# adjustments to make it actually work.
+#
+# The setup does rely on virtual mailboxes (and virtual aliases), so this
+# config file is not really considered. It is provided for special use cases.
+#
+# See https://www.postfix.org/aliases.5.html for the actual configuration
+# syntax, which is differing from the *usual* format for Postfix's databases.
+#
+# Please note, that this file has to be compiled to be used by Postfix!
+#   ``# newaliases``

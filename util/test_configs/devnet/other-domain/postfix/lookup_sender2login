@@ -6,9 +6,17 @@
 # Provide the sender to login map for the mail setup.
 # These will be applied in Postfix's ``smtpd_sender_login_maps`` setting.
 #
-# TODO: With the current setup it is required to have entries for every
-#       mailbox in this file. This must be considered while working on
-#       https://github.com/Mischback/mailsrv/issues/16
+# In the current, file-based setup, it is required to have an entry for all
+# mailboxes aswell. Most likely you will want to limit the sender-to-login
+# mapping to the mailbox owner himself, e.g.
+#
+#   mailbox@mailsrv.test  mailbox@mailsrv.test
+#
+# This is an inconvenience right now, but given the low number of actual
+# mailboxes, it is ok for now.
+#
+# https://github.com/Mischback/mailsrv/issues/16 is kind of related, as it will
+# solve this inconvenience.
 #
 #
 # FORMAT: [key][BLANK][list of logins]
