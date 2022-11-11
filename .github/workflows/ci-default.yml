@@ -2,9 +2,9 @@ name: CI default branch
 
 on:
   push:
-    branches: [dependabot-setup]
-  pull_request:
     branches: [development]
+  pull_request:
+    branches: [development, milestone-*]
 
 # Dependabot PRs of minor/patch versions should be auto-approved. This requires
 # the permission to modify the PR from this workflow.
