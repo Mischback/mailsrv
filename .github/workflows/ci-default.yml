@@ -24,4 +24,6 @@ jobs:
           python-version: 3.9
       - name: Pre-commit Linters
         run: |
+          python -m pip install --upgrade pip
           make util/pre-commit pre-commit_files="--all-files"
+          cat /home/runner/work/mailsrv/mailsrv/.tox/typechecking/log/typechecking-0.log
