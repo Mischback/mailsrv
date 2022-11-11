@@ -25,4 +25,4 @@ jobs:
       - name: Pre-commit Linters
         run: |
           python -m pip install --upgrade pip
-          make util/pre-commit pre-commit_files="--all-files"
+          make util/ci/linting
