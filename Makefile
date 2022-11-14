@@ -139,6 +139,9 @@ MAKEFLAGS += --no-print-directory
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
+docs : util/docs/serve/html
+.PHONY : docs
+
 
 # ### RECIPES
 
@@ -319,7 +322,7 @@ util/docs/build/html : $(TOX_VENV_INSTALLED)
 	$(TOX_CMD) -q -e docs
 .PHONY : util/docs/build/html
 
-util/docs/serve/html : $(TOX_VENV_INSTALLED)
+util/docs/serve/html : $(TOX_VENV_INSTALLED) util/docs/build/html
 	$(TOX_CMD) -q -e docs-serve
 .PHONY : util/docs/serve/html
 
