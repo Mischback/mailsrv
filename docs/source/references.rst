@@ -81,3 +81,40 @@ Guides
 
   Additionally, there is a section about *TLS policies* which might be
   included in future releases.
+
+**********************
+Other Notable Projects
+**********************
+
+- `Mail-in-a-Box <https://github.com/mail-in-a-box/mailinabox>`_ has a quite
+  similar purpose, it provides a production-ready setup of Postfix, Dovecot
+  and various other tools.
+
+  It's intended to be an *one-click email appliance*, hiding most of the
+  gory configuration details from the user.
+
+  If you think **mailsrv** does require too much additional setup (or if you
+  don't need the flexibility of **mailsrv**), you may want to give
+  *Mail-in-a-Box* a try.
+
+- `Mailcow: dockerized <https://github.com/mailcow/mailcow-dockerized>`_ is a
+  complete and production-ready mail setup, provided in Docker containers.
+
+  It features several services, including Postifx, Dovecot, rspamd, but quite
+  a lot more on top of them, all provided in their dedicated container,
+  connected by volumes and a bridge network.
+
+  If you're looking for a container-based setup, *mailcow* seems the way to
+  go.
+
+- `Mailu <https://github.com/Mailu/Mailu>`_ is a complete and production-ready
+  mail setup which emphasizes the use of *free software*. It includes a
+  coherent administration backend and provides its services in dedicated
+  containers.
+
+- `Docker Mailserver <https://github.com/docker-mailserver/docker-mailserver>`_
+  is another complete setup, provided in a single Docker container.
+
+  The codebase is looking like real high quality and all of the *must haves*
+  are included. *imho*, the general architecture including all required
+  services in a single container seems counter-intuitive. YMMV, so have a look.
