@@ -1,15 +1,13 @@
-name: CI default branch
+name: CI Default Branch
 
 on:
   push:
-    branches: [development]
+    branches:
+      - development
   pull_request:
-    branches: [development, milestone-*]
-
-# Dependabot PRs of minor/patch versions should be auto-approved. This requires
-# the permission to modify the PR from this workflow.
-permissions:
-  pull-requests: write
+    branches:
+      - development
+      - milestone-*
 
 jobs:
   linting:
@@ -34,6 +32,11 @@ jobs:
     name: Dependabot (auto approve)
     needs: linting
     if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+
+    # Dependabot PRs of minor/patch versions should be auto-approved. This requires
+    # the permission to modify the PR from this workflow.
+    permissions:
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: Update Metadata
