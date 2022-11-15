@@ -22,4 +22,5 @@ raised `there <https://github.com/Mischback/mailsrv/issues>`_.
    :maxdepth: 2
    :caption: Contents:
 
+   developer/index
    references
