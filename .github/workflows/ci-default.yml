@@ -25,28 +25,10 @@ jobs:
           python -m pip install --upgrade pip
           make util/ci/linting
 
-  # If the workflow is run because of a Dependabot-created PR, automatically
-  # approve the PR if it is a minor/patch update of a dependency.
-  # This requires the completion of the ``testing`` step.
   dependabot:
-    name: Dependabot (auto approve)
     needs: linting
-    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
-
-    # Dependabot PRs of minor/patch versions should be auto-approved. This requires
-    # the permission to modify the PR from this workflow.
-    permissions:
-      pull-requests: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Update Metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@v1.3.4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Automatically approve minor and patch updates
-        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
-        run: gh pr review --approve "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    uses: mischback/development-meta/.github/workflows/dependabot-auto-approve.yml@development
+    with:
+      pr_url: ${{ github.event.pull_request.html_url }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
