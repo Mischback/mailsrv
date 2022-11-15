@@ -1,8 +1,13 @@
+![Milestone Crawl](https://img.shields.io/github/milestones/progress/mischback/mailsrv/1?style=flat&color=%23ffcc33)
+![Milestone Walk](https://img.shields.io/github/milestones/progress/mischback/mailsrv/2?style=flat&color=%23999)
+![Milestone Run](https://img.shields.io/github/milestones/progress/mischback/mailsrv/3?style=flat&color=%23999)
+![Milestone Fly](https://img.shields.io/github/milestones/progress/mischback/mailsrv/4?style=flat&color=%23999)
+
 # mailsrv
 
 This is a mail server setup using [Postfix](http://www.postfix.org/) as
 **Mail Transport Agent** (MTA) and [Dovecot](https://www.dovecot.org/) as
-**Mail Delivery Agent** (MDA).
+**Mail Delivery Agent** (MDA) and IMAP/POP3 server.
 
 
 ## Disclaimer
