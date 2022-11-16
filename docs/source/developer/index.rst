@@ -13,5 +13,6 @@ rather administrative things, like the coding style.
 
 .. toctree::
 
+    development_setup
     coding_style
     git_branching_model
