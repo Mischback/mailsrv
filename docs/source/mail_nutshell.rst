@@ -8,7 +8,9 @@ Visualization of Sending a Mail
 *******************************
 
 #. A user fires up his mail programm of choice (e.g. Thunderbird, Outlook) to
-   draft a message and then clicks **send**. ::
+   draft a message and then clicks **send**.
+
+   .. code-block:: text
 
      -> "Hey, mail server, sorry to disturb your idle time... I have a message in need of transfer!"
      <- "Terrific! Can you prove your identity?"
@@ -30,7 +32,9 @@ Visualization of Sending a Mail
 
 #. The mail server (or more specifically: the Mail Transfer Agent (MTA))
    determines the address of the server which handles mails for the recipient
-   address. ::
+   address.
+
+   .. code-block:: text
 
      -> "Yo, do you know who handles mails for target-domain.test?"
      <- "That would be mail.target-domain.test."
@@ -40,7 +44,10 @@ Visualization of Sending a Mail
      <- "..."
 
 #. The mail server (again, the MTA) connects to the target server
-   ``mail.target-domain.test`` using port ``25`` and submits the message. ::
+   ``mail.target-domain.test`` using port ``25`` and submits the message.
+
+   .. code-block:: text
+
 
      -> "Yo yo yo, it's me, mail.the-domain.test. I've got a message for one of your users."
      <- "Do you care to take encrypted?"
@@ -53,14 +60,18 @@ Visualization of Sending a Mail
      <- "C ya!"
 
 #. The MTA hands the message to the MDA (or LDA), who will add it to the
-   recipient's mailbox. ::
+   recipient's mailbox.
+
+   .. code-block:: text
 
      -> "Wake up, you lazy waste of bytes!"
      <- "What's up?"
      -> "Here's a message for recipient@target-domain.test. Make sure he receives it!"
      <- "Chill, man, I'll take care of it."
 
-#. The recipient fires up his MUA to check for new mails using IMAP. ::
+#. The recipient fires up his MUA to check for new mails using IMAP.
+
+   .. code-block:: text
 
      -> "Greetings! Do you have any recent messages for my account?"
      <- "Let's see... Send your credentials!"
