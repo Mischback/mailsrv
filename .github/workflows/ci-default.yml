@@ -27,6 +27,7 @@ jobs:
 
   documentation:
     name: Build and check documentation
+    needs: linting
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
