@@ -23,5 +23,6 @@ raised `there <https://github.com/Mischback/mailsrv/issues>`_.
    :caption: Contents:
 
    mail_nutshell
+   configuration/index
    developer/index
    references
