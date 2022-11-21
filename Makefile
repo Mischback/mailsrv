@@ -322,6 +322,10 @@ util/docs/build/html : $(TOX_VENV_INSTALLED)
 	$(TOX_CMD) -q -e docs
 .PHONY : util/docs/build/html
 
+util/docs/linkcheck : $(TOX_VENV_INSTALLED)
+	$(TOX_CMD) -q -e docs -- make linkcheck
+.PHONY : util/docs/linkcheck
+
 util/docs/serve/html : $(TOX_VENV_INSTALLED) util/docs/build/html
 	$(TOX_CMD) -q -e docs-serve
 .PHONY : util/docs/serve/html
