@@ -3,9 +3,9 @@ Mail in a Nutshell
 ##################
 
 
-*******************************
-Visualization of Sending a Mail
-*******************************
+****************************
+Sending Mail - non-technical
+****************************
 
 #. A user fires up his mail programm of choice (e.g. Thunderbird, Outlook) to
    draft a message and then clicks **send**.
@@ -82,3 +82,71 @@ Visualization of Sending a Mail
      <- "Seems valid, wait, I'll check your messages... Ah, here you go!"
      -> "Thanks buddy, see you soon!"
      <- "Yeah, whatever..."
+
+
+************************
+Sending Mail - technical
+************************
+
+Ok, let's get serious.
+
+There's no *mail server* in the sense of having one service, that does handle
+all required functions of *sending*, *receiving* and *retrieving* mails.
+
+A complete setup consists of several components, which are interdependent and
+are required to work together to provide the required functionality:
+
+- The **Mail Transfer Agent**
+  (`MTA <https://en.wikipedia.org/wiki/Message_transfer_agent>`_) handles
+  communication with other servers, meaning handling all communication with
+  other MTAs: It will receive messages for its recipients and pass messages for
+  external addressees along.
+
+  MTAs use the *Simple Mail Transfer Protocol*
+  (`SMTP <https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol>`_) for
+  communications. This is one of the oldest protocols of the internet,
+  originally standardized in
+  `RFC 772 <https://datatracker.ietf.org/doc/html/rfc772>`_ with its latest
+  core version `RFC 5321 <https://datatracker.ietf.org/doc/html/rfc5321>`_.
+  Today, there is a whole ecosystem of RFCs around SMTP, defining various
+  protocol extensions, additional implementation details and addons.
+
+  **mailsrv** uses `Postfix <https://www.postfix.org/>`_ in the MTA role.
+
+- The **Mail Delivery Agent**
+  (`MDA <https://en.wikipedia.org/wiki/Message_delivery_agent>`_) adds received
+  messages to the users' mailboxes.
+
+  **mailsrv** uses `Dovecot <https://www.dovecot.org/>`_ in the MDA role.
+
+- **Mail User Agents** (`MUA <https://en.wikipedia.org/wiki/Email_client>`_)
+  are used to read and write mails at the user's machine.
+
+  Historically, users would read/write mails directly on the server. This
+  architecture is obsolete nowadays. Users will access their mailboxes
+  remotely, using protocols like *Internet Message Access Protocol*
+  (`IMAP <https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol>`_) or
+  the older *Post Office Protocol*
+  (`POP <https://en.wikipedia.org/wiki/Post_Office_Protocol>`_) to retrieve
+  messages from their mailboxes.
+
+  In order to sent mails, the MUA will contact a *Mail Submission Agent*
+  (`MSA <https://en.wikipedia.org/wiki/Message_submission_agent>`_) on the
+  corresponding server (see below).
+
+  The *MUA* is not part of **mailsrv**'s setup, but there are lots of email
+  clients to choose from, e.g. Thunderbird or Outlook.
+
+  However, **mailsrv** provides access to mailboxes with IMAP and POP, using
+  services implemented by `Dovecot <https://www.dovecot.org/>`_.
+
+- The **Mail Submission Agent**
+  (`MSA <https://en.wikipedia.org/wiki/Message_submission_agent>`_) will accept
+  users' mails and process them, which means the *MTA* will deliver them to
+  other servers as required.
+
+  Technically, *mail submission* uses *SMTP* aswell on the communication
+  protocol level, but its specification was moved to
+  `RFC 6409 <https://datatracker.ietf.org/doc/html/rfc6409>`_.
+
+  **mailsrv** uses `Postfix <https://www.postfix.org/>`_ in the MSA role.
