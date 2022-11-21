@@ -150,3 +150,28 @@ are required to work together to provide the required functionality:
   `RFC 6409 <https://datatracker.ietf.org/doc/html/rfc6409>`_.
 
   **mailsrv** uses `Postfix <https://www.postfix.org/>`_ in the MSA role.
+
+
+Security Considerations
+=======================
+
+Let's face it, it's 2022 and the internet is no longer the nice playground it
+was. Security and privacy are issues that do apply to mail aswell.
+
+While *SMTP*, *POP* and *IMAP* were developed as clear-text protocols, their
+communication must be secured today.
+
+State of the art cryptography is available with **Transport Layer Security**
+(`TLS <https://en.wikipedia.org/wiki/Transport_Layer_Security>`_) and
+**mailsrv** makes heavy use of it.
+
+While the default setup does provide the non-secure variants of SMTP, POP and
+IMAP on their default ports, relevant parts of the setup do only work on
+secured connections, using
+`STARTTLS <https://en.wikipedia.org/wiki/Opportunistic_TLS>`_.
+
+However, the *TLS* setup is not part of **mailsrv**. You will have to provide
+the required certificates yourself.
+
+.. TODO: Add reference to the related settings!
+.. TODO: Add reference to the cookbook recipe for TLS
