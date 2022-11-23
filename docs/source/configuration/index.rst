@@ -13,5 +13,6 @@ configurations, but be aware that some of the settings are interdependent.
    :maxdepth: 2
    :caption: Contents:
 
+   mailsrv_settings
    postfix
    dovecot
