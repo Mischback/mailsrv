@@ -22,4 +22,9 @@ raised `there <https://github.com/Mischback/mailsrv/issues>`_.
    :maxdepth: 2
    :caption: Contents:
 
+   mail_nutshell
+   installation_process
+   configuration/index
+   cookbook/index
+   developer/index
    references
