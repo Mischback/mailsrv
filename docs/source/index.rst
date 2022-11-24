@@ -23,6 +23,7 @@ raised `there <https://github.com/Mischback/mailsrv/issues>`_.
    :caption: Contents:
 
    mail_nutshell
+   installation_process
    configuration/index
    cookbook/index
    developer/index
