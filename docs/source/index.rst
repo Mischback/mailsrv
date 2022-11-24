@@ -24,5 +24,6 @@ raised `there <https://github.com/Mischback/mailsrv/issues>`_.
 
    mail_nutshell
    configuration/index
+   cookbook/index
    developer/index
    references
