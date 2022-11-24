@@ -54,3 +54,97 @@ and IMAP/POP server.
 
   `ACME Client Implementations <https://letsencrypt.org/docs/client-options/>`_
   is the recommended starting point.
+
+
+.. notes::
+   All of the following commands are meant to be executed from the root of the
+   repository.
+
+
+*****************
+Step 1: Configure
+*****************
+
+Overall Settings
+================
+
+Assuming you're starting from scratch (without using **mailsrv** before), just
+run
+
+.. code-block:: console
+
+   make configure
+
+to start the configuration process. The command will trigger the installation
+of the required packages, create required system users and adjust some paths
+and permissions. Also, this will create actual configuration files from the
+repository's templates.
+
+.. note::
+   You may want to have a look at :ref:`Version-controlled Configuration`.
+
+To adjust **mailsrv**'s configuration, you want to modify the file
+``settings.env``. To apply the adjustments to the configuration files, just run
+
+.. code-block:: console
+
+   make configure
+
+again.
+
+
+Virtual Mail Setup
+==================
+
+The next step is the setup of virtual domains, mailboxes and aliases. These
+are configured in
+
+- ``postfix/lookup_vdomains``
+- ``postfix/lookup_vmailboxes``
+- ``postfix/lookup_valiases``
+
+Refer to the documentation in the files.
+
+
+Virtual Users
+=============
+
+All *virtual mailboxes* require an actual account, these will be added in
+``dovecot/vmail_users``.
+
+This file **must** contain the usernames in the form of a full mail address,
+synchronized with ``postfix/lookup_vmailboxes``. To generate the required
+password hashes, you can use *Dovecot*'s built-in ``doveadm pw`` utility (see
+`its documentation <https://wiki.dovecot.org/Tools/Doveadm/Pw>`_).
+
+
+Optional: Validating the virtual setup
+======================================
+
+**mailsrv** provides a Python-based script to perform a *basic* validation of
+the configuration files.
+
+.. code-block:: console
+
+   ./util/validator.py
+
+
+***************
+Step 2: Install
+***************
+
+Everything is prepared, so running
+
+.. code-block:: console
+
+   make install
+
+will copy the configuration files to their final destinations (e.g.
+``/etc/postfix/``, ``/etc/dovecot/``).
+
+Congratulation, your server is ready.
+
+.. code-block:: console
+
+   systemctl restart postfix*
+   systemctl restart dovecot*
