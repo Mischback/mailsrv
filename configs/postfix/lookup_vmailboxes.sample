@@ -1,0 +1,18 @@
+# This is a **sample** of Postfix's ``virtual_mailboxes`` file.
+#
+# It is not meant to be used directly, but will need automatic or manual
+# adjustments to make it actually work.
+#
+# Provide the virtual mailboxes for the mail setup
+# These will be applied in Postfix's ``virtual_mailbox_maps`` setting. These
+# are the actual mailboxes. The content of this file **should** be synchronized
+# with Dovecot's user database. Otherwise the mailbox may not be accessed
+# using Dovecot (IMAP or POP3) and the mailbox can not be used to send mails.
+#
+# FORMAT: [key][BLANK][ANYTHING], where only [key] is relevant
+#
+# Examples:
+#
+# Make *mailbox@mailsrv.test* an actual mailbox.
+#
+#   mailbox@mailsrv.test  OK

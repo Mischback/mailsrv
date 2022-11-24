@@ -1,6 +1,0 @@
-# Provide the virtual domains for the mail setup
-# These will be applied in Postfix's ``virtual_mailbox_domains`` setting.
-#
-# FORMAT: [key][BLANK][ANYTHING], where only [key] is relevant
-sut-one.test  OK
-sut-two.test  OK

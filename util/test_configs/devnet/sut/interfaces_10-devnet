@@ -1,0 +1,10 @@
+# This is a static manually assigned IPv6 for the development network.
+#
+# The file must be placed in ``/etc/network/interfaces.d/``
+#
+# Please note that this is only reflecting my own test setup. If you want to
+# replicate this test setup, make sure to adjust all values for your own setup,
+# e.g. the interface name, the IP addresses in use.
+iface enp1s0 inet6 static
+    address fd21:9e0:de85:51e6:7e57:c0de:ffff:21/64
+    dns-nameservers fd21:9e0:de85:51e6:7e57:c0de:ffff:2

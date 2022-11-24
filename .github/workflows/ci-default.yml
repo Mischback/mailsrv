@@ -1,0 +1,51 @@
+name: CI Default Branch
+
+on:
+  push:
+    branches:
+      - development
+  pull_request:
+    branches:
+      - development
+      - milestone-*
+
+jobs:
+  linting:
+    name: Run Linters
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Linters
+        run: |
+          python -m pip install --upgrade pip
+          make util/ci/linting
+
+  documentation:
+    name: Build and check documentation
+    needs: linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Linters
+        run: |
+          python -m pip install --upgrade pip
+          make util/docs/linkcheck
+          make util/docs/build/html
+
+  dependabot:
+    needs: linting
+    uses: mischback/development-meta/.github/workflows/dependabot-auto-approve.yml@development
+    with:
+      pr_url: ${{ github.event.pull_request.html_url }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}

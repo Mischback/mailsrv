@@ -1,0 +1,42 @@
+# This is a **sample** of Postfix's ``virtual_aliases`` file.
+#
+# It is not meant to be used directly, but will need automatic or manual
+# adjustments to make it actually work.
+#
+# Provide the virtual aliases for the mail setup
+# These will be applied in Postfix's ``virtual_alias_maps`` setting.
+#
+# FORMAT: [key][BLANK][list of targets]
+#
+# Examples:
+#
+# This will deliver all mails to *alias@mailsrv.test* to
+# *mailbox01@mailsrv.test*.
+#
+#   alias@mailsrv.test  mailbox01@mailsrv.test
+#
+#
+# This will deliver all mails to *alias@mailsrv.test* to the mailboxes of
+# *mailbox01@mailsrv.test* **AND** *mailbox02@mailsrv.test*
+#
+#   alias@mailsrv.test  mailbox01@mailsrv.test mailbox02@mailsrv.test
+#
+#
+# Technically it is possible to have external addresses for the alias. This
+# has some significant negative implications, e.g. the server might be
+# considered a SPAM-sender, because the forwarded mails will seem to be
+# originating from this server. However, here's the example:
+#
+#   alias@mailsrv.test  mailbox@another-host.test
+#
+#
+# Alias definitions can be chained, meaning a mail to *alias_two@mailsrv.test*
+# will be delivered to *mailbox01@mailsrv.test*.
+#
+#   alias_two@mailsrv.test  alias@mailsrv.test
+#   alias@mailsrv.test      mailbox01@mailsrv.test
+postmaster@other-domain.test  user@other-domain.test
+abuse@other-domain.test       user@other-domain.test
+postmaster@devnet.test        system@devnet.test
+abuse@devnet.test             system@devnet.test
+hostmaster@devnet.test        system@devnet.test

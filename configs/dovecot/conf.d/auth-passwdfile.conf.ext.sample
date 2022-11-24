@@ -1,0 +1,58 @@
+# This is a **sample** of Dovecots's ``auth-passwdfile.conf.ext`` config file.
+#
+# This makes Dovecot use a *passwd-like* file as its **combined**  user and
+# password database, placed in ``/etc/dovecot/vmail_users`` (see:
+# https://doc.dovecot.org/configuration_manual/authentication/passwd_file/#authentication-passwd-file
+# for details on the file format).
+#
+# This file might work out of the box, but needs adjustment if the user
+# database file is placed in another location.
+#
+# This file is included from ``10-auth.conf``.
+#
+# Obviously, this file will be obsolete when
+# https://github.com/Mischback/mailsrv/issues/16 is processed.
+
+
+# The user password database is used to authenticate users.
+#
+# Ref: https://doc.dovecot.org/configuration_manual/authentication/password_databases_passdb/
+#
+# See https://doc.dovecot.org/configuration_manual/authentication/passwd_file/#passwd-file-args
+# for details on the provided arguments.
+passdb {
+  driver = passwd-file
+  args = scheme=CRYPT username_format=%u /etc/dovecot/vmail_users
+}
+
+# The user database is used to lookup user-specific settings.
+#
+# Ref: https://doc.dovecot.org/configuration_manual/authentication/user_databases_userdb/
+#
+# This also applies the system's user ``vmail`` as owner of all virtual mails.
+#
+# Please note: This assumes the availability of the user and group ``vmail`` on
+# the system. This repository ensures this during the setup process, using
+# ``util/scripts/create-vmail-user.sh``.
+userdb {
+  driver = passwd-file
+  args = username_format=%u /etc/dovecot/vmail_users
+
+  # Default fields that can be overridden by passwd-file
+  #default_fields = quota_rule=*:storage=1G
+
+  # All mails will be delivered to virtual mailboxes, located at /var/vmail
+  # and owned by vmail:vmail user/group
+  #
+  # These fields may be omitted in the actual passwd-file and are provided
+  # here.
+  default_fields = uid=vmail gid=vmail home=/var/vmail/%u
+
+  # This is the single source of truth for virtual users, so NEVER skip this!
+  skip = never
+
+  # This is the single source of truth for virtual users, lookups are final!
+  result_success = return-ok
+  result_failure = return-fail
+  result_internalfail = return-fail
+}

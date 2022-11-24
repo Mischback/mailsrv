@@ -62,4 +62,28 @@ setenv =
 skip_install = true
 commands =
   {posargs:mypy}
+
+[testenv:docs]
+basepython = {[testenv:util]basepython}
+changedir = {toxinidir}/docs
+deps =
+  -r {toxinidir}/requirements/documentation.txt
+envdir = {toxworkdir}/docs
+setenv =
+  PYTHONDONTWRITEBYTECODE=1
+skip_install = true
+whitelist_externals =
+  make
+commands =
+  {posargs:make html}
+
+[testenv:docs-serve]
+basepython = {[testenv:docs]basepython}
+changedir = {toxinidir}/docs/build/html
+deps = {[testenv:docs]deps}
+envdir = {[testenv:docs]envdir}
+setenv = {[testenv:docs]setenv}
+skip_install = {[testenv:docs]skip_install}
+commands =
+  python -m http.server {posargs:8082}
 """

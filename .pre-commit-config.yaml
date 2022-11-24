@@ -24,6 +24,7 @@ repos:
         description: "Run mypy locally, with dependencies, via tox"
         language: script
         "types_or": [python, pyi]
+        exclude: ^docs/
         entry: util/typechecking_runner.py
   # flake8 (linting)
   - repo: https://github.com/PyCQA/flake8
@@ -31,6 +32,15 @@ repos:
     hooks:
       - id: flake8
         additional_dependencies: [flake8-bugbear, flake8-comprehensions, flake8-docstrings, flake8-logging-format]
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.8.0.4
+    hooks:
+      - id: shellcheck
+        name: shellcheck
+        entry: shellcheck
+        language: python
+        types: [shell]
+        require_serial: true
   # easy regex checks
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.9.0
@@ -46,12 +56,18 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
+      # check scripts to have shebangs
+      - id: check-executables-have-shebangs
       # check JSON files
       - id: check-json
       # check TOML files
       - id: check-toml
       # check YAML files
       - id: check-yaml
+      # check links to GitHub
+      - id: check-vcs-permalinks
+      # sort Python requirements files
+      - id: requirements-txt-fixer
       # let all files end with a single new line (this *should be ensured by
       # .editorconfig already)
       - id: end-of-file-fixer

@@ -1,0 +1,17 @@
+# This is a **sample** of Postfix's ``virtual_domains`` file.
+#
+# It is not meant to be used directly, but will need automatic or manual
+# adjustments to make it actually work.
+#
+# Provide the virtual domains for the mail setup
+# These will be applied in Postfix's ``virtual_mailbox_domains`` setting.
+#
+# FORMAT: [key][BLANK][ANYTHING], where only [key] is relevant
+#
+# Example:
+#
+# Use *mailsrv.test* as a virtual domain and make Postfix accept mails for it.
+#
+#   mailsrv.test  OK
+other-domain.test  OK
+devnet.test        OK

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Actually overwrite whatever there was in the DHCP response!
+echo "# FORCE devnet's nameserver" > /etc/resolv.conf
+echo "nameserver fd21:9e0:de85:51e6:7e57:c0de:ffff:2" >> /etc/resolv.conf
