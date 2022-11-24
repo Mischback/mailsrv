@@ -1,5 +1,8 @@
-![Milestone Crawl](https://img.shields.io/github/milestones/progress/mischback/mailsrv/1?style=flat&color=%23ffcc33)
-![Milestone Walk](https://img.shields.io/github/milestones/progress/mischback/mailsrv/2?style=flat&color=%23999)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Mischback/mailsrv/CI%20Default%20Branch/development?label=Actions&logo=github)
+![GitHub License](https://img.shields.io/github/license/mischback/mailsrv)
+
+![Milestone Crawl](https://img.shields.io/github/milestones/progress/mischback/mailsrv/1?style=flat&color=%2300cc00)
+![Milestone Walk](https://img.shields.io/github/milestones/progress/mischback/mailsrv/2?style=flat&color=%23ffcc33)
 ![Milestone Run](https://img.shields.io/github/milestones/progress/mischback/mailsrv/3?style=flat&color=%23999)
 ![Milestone Fly](https://img.shields.io/github/milestones/progress/mischback/mailsrv/4?style=flat&color=%23999)
 
