@@ -10,3 +10,4 @@ recommendations and a collection of best practices.
    :caption: Contents:
 
    vcs_config
+   ip_dns

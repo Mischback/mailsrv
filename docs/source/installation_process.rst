@@ -56,7 +56,7 @@ and IMAP/POP server.
   is the recommended starting point.
 
 
-.. notes::
+.. note::
    All of the following commands are meant to be executed from the root of the
    repository.
 
