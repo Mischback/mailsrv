@@ -1,8 +1,8 @@
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Mischback/mailsrv/CI%20Default%20Branch/development?label=Actions&logo=github)
 ![GitHub License](https://img.shields.io/github/license/mischback/mailsrv)
 
-[![Python style: black](https://img.shields.io/badge/Python%20style-black-000000.svg)](https://github.com/psf/black)
-[![Shell style: shellcheck](https://img.shields.io/badge/Shell%20style-shellcheck-blue)](https://github.com/koalaman/shellcheck)
+[![Python style: black](https://img.shields.io/badge/Python%20style-black-000000?logo=Python)](https://github.com/psf/black)
+[![Shell style: shellcheck](https://img.shields.io/badge/Shell%20style-shellcheck-blue?logo=GNU%20Bash)](https://github.com/koalaman/shellcheck)
 
 ![Milestone Crawl](https://img.shields.io/github/milestones/progress/mischback/mailsrv/1?style=flat&color=%2333cc33)
 ![Milestone Walk](https://img.shields.io/github/milestones/progress/mischback/mailsrv/2?style=flat&color=%23ffcc33)
