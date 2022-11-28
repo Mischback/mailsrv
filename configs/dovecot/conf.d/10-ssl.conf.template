@@ -1,4 +1,4 @@
-# This is a **sample** of Dovecots's ``10-ssl.conf`` config file.
+# This is the **template** of Dovecots's ``10-ssl.conf`` config file.
 #
 # There a several adjustments from Debian's default values aswell as deviations
 # from the ISPmail tutorial
