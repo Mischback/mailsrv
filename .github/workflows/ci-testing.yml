@@ -14,5 +14,11 @@ jobs:
           cat /etc/docker/daemon.json
       - name: Run minimal container
         run: |
-          docker run -di --name alpine6-1 alpine
-          docker exec alpine6-1 ip a
+          docker run -di --name alpine1 alpine
+          docker exec alpine1 ip a
+      - name: Dedicated IPv6 network for containers
+        run: |
+          docker network create --subnet="fd21:9e0:de85:51e6::/64" --ipv6 net-mailsrv
+          docker run -di --name alpine2 --network net-mailsrv alpine
+          docker network inspect net-mailsrv
+          docker exec alpine2 ip a
