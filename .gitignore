@@ -9,7 +9,7 @@
 # Ref: https://git-scm.com/docs/gitignore
 /configs/**
 !/configs/**/
-!/configs/**/*.sample
+!/configs/**/*.template
 
 # Ignore the actual configuration files for the test setup.
 #
