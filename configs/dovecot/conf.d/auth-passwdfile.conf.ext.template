@@ -1,4 +1,4 @@
-# This is a **sample** of Dovecots's ``auth-passwdfile.conf.ext`` config file.
+# This is the **template** of Dovecots's ``auth-passwdfile.conf.ext`` config file.
 #
 # This makes Dovecot use a *passwd-like* file as its **combined**  user and
 # password database, placed in ``/etc/dovecot/vmail_users`` (see:

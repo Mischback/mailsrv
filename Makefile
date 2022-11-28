@@ -30,14 +30,14 @@ REPO_ROOT := $(patsubst %/, %, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 # This directory contains all the scripts
 SCRIPT_DIR := $(REPO_ROOT)/util/scripts
 
-# The base directory for all configuration samples.
-SAMPLE_DIR := $(REPO_ROOT)/configs
+# The base directory for all configuration templates.
+TEMPLATE_DIR := $(REPO_ROOT)/configs
 
 # The actual configuration files are placed in this directory.
 #
 # This directory may be determined while calling a recipe of this ``Makefile``.
 # By default, the actual configs will be generated along the corresponding
-# sample files.
+# template files.
 #
 # Please note: The actual configuration files are ignored in order to prevent
 # leaking of actual configurations.
@@ -46,26 +46,27 @@ CONFIG_DIR ?= $(REPO_ROOT)/configs
 # The filename of the settings file.
 SETTINGS_ENV_FILE := settings.env
 
-# Generate a list of all ``.sample`` files, stripping the common part of the
+# Generate a list of all ``.template`` files, stripping the common part of the
 # path.
 #
 # This is used instead of make's built-in ``wildcard``, as it automatically
 # supports infinite depth of directories. Portability is probably not an issue
 # here, all Linux/Unix boxes should have ``find``.
-ALL_SAMPLES := $(shell find $(SAMPLE_DIR) -type f -iname "*.sample" ! -iname "$(SETTINGS_ENV_FILE).sample" -printf "%P\n")
+ALL_TEMPLATES := $(shell find $(TEMPLATE_DIR) -type f -iname "*.template" ! -iname "$(SETTINGS_ENV_FILE).template" -printf "%P\n")
 
 # Generate a list of all required configuration files.
 #
-# Basically this is a list of all sample files, removing the suffix ``.sample``
-# and adding the value of $(CONFIG_DIR) as common prefix.
+# Basically this is a list of all template files, removing the suffix
+# ``.template`` and adding the value of $(CONFIG_DIR) as common prefix.
 #
 # This allows for some interesting applications:
-# - it recreates the existing structure inside of $(SAMPLE_DIR) in $(CONFIG_DIR)
+# - it recreates the existing structure inside of $(TEMPLATE_DIR) in
+#   $(CONFIG_DIR)
 # - without specifying $(CONFIG_DIR) while calling make, this creates all
-#   config files beneath their respective sample
+#   config files beneath their respective templates
 # - when explicitly specifying $(CONFIG_DIR), the structure is created in
 #   another location, but making them fully compatible.
-CONFIGURATION_FILES := $(addprefix $(CONFIG_DIR)/,$(patsubst %.sample, %, $(ALL_SAMPLES)))
+CONFIGURATION_FILES := $(addprefix $(CONFIG_DIR)/,$(patsubst %.template, %, $(ALL_TEMPLATES)))
 
 # Keep a reference to the actual settings file
 CONFIGURATION_ENV_FILE := $(CONFIG_DIR)/$(SETTINGS_ENV_FILE)
@@ -240,19 +241,20 @@ $(STAMP_POSTFIX_CHROOT) : $(SCRIPT_POSTFIX_CHROOT) | $(STAMP_OS_PACKAGES)
 	$(SCRIPT_POSTFIX_CHROOT)
 	touch $@
 
-# Generate the actual configuration files from the samples.
+# Generate the actual configuration files from the templates.
 #
 # This implicit rule is used to generate all configuration files, applying
 # variable substitution from $(CONFIGURATION_ENV_FILE).
-$(CONFIG_DIR)/% : $(SAMPLE_DIR)/%.sample $(CONFIGURATION_ENV_FILE) | $(STAMP_SOFTWARE_READY)
+$(CONFIG_DIR)/% : $(TEMPLATE_DIR)/%.template $(CONFIGURATION_ENV_FILE) | $(STAMP_SOFTWARE_READY)
 	$(create_dir)
 	$(SCRIPT_CONFIG_FROM_TEMPLATE) $@ $< $(CONFIGURATION_ENV_FILE)
 
-# Generate the actual setting file from the sample.
+# Generate the actual setting file from the template.
 #
-# This will overwrite existing settings, if there is a more recent ``.sample``.
-# This should not be a problem, as the existing file is backed up.
-$(CONFIGURATION_ENV_FILE) : $(SAMPLE_DIR)/$(SETTINGS_ENV_FILE).sample
+# This will overwrite existing settings, if there is a more recent
+# ``.template``. This should not be a problem, as the existing file is backed
+# up.
+$(CONFIGURATION_ENV_FILE) : $(TEMPLATE_DIR)/$(SETTINGS_ENV_FILE).template
 	$(create_dir)
 	$(SCRIPT_SAVE_COPY) $@ $<
 

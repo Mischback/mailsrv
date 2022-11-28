@@ -1,4 +1,4 @@
-# This is a **sample** of Postfix's ``virtual_mailboxes`` file.
+# This file is generated from ``configs/postfix/lookup_vmailboxes.template``.
 #
 # It is not meant to be used directly, but will need automatic or manual
 # adjustments to make it actually work.

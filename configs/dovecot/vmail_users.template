@@ -1,4 +1,4 @@
-# This is a **sample** of Dovecots's ``vmail_users`` config file.
+# This is the **template** of Dovecots's ``vmail_users`` config file.
 # That file is used as *passwd-like* user database file in
 # ``auth-passwdfile.conf.ext``.
 #

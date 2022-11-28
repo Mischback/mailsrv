@@ -2,14 +2,14 @@
 #
 # 1) ignore anything in /configs
 # 2) unignore all directories below /configs
-# 3) unignore all files with the suffix ``.sample``
+# 3) unignore all files with the suffix ``.template``
 #
 # Ref: https://stackoverflow.com/a/19023985
 # Ref: https://stackoverflow.com/a/30476326
 # Ref: https://git-scm.com/docs/gitignore
 /configs/**
 !/configs/**/
-!/configs/**/*.sample
+!/configs/**/*.template
 
 # Ignore the actual configuration files for the test setup.
 #

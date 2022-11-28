@@ -34,7 +34,7 @@ How?
 *Postfix* already provides the required configuration items to ensure the
 desired behaviour.
 
-**mailsrv** exposes them through :source:`configs/settings.env.sample`.
+**mailsrv** exposes them through :source:`configs/settings.env.template`.
 
 
 Method 1

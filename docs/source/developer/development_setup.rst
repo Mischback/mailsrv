@@ -41,7 +41,7 @@ Repository Layout
 
   mailsrv/
     .github/                 # utility files for GitHub, including workflows
-    configs/                 # the actual configuration samples
+    configs/                 # the actual configuration templates
     docs/                    # documentation sources for Sphinx
     requirements/            # requirments files to be used with pip
     util/                    # utility scripts

@@ -14,7 +14,7 @@ all aspects of the service.
    particular order, as Postfix will read the whole file during startup.
 
 .. important::
-   :source:`configs/postfix/main.cf.sample` does include the actual settings
+   :source:`configs/postfix/main.cf.template` does include the actual settings
    aswell as documentation of each setting with its references.
 
    It is not duplicated here, please see :issue:`38`.
@@ -27,7 +27,7 @@ master.cf
 Postfix's ``master.cf`` defines which (sub) services of Postfix are launched.
 
 .. important::
-   :source:`configs/postfix/master.cf.sample` does include the actual settings.
+   :source:`configs/postfix/master.cf.template` does include the actual settings.
 
    :issue:`38` will consider this file aswell. See :issue:`17` aswell, as this
    will likely adjust Postfix's service configuration.

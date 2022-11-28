@@ -1,4 +1,4 @@
-# This is a **sample** of Dovecots's ``10-master.conf`` config file.
+# This is the **template** of Dovecots's ``10-master.conf`` config file.
 #
 # There are some modifications of Debian bullseye's default version of this
 # file, but they should work for the setup without further adjustments.
