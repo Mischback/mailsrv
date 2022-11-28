@@ -1,0 +1,27 @@
+# Docker is used to build the required containers for CI.
+#
+# It is not meant to be used in production!
+
+# Documentation is not required in the Docker images
+**/docs
+
+# The reference configurations are not required in the Docker images
+**/.ref
+
+# Administrative files are not required in the Docker images
+**/.dockerignore
+**/.editorconfig
+**/.flake8
+**/.github
+**/.gitignore
+**/.pre-commit-config.yaml
+**/README.*
+**/requirements
+**/LICENSE
+**/CHANGELOG.*
+**/pyproject.toml
+
+# temporary internal directories are not required in the Docker images
+**/.tox-venv
+**/.tox
+**/.git
