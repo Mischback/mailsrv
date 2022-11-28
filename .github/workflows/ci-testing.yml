@@ -12,3 +12,7 @@ jobs:
       - name: Get docker config
         run: |
           cat /etc/docker/daemon.json
+      - name: Run minimal container
+        run: |
+          docker run -di --name alpine6-1 alpine
+          docker exec alpine6-1 ip a
