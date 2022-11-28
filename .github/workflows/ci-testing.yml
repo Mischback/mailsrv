@@ -1,0 +1,33 @@
+name: TESTING
+
+on:
+  push:
+    branches:
+      - ci-test-suite
+
+jobs:
+  temporary:
+    runs-on: ubuntu-latest
+    steps:
+      #- name: Get docker config
+        #run: |
+          #cat /etc/docker/daemon.json
+      #- name: Run minimal container
+        #run: |
+          #docker run -di --name alpine1 alpine
+          #docker exec alpine1 ip a
+      #- name: Dedicated IPv6 network for containers
+        #run: |
+          #docker network create --subnet="fd21:9e0:de85:51e6::/64" --ipv6 net-mailsrv
+          #docker run -di --name alpine2 --network net-mailsrv alpine
+          #docker network inspect net-mailsrv
+          #docker exec alpine2 ip a
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Show build context
+        run: |
+          make dev/docker/build-context
+      - name: Run Docker-based test setup
+        uses: isbang/compose-action@v1.4.1
+        with:
+          compose-file: util/test_configs/ci/docker-compose.yml
