@@ -148,9 +148,15 @@ docs : util/docs/serve/html
 
 # ##### DEVELOPMENT
 
-tmp :
-	echo $(CONFIGURATION_FILES)
-.PHONY : tmp
+dev/docker/build-context:
+	echo " \
+		FROM busybox\n \
+		COPY . /build-context\n \
+		WORKDIR /build-context\n \
+		CMD find ." | \
+	$(shell which docker) build -t "mailsrv/build-context:latest" -f- . && \
+	$(shell which docker) container run --rm "mailsrv/build-context:latest"
+.PHONY : dev/docker/build-context
 
 
 # ##### INSTALLATION
