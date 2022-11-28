@@ -52,7 +52,7 @@ SETTINGS_ENV_FILE := settings.env
 # This is used instead of make's built-in ``wildcard``, as it automatically
 # supports infinite depth of directories. Portability is probably not an issue
 # here, all Linux/Unix boxes should have ``find``.
-ALL_SAMPLES := $(shell find $(TEMPLATE_DIR) -type f -iname "*.template" ! -iname "$(SETTINGS_ENV_FILE).template" -printf "%P\n")
+ALL_TEMPLATES := $(shell find $(TEMPLATE_DIR) -type f -iname "*.template" ! -iname "$(SETTINGS_ENV_FILE).template" -printf "%P\n")
 
 # Generate a list of all required configuration files.
 #
@@ -66,7 +66,7 @@ ALL_SAMPLES := $(shell find $(TEMPLATE_DIR) -type f -iname "*.template" ! -iname
 #   config files beneath their respective templates
 # - when explicitly specifying $(CONFIG_DIR), the structure is created in
 #   another location, but making them fully compatible.
-CONFIGURATION_FILES := $(addprefix $(CONFIG_DIR)/,$(patsubst %.template, %, $(ALL_SAMPLES)))
+CONFIGURATION_FILES := $(addprefix $(CONFIG_DIR)/,$(patsubst %.template, %, $(ALL_TEMPLATES)))
 
 # Keep a reference to the actual settings file
 CONFIGURATION_ENV_FILE := $(CONFIG_DIR)/$(SETTINGS_ENV_FILE)
