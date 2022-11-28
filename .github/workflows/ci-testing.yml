@@ -1,0 +1,14 @@
+name: TESTING
+
+on:
+  push:
+    branches:
+      - ci-test-suite
+
+jobs:
+  temporary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get docker config
+        run: |
+          cat /etc/docker/daemon.json
