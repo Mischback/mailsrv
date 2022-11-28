@@ -38,6 +38,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 #            the repository's setup process!
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get install -y make
+    && apt-get install -y make gettext dumb-init \
+    && apt-get install -y tree
 
-CMD ["bash", "-c", "which make"]
+# RUN mkdir -p /mailsrv
+
+COPY . /mailsrv
+WORKDIR /mailsrv
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# FIXME: Need another way to do this! E.g. ``supervisord`` may be able to
+#        launch the required services (Postfix, Dovecot, ...)
+# Ref: https://github.com/docker-mailserver/docker-mailserver/blob/2bc4078e351bc6f3867524e38d0b5c578b107fb5/Dockerfile#L262
+CMD ["bash", "-c", "make install CONFIG_DIR=/mailsrv/util/test_configs/devnet/sut"]

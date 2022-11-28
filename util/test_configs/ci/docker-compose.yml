@@ -6,3 +6,15 @@ services:
       context: ../../../
       dockerfile: util/test_configs/ci/sut.dockerfile
     image: mailsrv-ci/sut:ci
+    networks:
+      ci_net:
+        ipv6_address: fd21:9e0:de85:51e6:7e57:c0de:2000:21
+
+networks:
+  ci_net:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: fd21:9e0:de85:51e6::/64
