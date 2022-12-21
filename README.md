@@ -1,4 +1,4 @@
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Mischback/mailsrv/CI%20Default%20Branch/development?label=Actions&logo=github)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/mischback/mailsrv/ci-default.yml?branch=development&style=flat&logo=github)
 ![GitHub License](https://img.shields.io/github/license/mischback/mailsrv)
 
 [![Python style: black](https://img.shields.io/badge/Python%20style-black-000000?logo=Python&logoColor=white)](https://github.com/psf/black)
