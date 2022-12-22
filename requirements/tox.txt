@@ -4,4 +4,4 @@
 # These environments are not directly related to the actual purpose of the
 # project, so a real pinning is not required. The specified value is just the
 # minimal requirement.
-tox>=3.26
+tox>=3.26,<4.0
